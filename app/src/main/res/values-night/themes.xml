@@ -1,0 +1,4 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme (night). Compose drives the actual UI colors. -->
+    <style name="Theme.GermanLiniA2_B2" parent="Theme.Material3.DayNight.NoActionBar" />
+</resources>

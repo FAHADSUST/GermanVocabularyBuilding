@@ -1,0 +1,5 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. Compose drives the actual UI colors;
+         this NoActionBar theme just sets the window background/launch. -->
+    <style name="Theme.GermanLiniA2_B2" parent="Theme.Material3.DayNight.NoActionBar" />
+</resources>
