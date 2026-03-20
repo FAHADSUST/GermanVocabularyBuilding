@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -16,12 +17,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +38,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
@@ -75,14 +79,11 @@ fun WordCardScreen(
         },
         bottomBar = {
             Row(
-                Modifier.fillMaxWidth().padding(12.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
-                    onClick = { viewModel.previous() },
-                    enabled = state.hasPrevious
-                ) {
+                OutlinedButton(onClick = { viewModel.previous() }, enabled = state.hasPrevious) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     Text("Zurück")
                 }
@@ -109,46 +110,42 @@ fun WordCardScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             HeaderCard(word, onSpeak = { speaker.speak(word.word) })
 
-            Section("Bedeutung") {
+            // Meaning + example + forms + grammar + tip — all in one compact card.
+            InfoCard {
                 Labeled("EN", word.english)
                 Labeled("DE", word.germanMeaning)
+                if (word.exampleDe.isNotBlank()) {
+                    Text(
+                        "„${word.exampleDe}“",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                verbLine(word)?.let { Labeled("Formen", it) }
+                adjLine(word)?.let { Labeled("Steigerung", it) }
+                grammarLine(word)?.let { Labeled("Grammatik", it) }
+                if (word.memoryTrick.isNotBlank()) Labeled("Tipp", word.memoryTrick)
             }
 
-            if (word.exampleDe.isNotBlank()) {
-                Section("Beispiel") {
-                    Text("„${word.exampleDe}“", fontStyle = FontStyle.Italic)
+            // Synonyms / antonyms together.
+            if (word.synonymList.isNotEmpty() || word.antonymList.isNotEmpty()) {
+                InfoCard {
+                    RelationRow("Syn.", word.synonymList) { value ->
+                        scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
+                    }
+                    RelationRow("Ant.", word.antonymList) { value ->
+                        scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
+                    }
                 }
             }
 
-            VerbAdjectiveForms(word)
-
-            GrammarSection(word)
-
-            if (word.memoryTrick.isNotBlank()) {
-                Section("Merkhilfe") { Text(word.memoryTrick) }
-            }
-
-            WordRelations(
-                title = "Synonyme",
-                words = word.synonymList,
-                onClick = { value ->
-                    scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
-                }
-            )
-            WordRelations(
-                title = "Antonyme",
-                words = word.antonymList,
-                onClick = { value ->
-                    scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
-                }
-            )
-
-            ReviewSection(progress, viewModel)
+            ReviewCard(progress, viewModel)
         }
     }
 
@@ -165,19 +162,24 @@ fun WordCardScreen(
 private fun HeaderCard(word: VocabularyEntity, onSpeak: () -> Unit) {
     ElevatedCard(Modifier.fillMaxWidth()) {
         Row(
-            Modifier.fillMaxWidth().padding(16.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f)) {
-                Text(word.displayWord, style = MaterialTheme.typography.headlineSmall)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (word.plural.isNotBlank()) {
-                        Text("Pl.: ${word.plural}", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
                 Text(
-                    "${word.level} · ${word.book} · ${word.chapter}",
-                    style = MaterialTheme.typography.labelMedium,
+                    buildAnnotatedString {
+                        append(word.displayWord)
+                        if (word.plural.isNotBlank()) {
+                            withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
+                                append("  (Pl. ${word.plural})")
+                            }
+                        }
+                    },
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    "${word.level} · ${word.chapter}",
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -188,92 +190,116 @@ private fun HeaderCard(word: VocabularyEntity, onSpeak: () -> Unit) {
     }
 }
 
-@Composable
-private fun VerbAdjectiveForms(word: VocabularyEntity) {
-    if (word.isVerb && (word.verbPresent3rd.isNotBlank() || word.verbPast.isNotBlank() || word.verbPerfect.isNotBlank())) {
-        Section("Verbformen") {
-            Labeled("3. Person", word.verbPresent3rd)
-            Labeled("Präteritum", word.verbPast)
-            Labeled("Perfekt", word.verbPerfect)
-        }
-    }
-    if (word.isAdjective && (word.adjComparative.isNotBlank() || word.adjSuperlative.isNotBlank())) {
-        Section("Steigerung") {
-            Labeled("Komparativ", word.adjComparative)
-            Labeled("Superlativ", word.adjSuperlative)
-        }
-    }
-}
-
-@Composable
-private fun GrammarSection(word: VocabularyEntity) {
-    val hasGrammar = word.grammarGroup.isNotBlank() || word.preposition.isNotBlank() || word.governCase.isNotBlank()
-    if (!hasGrammar) return
-    Section("Grammatik") {
-        if (word.grammarGroup.isNotBlank()) Labeled("Gruppe", word.grammarGroup)
-        if (word.preposition.isNotBlank()) Labeled("Präposition", word.preposition)
-        if (word.governCase.isNotBlank()) Labeled("Kasus", word.governCase)
-    }
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun WordRelations(title: String, words: List<String>, onClick: (String) -> Unit) {
+private fun RelationRow(label: String, words: List<String>, onClick: (String) -> Unit) {
     if (words.isEmpty()) return
-    Section(title) {
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            "$label ",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(end = 4.dp, top = 2.dp)
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             words.forEach { w ->
-                SuggestionChip(onClick = { onClick(w) }, label = { Text(w) })
+                SuggestionChip(
+                    onClick = { onClick(w) },
+                    label = { Text(w, style = MaterialTheme.typography.labelMedium) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ReviewSection(progress: ProgressEntity?, viewModel: WordCardViewModel) {
-    Section("Wiederholung") {
-        if (progress == null) {
-            Text("Noch nicht gelernt.", style = MaterialTheme.typography.bodyMedium)
-            Button(onClick = { viewModel.markLearned() }, modifier = Modifier.padding(top = 8.dp)) {
-                Text("Als gelernt markieren")
-            }
-        } else {
-            Labeled("Zuletzt wiederholt", progress.lastReviewed?.let { LocalDate.ofEpochDay(it).toString() } ?: "—")
-            Labeled("Nächste Wiederholung", LocalDate.ofEpochDay(progress.nextDue).toString())
-            Row(
-                Modifier.padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(onClick = { viewModel.reviewFail() }) {
-                    Icon(Icons.Default.Close, contentDescription = null)
-                    Text("Nochmal")
-                }
-                Button(onClick = { viewModel.reviewSuccess() }) {
-                    Icon(Icons.Default.Check, contentDescription = null)
-                    Text("Gewusst")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun Section(title: String, content: @Composable () -> Unit) {
+private fun ReviewCard(progress: ProgressEntity?, viewModel: WordCardViewModel) {
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-            HorizontalDivider(Modifier.padding(vertical = 2.dp))
-            content()
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (progress == null) {
+                FilledTonalButton(
+                    onClick = { viewModel.markLearned() },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Als gelernt markieren") }
+            } else {
+                val last = progress.lastReviewed?.let { LocalDate.ofEpochDay(it).toString() } ?: "—"
+                val due = LocalDate.ofEpochDay(progress.nextDue).toString()
+                Text(
+                    "Zuletzt: $last   ·   Nächste: $due",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { viewModel.reviewFail() },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = null, Modifier.size(18.dp))
+                        Text(" Nochmal")
+                    }
+                    Button(
+                        onClick = { viewModel.reviewSuccess() },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Check, contentDescription = null, Modifier.size(18.dp))
+                        Text(" Gewusst")
+                    }
+                }
+            }
         }
     }
 }
 
+/** Compact card container without per-section dividers. */
+@Composable
+private fun InfoCard(content: @Composable () -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) { content() }
+    }
+}
+
+/** One-line "Label value" with the label emphasized; hidden when value is blank. */
 @Composable
 private fun Labeled(label: String, value: String) {
     if (value.isBlank()) return
-    Row {
-        Text("$label: ", style = MaterialTheme.typography.labelLarge)
-        Text(value, style = MaterialTheme.typography.bodyMedium)
-    }
+    Text(
+        buildAnnotatedString {
+            withStyle(
+                SpanStyle(
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            ) { append("$label  ") }
+            append(value)
+        },
+        style = MaterialTheme.typography.bodyMedium
+    )
 }
 
+/** "spricht · sprach · hat gesprochen" or null if no verb forms. */
+private fun verbLine(word: VocabularyEntity): String? {
+    if (!word.isVerb) return null
+    val parts = listOf(word.verbPresent3rd, word.verbPast, word.verbPerfect)
+        .filter { it.isNotBlank() }
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+}
+
+/** "schneller · am schnellsten" or null. */
+private fun adjLine(word: VocabularyEntity): String? {
+    if (!word.isAdjective) return null
+    val parts = listOf(word.adjComparative, word.adjSuperlative).filter { it.isNotBlank() }
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+}
+
+/** "Verben mit Präposition · an + Akkusativ" or null. */
+private fun grammarLine(word: VocabularyEntity): String? {
+    val prep = listOf(word.preposition, word.governCase).filter { it.isNotBlank() }.joinToString(" + ")
+    val parts = listOf(word.grammarGroup, prep).filter { it.isNotBlank() }
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+}
