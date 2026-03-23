@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +19,9 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -59,6 +62,7 @@ fun VocabularyListScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
     val sortMode by viewModel.sortMode.collectAsStateWithLifecycle()
     val dueCount by viewModel.dueCount.collectAsStateWithLifecycle()
+    val dueWords by viewModel.dueWords.collectAsStateWithLifecycle()
     val learnedCount by viewModel.learnedCount.collectAsStateWithLifecycle()
     val speaker = rememberGermanSpeaker()
 
@@ -76,11 +80,29 @@ fun VocabularyListScreen(
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
 
-            Text(
-                "Gelernt: $learnedCount   ·   Heute fällig: $dueCount",
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Gelernt: $learnedCount   ·   Heute fällig: $dueCount",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.weight(1f)
+                )
+                Button(
+                    onClick = {
+                        if (dueWords.isNotEmpty()) {
+                            CardDeck.setDeck(dueWords.map { it.id })
+                            onOpenCard(dueWords.first().id)
+                        }
+                    },
+                    enabled = dueWords.isNotEmpty(),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Icon(Icons.Default.Refresh, contentDescription = null, Modifier.size(18.dp))
+                    Text(" Wiederholen ($dueCount)")
+                }
+            }
 
             OutlinedTextField(
                 value = query,

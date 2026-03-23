@@ -56,6 +56,10 @@ class VocabularyListViewModel(
     val dueCount: StateFlow<Int> =
         repo.observeDueCount().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    /** Snapshot of the words that are due for review today (drives the review session). */
+    val dueWords: StateFlow<List<VocabularyEntity>> =
+        repo.observeDue().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val learnedCount: StateFlow<Int> =
         repo.observeLearnedCount().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
