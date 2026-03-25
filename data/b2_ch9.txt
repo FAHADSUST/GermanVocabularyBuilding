@@ -1,135 +1,133 @@
-Here is the complete transcription, translation, and contextual explanation for **Kapitel 8: In der Gastronomie** (In Gastronomy / Catering Industry). This page focuses on cooking, restaurant management, kitchen tools, and supplier logistics.
+Here is the complete transcription, translation, and breakdown for **Kapitel 9: Handel international** (International Trade), along with the final words from the previous chapter regarding negotiations and viewpoints.
 
 ---
 
-## 1. Kochen und essen (Cooking and Eating)
+## Remaining Section from Chapter 8 (Negotiation & Discussion)
 
 | German Word | English Meaning | German Definition | Example Sentence |
 | --- | --- | --- | --- |
-| **das Gericht, -e** | Dish / Meal | Eine zubereitete Speise. | Welches **Gericht** können Sie heute empfehlen? |
-| **mild ≠ scharf** | Mild ≠ Spicy | Nicht intensiv gewürzt ≠ brennend im Geschmack. | Das Curry ist nicht **mild**, sondern ziemlich **scharf**. |
+| **der Konflikt, -e** | Conflict | Ein heftiger Streit oder eine Meinungsverschiedenheit. | Im Team gab es einen kleinen **Konflikt** wegen der Arbeitszeiten. |
+| **ausweichen** | To avoid / evade | Einem Problem oder einer Frage aus dem Weg gehen. | Der Chef wollte meiner Frage nach einer Gehaltserhöhung **ausweichen**. |
+| **die Forderung, -en** | Demand | Ein klarer Anspruch oder Wunsch an jemanden. | Die Gewerkschaft stellt eine **Forderung** nach mehr Lohn. |
+| **fordern** | To demand | Etwas mit Nachdruck verlangen. | Die Kunden **fordern** eine schnellere Lieferung der Waren. |
+| **bestehen (in + D.)** | To consist in | Den Kern oder die Hauptsache von etwas darstellen. | Das Hauptproblem **besteht in** der schlechten Kommunikation. |
+| **unglaubwürdig** | Unbelievable / Unreliable | So, dass man es einer Person nicht glauben kann. | Seine Ausrede für das Zuspätkommen klingt völlig **unglaubwürdig**. |
+| **das Selbstbewusstsein (Sg.)** | Self-confidence | Das Vertrauen in die eigenen Fähigkeiten. | Durch den Erfolg im neuen Job wuchs sein **Selbstbewusstsein**. |
+| **schweigen** | To keep silent | Nichts sagen; still sein. | Wenn man keine Antwort weiß, sollte man besser **schweigen**. |
+| **Stellung beziehen** | To take a stand | Seine Meinung zu einem Thema öffentlich machen. | Der Politiker musste zu dem Skandal **Stellung beziehen**. |
+| **der Standpunkt, -e** | Point of view / Standpoint | Die eigene, feste Meinung zu einer Sache. | Ich verstehe deinen **Standpunkt**, sehe es aber anders. |
+| **jemanden in eine Rolle drängen** | To push someone into a role | Jemanden zwingen, sich auf eine bestimmte Art zu verhalten. | Man darf neue Mitarbeiter nicht sofort **in eine Rolle drängen**. |
+| **die Ausdauer (Sg.)** | Endurance / Persistence | Die Fähigkeit, eine anstrengende Sache lange durchzuhalten. | Für dieses komplizierte Projekt braucht man viel **Ausdauer**. |
+| **nachgeben** | To give in / yield | Seinen Widerstand aufgeben und den Wünschen anderer folgen. | Bei der Preisverhandlung mussten wir am Ende leider **nachgeben**. |
+| **sich einstellen (auf + A.)** | To adapt to / prepare for | Sich auf eine neue Situation vorbereiten. | Wir müssen **uns auf** veränderte Kundenwünsche **einstellen**. |
+| **nachfragen** | To inquire / ask again | Noch einmal nach Informationen fragen. | Wenn Sie die Aufgabe nicht verstehen, sollten Sie **nachfragen**. |
+| **sich erkundigen** | To gather information / inquire | Informationen über ein Thema einholen. | Ich möchte **mich** nach den aktuellen Lieferbedingungen **erkundigen**. |
 
 ---
 
-## 2. Vielfalt des Angebots (Variety of the Offer)
+## Kapitel 9: Handel international (International Trade)
+
+### 1. Handel früher und heute (Trade Past and Present)
 
 | German Word | English Meaning | German Definition | Example Sentence |
 | --- | --- | --- | --- |
-| **die silberne Hochzeit, -en** | Silver wedding anniversary | Das Fest nach 25 Jahren Ehe. | Sie feiern ihre **silberne Hochzeit** im Restaurant. |
-| **gewürzt** | Seasoned / Spiced | Mit Salz, Pfeffer oder Kräutern verfeinert. | Die Suppe ist perfekt mit frischen Kräutern **gewürzt**. |
-| **kompetent** | Competent / Capable | Fachlich geschickt und gut informiert. | Unser Servicepersonal ist sehr aufmerksam und **kompetent**. |
-| **die Sorgfalt (Sg.)** | Care / Diligence | Sehr genaue und ordentliche Arbeit. | In der Küche ist absolute **Sorgfalt** bei der Hygiene nötig. |
-| **vegan** | Vegan | Ohne jegliche tierische Produkte. | Haben Sie auch eine **vegane** Alternative auf der Karte? |
-| **der Allergiker, - / die -in** | Allergy sufferer | Jemand, der bestimmte Stoffe nicht verträgt. | Für **Allergiker** bieten wir glutenfreie Gerichte an. |
-| **der Liebhaber, - / die -in** | Enthusiast / Lover | Jemand, der eine bestimmte Sache sehr mag. | Das Steakhouse ist ein Paradies für Fleisch**liebhaber**. |
-| **erstklassig** | First-class / Excellent | Von hervorragender Qualität. | Der Fisch schmeckt absolut **erstklassig**. |
-| **die Zutat, -en** | Ingredient | Bestandteil, den man zum Kochen braucht. | Kaufen wir alle **Zutaten** frisch auf dem Markt? |
-| **umfangreich** | Extensive / Comprehensive | Sehr groß; mit vielen Optionen. | Unsere Weinkarte ist sehr **umfangreich**. |
-| **der Genuss, ¨e** | Enjoyment / Delight | Eine große Freude beim Essen oder Trinken. | Dieses Dessert ist ein echter **Genuss**. |
-| **zeitgemäß** | Contemporary / Modern | Passend zur heutigen Zeit. | Eine moderne, **zeitgemäße** Küche bietet leichte Speisen an. |
-| **der Trend, -s** | Trend | Eine neue, beliebte Entwicklung. | Alkoholfreie Cocktails liegen aktuell voll im **Trend**. |
-| **knusprig** | Crispy / Crunchy | Fest und frisch gebacken oder gebraten. | Die Pommes sind schön **knusprig**. |
-| **cremig** | Creamy | Weich und dickflüssig (wie Sahne). | Die Suppe ist wunderbar **cremig**. |
-| **reichhaltig** | Rich / Plentiful / Abundant | Mit vielen Kalorien oder reich an Auswahl. | Das Frühstücksbüfett ist sehr **reichhaltig**. |
-| **bewährt** | Proven / Time-tested | Schon lange bekannt und für gut befunden. | Das ist ein altes, **bewährtes** Familienrezept. |
-| **würzig** | Savory / Flavorful / Spicy | Mit kräftigem, gutem Eigengeschmack. | Der Käse hat ein sehr **würziges** Aroma. |
-| **das Ambiente (Sg.)** | Ambience / Atmosphere | Die besondere Stimmung eines Raumes. | Das Restaurant hat ein gemütliches **Ambiente**. |
-| **der Speisesaal, -säle** | Dining hall | Ein großer Raum zum Essen. | Das Hotel hat einen großen, hellen **Speisesaal**. |
-| **bewerten** | To rate / evaluate | Sagen oder schreiben, wie gut etwas war. | Die Gäste **bewerten** unseren Service im Internet sehr positiv. |
-| **die Bewertung, -en** | Review / Rating | Die Benotung im Internet oder Magazin. | Das Restaurant hat eine Fünf-Sterne-**Bewertung** erhalten. |
-| **der Pluspunkt, -e** | Advantage / Asset / Plus point | Ein Vorteil einer Sache. | Die zentrale Lage des Cafés ist ein großer **Pluspunkt**. |
-| **aromatisch** | Aromatic | Intensiv und gut duftend oder schmeckend. | Die Tomaten sind frisch und sehr **aromatisch**. |
-| **sich etwas gönnen** | To treat oneself to something | Sich freiwillig etwas Schönes kaufen. | Am Wochenende **gönne ich mir** ein teures Abendessen. |
-| **abwechslungsreich** | Varied / Diverse | Nicht eintönig; mit viel Auswahl. | Die Wochenkarte ist sehr **abwechslungsreich** gestaltet. |
-| **die Portion, -en** | Portion / Serving | Die Menge an Essen auf einem Teller. | Die **Portionen** hier sind riesig, man wird gut satt. |
-| **der Gang, ¨e** | Course (of a meal) | Ein Teil eines mehrteiligen Menüs. | Als ersten **Gang** servieren wir eine feine Suppe. |
-| **zuverlässig** | Reliable | Jemand, auf den man sich verlassen kann. | Unser Gemüse-Lieferant ist absolut **zuverlässig**. |
-| **schwören (auf + A.)** | To swear by something | Fest von einer Sache überzeugt sein. | Unser Küchenchef **schwört auf** französische Butter. |
+| **die Dienstleistung, -en** | Service | Eine Arbeit, die man für Kunden erledigt (kein Sachgut). | Unsere Firma bietet IT-Beratung als **Dienstleistung** an. |
+| **expandieren** | To expand | Als Firma größer werden oder neue Märkte erobern. | Das Unternehmen möchte im nächsten Jahr nach Asien **expandieren**. |
+| **der Export, -e** | Export | Der Verkauf und Transport von Waren ins Ausland. | Der **Export** von Autos ist für Deutschland sehr wichtig. |
+| **exportieren** | To export | Waren ins Ausland verkaufen. | Wir **exportieren** unsere Maschinen in die ganze Welt. |
+| **global ≠ lokal** | Global ≠ Local | Weltweit ≠ Auf einen kleinen Ort beschränkt. | Die Klimakrise ist ein **globales** Problem, das **lokale** Lösungen braucht. |
+| **der Großhandel (Sg.)** | Wholesale | Handel mit großen Warenmengen (oft für Firmen). | Unser Betrieb kauft die Rohstoffe direkt im **Großhandel**. |
+| **die Kundenorientierung (Sg.)** | Customer orientation | Die Ausrichtung aller Firmenprozesse auf den Kunden. | Exzellenter Service zeigt eine starke **Kundenorientierung**. |
+| **der Markt, ¨e** | Market | Der wirtschaftliche Ort von Angebot und Nachfrage. | Der europäische **Markt** bietet viele Chancen für Start-ups. |
+| **die Marktlücke, -n** | Market niche / gap | Ein Produkt oder Service, den es so noch nicht gibt. | Sie hat eine echte **Marktlücke** für vegane Tiernahrung gefunden. |
+| **die Nachfrage (Sg.)** | Demand | Der Wunsch von Käufern, ein Produkt zu erwerben. | Die **Nachfrage** nach Elektroautos ist stark gestiegen. |
+| **die Nachhaltigkeit (Sg.)** | Sustainability | Verantwortungsvoller Umgang mit Ressourcen für die Zukunft. | Bei der Produktion legen wir großen Wert auf **Nachhaltigkeit**. |
+| **online ≠ offline** | Online ≠ Offline | Im Internet ≠ In der realen Welt. | Viele Geschäfte verkaufen ihre Waren sowohl **online** als auch **offline**. |
+| **die Produktion (Sg.)** | Production / Manufacturing | Die Herstellung von Waren in einer Fabrik. | Die **Produktion** der neuen Bauteile beginnt im Sommer. |
+| **der Umsatz, ¨e** | Turnover / Revenue | Das gesamte Geld, das eine Firma durch Verkäufe einnimmt. | Unser **Umsatz** hat sich in diesem Jahr verdoppelt. |
+| **der Umweltstandard, -s** | Environmental standard | Gesetzliche Regeln zum Schutz der Natur. | Die Fabrik erfüllt alle modernen **Umweltstandards**. |
+| **die Währung, -en** | Currency | Das offizielle Geld eines Landes (z. B. Euro, Dollar). | In England zahlt man mit der **Währung** Pfund. |
+| **der Wechselkurs, -e** | Exchange rate | Der Wert, zu dem man Geld in eine andere Währung tauscht. | Der **Wechselkurs** zwischen Euro und Dollar schwankt täglich. |
+| **die Zielgruppe, -n** | Target group / audience | Die Gruppe von Menschen, an die sich ein Produkt richtet. | Junge Familien sind die wichtigste **Zielgruppe** für unser Auto. |
 
 ---
 
-## 3. Im Kochkurs (In the Cooking Class)
+### 2. Handel im Netz (E-Commerce / Online Trade)
 
 | German Word | English Meaning | German Definition | Example Sentence |
 | --- | --- | --- | --- |
-| **der Topf, ¨e** | Pot | Ein tiefes Gefäß zum Kochen von Suppe. | Wasser kocht am schnellsten mit einem Deckel auf dem **Topf**. |
-| **die Pfanne, -n** | Pan / Skillet | Ein flaches Gefäß zum Braten von Fleisch. | Gib etwas Öl in die **Pfanne**, bevor du das Fleisch brätst. |
-| **das Backblech, -e** | Baking sheet / tray | Eine flache Metallplatte für den Ofen. | Kuchen wird direkt auf dem **Backblech** gebacken. |
-| **die Schüssel, -n** | Bowl | Ein tiefes Gefäß, z.B. für Salat. | Stell bitte die **Schüssel** mit dem Salat auf den Tisch. |
-| **das Sieb, -e** | Strainer / Colander / Sieve | Gerät mit Löchern zum Trennen von Wasser. | Schütte die Nudeln nach dem Kochen in ein **Sieb**. |
-| **die Waage, -n** | Scale | Gerät zum Messen von Gewicht. | Nutze die **Waage**, um 500 Gramm Mehl abzuwiegen. |
-| **die Pfeffermühle, -n** | Pepper mill / grinder | Gerät zum feinen Zermahlen von Pfeffer. | Reiche mir bitte kurz die **Pfeffermühle**. |
-| **der Salzstreuer, -** | Salt shaker | Ein kleines Gefäß für Salz auf dem Tisch. | Der **Salzstreuer** steht direkt neben dem Brot. |
-| **die Knoblauchpresse, -n** | Garlic press | Werkzeug zum feinen Zerdrücken von Knoblauch. | Mit der **Knoblauchpresse** spart man viel Zeit. |
-| **der Mixer, -** | Blender / Mixer | Elektrisches Gerät zum Pürieren. | Mixe die Früchte mit dem **Mixer**, bis sie flüssig sind. |
-| **abwiegen** | To weigh out | Das genaue Gewicht bestimmen. | Wir müssen die Zutaten für den Teig exakt **abwiegen**. |
-| **reiben** | To grate / rub | Etwas mit einer Reibe zerkleinern (Käse). | Kannst du bitte den Parmesan für die Pasta **reiben**? |
-| **rühren** | To stir / mix | Flüssigkeiten mit einem Löffel bewegen. | Du musst die Suppe ständig **rühren**, damit sie nicht anbrennt. |
-| **braten** | To fry / roast | Essen in der Pfanne bei Hitze garen. | Wir **braten** die Steaks circa drei Minuten pro Seite. |
-| **schälen** | To peel | Die Schale von Obst oder Gemüse entfernen. | Vor dem Kochen muss man die Kartoffeln **schälen**. |
-| **zäh** | Tough / Chewy | Fleisch, das schwer zu kauen ist. | Das Rindfleisch war leider zu lang im Ofen und ist sehr **zäh**. |
-| **die Schürze, -n** | Apron | Kleidungsschutz für die Arbeit in der Küche. | Binde dir die **Schürze** um, damit deine Kleidung sauber bleibt. |
+| **die Mimik (Sg.)** | Facial expressions | Der Ausdruck des Gesichts beim Reden oder Fühlen. | Seine **Mimik** verriet mir sofort, dass er unzufrieden war. |
+| **die Gestik (Sg.)** | Gestures | Die Bewegung von Händen und Armen beim Sprechen. | Er nutzt beim Erklären eine sehr lebendige **Gestik**. |
+| **der Webauftritt, -e** | Website / Web presence | Die Homepage oder Internetseite einer Firma. | Unser neuer **Webauftritt** sieht viel moderner aus. |
+| **etwas/jemanden schätzen** | To value / appreciate | Den Wert von etwas oder die Arbeit von jemandem loben. | Ich **schätze** die Zuverlässigkeit meiner Kollegen sehr. |
+| **gut ankommen** | To be well received | Wenn eine Idee oder ein Produkt den Menschen gefällt. | Das neue Design ist bei den Kunden sehr **gut angekommen**. |
+| **indem** | By / Through doing | Drückt aus, wie oder mit welchem Mittel etwas gemacht wird. | Man spart Energie, **indem** man das Licht ausschaltet. |
+| **universell** | Universal | Überall und für fast alles passend oder gültig. | Dieses Werkzeug ist **universell** einsetzbar. |
+| **ohne ... dass** | Without ... doing | Drückt ein Fehlen einer Begleiterscheinung aus. | Er ging aus dem Büro, **ohne dass** es jemand bemerkte. |
+| **potenziell** | Potential | Möglich; in der Zukunft denkbar. | Auf der Messe haben wir viele **potenzielle** Kunden getroffen. |
+| **etwas ausgleichen** | To compensate / balance | Einen Nachteil durch einen Vorteil neutralisieren. | Die Qualität des Produkts **gleicht** den hohen Preis wieder **aus**. |
+| **visuell** | Visual | Das Sehen betreffend; optisch. | Der Webauftritt bietet viele **visuelle** Reize für den Käufer. |
+| **der Effekt, -e** | Effect | Die Wirkung von etwas. | Die Werbung hatte einen sehr positiven **Effekt** auf die Verkäufe. |
+| **freizügig** | Revealing / Liberal | Sehr offen; wenig Kleidung tragend oder großzügig. | Für geschäftliche Meetings ist dieses Outfit zu **freizügig**. |
+| **provozieren** | To provoke | Einen Streit oder eine heftige Reaktion absichtlich auslösen. | Mit seinen frechen Kommentaren wollte er den Chef **provozieren**. |
+| **die Geste, -n** | Gesture | Eine Bewegung mit der Hand als Zeichen des Grußes/Danks. | Das Geschenk war eine sehr nette **Geste** der Firma. |
+| **die Beleidigung, -en** | Insult / Offense | Ein unfreundliches Wort, das jemanden verletzt. | Das war eine schwere **Beleidigung** für das gesamte Team. |
+| **ohne zu ...** | Without ... -ing | Eine Handlung ohne eine andere Begleithandlung ausführen. | Er unterschrieb den Vertrag, **ohne** ihn vorher **zu** lesen. |
+| **recherchieren** | To research / investigate | Nach Informationen suchen. | Vor dem Kauf sollten Sie gründlich im Netz **recherchieren**. |
+| **vertikal ≠ horizontal** | Vertical ≠ Horizontal | Von oben nach unten ≠ Von links nach rechts. | Die Linien auf dem Grundriss verlaufen **vertikal** und **horizontal**. |
+| **sich zurechtfinden** | To find one's way / Navigate | Sich an einem neuen Ort oder auf einer Webseite orientieren. | Auf dem neuen Onlineportal kann man **sich** sehr leicht **zurechtfinden**. |
+| **freischalten** | To unlock / activate | Den Zugriff auf eine Internetseite oder Funktion erlauben. | Die Bank muss Ihr Konto erst für das Online-Shopping **freischalten**. |
+| **etwas herausfinden** | To find out / discover | Die Antwort auf eine Frage durch Suchen entdecken. | Wir müssen **herausfinden**, warum der Server abgestürzt ist. |
+| **der Faktor, -en** | Factor | Ein Umstand, der ein Ergebnis beeinflusst. | Pünktlichkeit ist ein wichtiger **Faktor** für den Erfolg. |
+| **bewusst** | Conscious / Intentional | Mit Absicht und klarem Verstand. | Sie hat sich **bewusst** für ein duales Studium entschieden. |
+| **berücksichtigen** | To consider / take into account | Eine Information bei der Planung beachten. | Wir müssen das Budget bei unserer Entscheidung **berücksichtigen**. |
+| **anpassungsfähig** | Adaptable | In der Lage, sich schnell an Neues zu gewöhnen. | In einer Krise müssen Unternehmen sehr **anpassungsfähig** sein. |
+| **etwas umsetzen** | To implement / realize | Eine Idee oder einen Plan in die Realität bringen. | Wir wollen den neuen Marketingplan ab Montag **umsetzen**. |
+| **der Konsument, -en / die -in** | Consumer | Der Endverbraucher, der ein Produkt kauft. | Die Wünsche der **Konsumenten** verändern sich rasant. |
+| **die Zuwachsrate, -n** | Growth rate | Der Prozentsatz, um den etwas wächst oder steigt. | Der Onlinehandel verzeichnet eine hohe **Zuwachsrate**. |
 
 ---
 
-## 4. Berufe rund ums Essen (Jobs Around Food)
+### 3. Telefonat mit IQ-Web (Phone call with IQ-Web)
 
 | German Word | English Meaning | German Definition | Example Sentence |
 | --- | --- | --- | --- |
-| **etwas vermitteln** | To convey / pass on | Wissen oder Jobs an andere weitergeben. | Der Kurs **vermittelt** grundlegende Kochtechniken. |
-| **vorausdenken** | To think ahead | Pläne für die Zukunft im Kopf machen. | Als Küchenchef muss man immer ein paar Tage **vorausdenken**. |
-| **verantwortungsvoll** | Responsible | Mit großer Pflicht bewusst handelnd. | Das Management eines Restaurants ist eine **verantwortungsvolle** Aufgabe. |
-| **erfahren** | Experienced | Wenn man einen Job schon sehr lange macht. | Sie ist eine sehr **erfahrene** Restaurantleiterin. |
-| **eigenverantwortlich** | On one's own responsibility | Selbstständig, ohne ständige Kontrolle arbeiten. | Jeder Koch arbeitet in seinem Bereich **eigenverantwortlich**. |
-| **serviceorientiert** | Service-oriented | Sehr freundlich und hilfsbereit zum Kunden. | Unser Service muss absolut **serviceorientiert** sein. |
-| **engagiert** | Committed / Dedicated | Mit viel persönlichem Einsatz bei der Arbeit. | Der neue Azubi zeigt sich in der Küche sehr **engagiert**. |
-| **belastbar** | Resilient / Able to work under pressure | Kann gut mit großem Stress umgehen. | Am Wochenende ist es stressig, da muss man **belastbar** sein. |
-| **die Flexibilität (Sg.)** | Flexibility | Die Fähigkeit, sich schnellen Änderungen anzupassen. | Schichtarbeit erfordert viel zeitliche **Flexibilität**. |
-| **die Teamfähigkeit (Sg.)** | Teamwork skills | Gut mit anderen Kollegen arbeiten können. | Ohne **Teamfähigkeit** funktioniert eine Großküche nicht. |
-| **die Geschicklichkeit (Sg.)** | Dexterity / Skillfulness | Feinmotorisches Talent mit den Händen. | Beim Verzieren von Torten braucht man **Geschicklichkeit**. |
-| **das Durchsetzungsvermögen** | Assertiveness | Seine Meinung oder Befehle durchsetzen können. | Eine Küchenchefin braucht ein starkes **Durchsetzungsvermögen**. |
-| **die Vollständigkeit (Sg.)** | Completeness | Wenn absolut nichts fehlt. | Prüfen Sie die Lieferung bei der Ankunft auf **Vollständigkeit**. |
-| **der Verbrauch (Sg.)** | Consumption / Usage | Die Menge, die verbraucht wird. | Der **Verbrauch** an Kaffeebohnen ist im Café sehr hoch. |
-| **die Instandhaltung (Sg.)** | Maintenance | Die regelmäßige Pflege technischer Geräte. | Die **Instandhaltung** der Spülmaschinen kostet viel Geld. |
-| **durchführen** | To execute / carry out | Eine geplante Aktion machen. | Wir müssen eine Inventur im Lager **durchführen**. |
-| **zuständig sein (für + A.)** | To be responsible for | Für einen Bereich die Verantwortung haben. | Wer ist **für** den Weinkeller **zuständig**? |
-| **achten (auf + A.)** | To pay attention to | Auf Details oder Regeln aufpassen. | **Achten Sie** besonders **auf** die Frische des Fisches. |
-| **umgehen (mit + D.)** | To handle / deal with | Wissen, wie man ein Werkzeug/Mensch nutzt. | Man muss vorsichtig **mit** scharfen Messern **umgehen**. |
-| **Ruhe bewahren** | To keep calm | In einer stressigen Situation leise und cool bleiben. | Wenn die Küche voll ist, muss das Servicepersonal **Ruhe bewahren**. |
-| **die Kompetenz, -en** | Competence / Expertise | Fachwissen in einem bestimmten Bereich. | Seine fachliche **Kompetenz** als Sommelier ist unbestritten. |
-| **einen Beruf ausüben** | To practice/exercise a profession | Aktiv in einem Job arbeiten. | Er **übt den Beruf** des Kochs seit fünf Jahren aus. |
-| **eröffnen** | To open / launch | Ein neues Geschäft oder Restaurant starten. | Wir wollen nächsten Monat ein kleines Bistro **eröffnen**. |
-| **der Einzelhandel (Sg.)** | Retail sector | Der Verkauf von Waren direkt an Endkunden. | Bevor sie im Restaurant anfing, arbeitete sie im **Einzelhandel**. |
-| **aussagekräftig** | Meaningful / Informative | Mit klaren Fakten und hohem Informationswert. | Ihre Bewerbung sollte **aussagekräftig** sein. |
-| **seither** | Since then / Ever since | Seit einem bestimmten Zeitpunkt in der Vergangenheit. | Er hat die Karte geändert, **seither** kommen mehr Gäste. |
-| **aufgeschlossen** | Open-minded / Sociable | Freundlich und interessiert an neuen Dingen/Menschen. | Unser Service-Team ist sehr **aufgeschlossen** und kommunikativ. |
-| **verderben** | To spoil / go bad | Wenn Essen schlecht und ungenießbar wird. | Fisch kann ungekühlt sehr schnell **verderben**. |
-| **vorrätig sein** | To be in stock / available | Im Lager vorhanden sein. | Diese Weinsorte ist momentan leider nicht mehr **vorrätig**. |
+| **das Bauteil, -e** | Component / Part | Ein einzelnes Teil einer Maschine oder Elektronik. | Für den Computer fehlt uns noch ein wichtiges **Bauteil**. |
+| **die Wunschliste, -n** | Wishlist | Eine Liste mit Dingen, die man gerne hätte. | Ich habe das Buch auf meine **Wunschliste** im Onlineshop gesetzt. |
+| **(eine Ware) vertreiben** | To distribute / market | Produkte kommerziell verkaufen. | Die Agentur **vertreibt** Softwarelösungen an kleine Firmen. |
+| **das Budget, -s** | Budget | Das Geld, das für eine Aufgabe zur Verfügung steht. | Wir haben das **Budget** für die Werbung leider schon überschritten. |
 
 ---
 
-## 5. Die Lieferung (The Delivery)
+### 4. Das war nicht optimal (That wasn't optimal)
 
 | German Word | English Meaning | German Definition | Example Sentence |
 | --- | --- | --- | --- |
-| **die Lieferung, -en** | Delivery | Die zugestellten Waren. | Die **Lieferung** mit dem frischen Gemüse kommt um 6 Uhr. |
-| **die Bestellung, -en** | Order | Die Anforderung von Waren beim Lieferanten. | Ich habe die **Bestellung** für die Getränke bereits abgeschickt. |
-| **prüfen** | To check / verify | Kontrollieren, ob alles korrekt ist. | Bitte **prüfen** Sie das Mindesthaltbarkeitsdatum. |
-| **vereinbaren** | To arrange / agree upon | Einen festen Termin oder Preis absprechen. | Wir haben einen festen Liefertermin **vereinbart**. |
-| **akzeptabel** | Acceptable | In Ordnung; annehmbar. | Eine Verspätung von zehn Minuten ist noch **akzeptabel**. |
-| **der Lieferschein, -e** | Delivery note | Ein Papier, das zeigt, was geliefert wurde. | Unterschreiben Sie den **Lieferschein** erst nach der Kontrolle. |
-| **vermerken** | To note down / record | Etwas schriftlich festhalten. | Bitte **vermerken** Sie den Fehler direkt auf dem Protokoll. |
-| **stattdessen** | Instead / Alternatively | Als Ersatz für etwas anderes. | Wir hatten keine Tomaten mehr, wir haben **stattdessen** Paprika genutzt. |
-| **auf den Markt kommen** | To hit the market / launched | Neu zum Verkauf angeboten werden. | Nächste Woche wird ein neues Bio-Bier **auf den Markt kommen**. |
-| **benötigen** | To need / require | Etwas dringend brauchen. | Für die Soße **benötigen** wir noch etwas Weißwein. |
-| **die Lieferzeit, -en** | Delivery time | Die Dauer, bis eine Ware ankommt. | Die **Lieferzeit** für die neuen Küchengeräte beträgt zwei Wochen. |
-| **der / die Vertriebsleiter/in** | Sales manager | Der Chef der Verkaufsabteilung. | Bei Großbestellungen wenden Sie sich an den **Vertriebsleiter**. |
-
----
-
-## 6. Erfolgreich verhandeln (Negotiating Successfully)
-
-| German Word | English Meaning | German Definition | Example Sentence |
-| --- | --- | --- | --- |
-| **erfolgreich** | Successful | Mit einem guten, positiven Ergebnis. | Die Preisverhandlung mit dem Winzer war **erfolgreich**. |
-| **der Verhandlungspartner, -** | Negotiation partner | Die Person, mit der man verhandelt. | Mein **Verhandlungspartner** war sehr kompromissbereit. |
+| **installieren** | To install | Eine Software auf dem PC aufspielen oder ein Gerät einbauen. | Du musst das neue Update auf deinem Laptop **installieren**. |
+| **der Mangel, ¨** | Defect / Lack / Shortcoming | Ein Fehler an einer Ware oder ein Fehlen von etwas. | Das gelieferte Gerät hat leider einen schweren **Mangel**. |
+| **einen Ablauf darstellen** | To map / outline a process | Zeigen, wie ein Prozess nacheinander funktioniert. | Die Grafik soll **einen** typischen Bestell**ablauf darstellen**. |
+| **die Grundlage, -n** | Foundation / Basis | Das Fundament für eine Arbeit. | Datenanalysen bilden die **Grundlage** für unsere Strategie. |
+| **etwas festlegen** | To determine / schedule | Einen festen Termin oder eine Regel bestimmen. | Wir müssen die Zuständigkeiten im Team genau **festlegen**. |
+| **einen Entwurf erstellen** | To create a draft | Die erste Rohversion eines Dokuments anfertigen. | Kannst du bitte **einen Entwurf** für das Angebot **erstellen**? |
+| **kommentieren** | To comment on | Seine Meinung zu einem Text oder einer Aussage schreiben. | Der Chef wird den Entwurf morgen im Meeting **kommentieren**. |
+| **überarbeiten** | To revise / rework | Einen Text korrigieren und verbessern. | Ich muss den Text für den Flyer noch einmal **überarbeiten**. |
+| **korrigieren** | To correct | Fehler ausbessern. | Bitte **korrigieren** Sie die Rechtschreibfehler im Brief. |
+| **die Überarbeitung, -en** | Revision / Reworking | Die Verbesserung oder Korrektur einer Sache. | Nach der **Überarbeitung** ist das Handbuch viel verständlicher. |
+| **die Benutzerfreundlichkeit** | User-friendliness | Wie leicht ein System oder eine Webseite zu bedienen ist. | Die **Benutzerfreundlichkeit** des Onlineshops muss besser werden. |
+| **die Lesbarkeit (Sg.)** | Readability | Wie gut man eine Schrift lesen kann. | Die Schriftgröße ist zu klein, das schadet der **Lesbarkeit**. |
+| **vollständig** | Complete / In full | Ohne Lücken; komplett. | Bitte füllen Sie das Formular **vollständig** aus. |
+| **(einen Fehler) beseitigen** | To eliminate / fix (an error) | Einen Fehler komplett löschen oder repariert haben. | Der Programmierer konnte den Software**fehler beseitigen**. |
+| **die Erprobungsphase, -n** | Testing phase | Zeitraum, in dem ein neues Produkt getestet wird. | Die App befindet sich aktuell noch in der **Erprobungsphase**. |
+| **einen Termin halten** | To meet a deadline | Pünktlich zu einem vereinbarten Datum fertig sein. | Wir müssen hart arbeiten, um **einen** engen **Termin zu halten**. |
+| **gelten** | To apply / be valid | Gültigkeit haben (z. B. ein Gesetz oder ein Preis). | Die Sonderangebote **gelten** nur bis zum Ende der Woche. |
+| **jemanden auffordern** | To call upon / request | Jemanden offiziell bitten, etwas Bestimmtes zu tun. | Der Vermieter **fordert uns auf**, die Miete pünktlich zu zahlen. |
+| **online gehen** | To go live / go online | Eine Webseite für alle Nutzer im Netz sichtbar machen. | Der neue Webauftritt wird am kommenden Montag **online gehen**. |
+| **die Beschreibung, -en** | Description | Text, der erklärt, wie ein Produkt aussieht/funktioniert. | Bitte lies die **Beschreibung**, bevor du das Gerät benutzt. |
+| **die Aufforderung, -en** | Request / Call to action | Eine offizielle Aufforderung, aktiv zu werden. | Sie erhielt eine schriftliche **Aufforderung** zur Zahlung. |
+| **das Handeln (Sg.)** | Actions / Conduct | Das aktive Tun einer Person oder Firma. | Schnelles **Handeln** war in dieser Notsituation absolut notwendig. |
+| **die Konsequenz, -en** | Consequence | Die logische Folge einer Handlung. | Fehler bei der Produktion haben teure **Konsequenzen**. |
+| **die Mahnung, -en** | Payment reminder / Warning | Ein offizieller Brief, wenn man eine Rechnung nicht zahlt. | Wenn Sie jetzt nicht zahlen, erhalten Sie eine **Mahnung**. |
+| **das Maß, -e** | Measure / Dimension / Degree | Die Abmessung oder das richtige Gleichgewicht von etwas. | Man muss bei der Arbeit das richtige **Maß** an Pausen finden. |
+| **der volle Preis** | The full price | Der gesamte Betrag ohne Rabatte. | Nach Ablauf der Aktion gilt wieder **der volle Preis**. |
+| **der Abzug, ¨e** | Deduction | Wenn ein Teil vom Geld abgezogen wird (z. B. Skonto). | Bei Zahlung innerhalb von drei Tagen erhalten Sie 2 % **Abzug**. |
+| **im Laufe des Tages** | During the day / Later today | Irgendwann vor dem Abend. | Der Techniker wird **im Laufe des Tages** bei Ihnen vorbeischauen. |
