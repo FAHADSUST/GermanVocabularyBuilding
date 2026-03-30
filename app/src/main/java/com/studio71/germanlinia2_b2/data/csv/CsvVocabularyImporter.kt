@@ -32,11 +32,11 @@ object CsvVocabularyImporter {
 
         return rows.drop(1)
             .filter { it.any { cell -> cell.isNotBlank() } }
-            .mapNotNull { raw ->
+            .mapIndexedNotNull { rowIndex, raw ->
                 val cells = raw.toMutableList()
                 val id = cells.col("id")
                 val word = cells.col("word")
-                if (id.isBlank() || word.isBlank()) return@mapNotNull null
+                if (id.isBlank() || word.isBlank()) return@mapIndexedNotNull null
                 VocabularyEntity(
                     id = id,
                     word = word,
@@ -63,7 +63,8 @@ object CsvVocabularyImporter {
                     verbAux = cells.col("verb_aux"),
                     adjComparative = cells.col("adj_comparative"),
                     adjSuperlative = cells.col("adj_superlative"),
-                    tags = cells.col("tags")
+                    tags = cells.col("tags"),
+                    orderIndex = cells.col("order_index").toIntOrNull() ?: rowIndex
                 )
             }
     }

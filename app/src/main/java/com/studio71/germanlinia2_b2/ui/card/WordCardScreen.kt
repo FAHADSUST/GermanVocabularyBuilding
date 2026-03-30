@@ -2,8 +2,6 @@ package com.studio71.germanlinia2_b2.ui.card
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,12 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -27,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -38,11 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
@@ -52,7 +42,7 @@ import com.studio71.germanlinia2_b2.ui.tts.rememberGermanSpeaker
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WordCardScreen(
     viewModel: WordCardViewModel,
@@ -113,38 +103,13 @@ fun WordCardScreen(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            HeaderCard(word, onSpeak = { speaker.speak(word.word) })
-
-            // Meaning + example + forms + grammar + tip — all in one compact card.
-            InfoCard {
-                Labeled("EN", word.english)
-                Labeled("DE", word.germanMeaning)
-                if (word.exampleDe.isNotBlank()) {
-                    Text(
-                        "„${word.exampleDe}“",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+            WordDetail(
+                word = word,
+                onSpeak = { speaker.speak(it) },
+                onRelationClick = { value ->
+                    scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
                 }
-                verbLine(word)?.let { Labeled("Formen", it) }
-                adjLine(word)?.let { Labeled("Steigerung", it) }
-                grammarLine(word)?.let { Labeled("Grammatik", it) }
-                if (word.memoryTrick.isNotBlank()) Labeled("Tipp", word.memoryTrick)
-            }
-
-            // Synonyms / antonyms together.
-            if (word.synonymList.isNotEmpty() || word.antonymList.isNotEmpty()) {
-                InfoCard {
-                    RelationRow("Syn.", word.synonymList) { value ->
-                        scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
-                    }
-                    RelationRow("Ant.", word.antonymList) { value ->
-                        scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
-                    }
-                }
-            }
-
+            )
             ReviewCard(progress, viewModel)
         }
     }
@@ -155,60 +120,6 @@ fun WordCardScreen(
             onDismiss = { detailWord = null },
             onSpeak = { speaker.speak(it) }
         )
-    }
-}
-
-@Composable
-private fun HeaderCard(word: VocabularyEntity, onSpeak: () -> Unit) {
-    ElevatedCard(Modifier.fillMaxWidth()) {
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    buildAnnotatedString {
-                        append(word.displayWord)
-                        if (word.plural.isNotBlank()) {
-                            withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
-                                append("  (Pl. ${word.plural})")
-                            }
-                        }
-                    },
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    "${word.level} · ${word.chapter}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            IconButton(onClick = onSpeak) {
-                Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Vorlesen")
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun RelationRow(label: String, words: List<String>, onClick: (String) -> Unit) {
-    if (words.isEmpty()) return
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            "$label ",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(end = 4.dp, top = 2.dp)
-        )
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            words.forEach { w ->
-                SuggestionChip(
-                    onClick = { onClick(w) },
-                    label = { Text(w, style = MaterialTheme.typography.labelMedium) }
-                )
-            }
-        }
     }
 }
 
@@ -253,53 +164,3 @@ private fun ReviewCard(progress: ProgressEntity?, viewModel: WordCardViewModel) 
     }
 }
 
-/** Compact card container without per-section dividers. */
-@Composable
-private fun InfoCard(content: @Composable () -> Unit) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(
-            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
-        ) { content() }
-    }
-}
-
-/** One-line "Label value" with the label emphasized; hidden when value is blank. */
-@Composable
-private fun Labeled(label: String, value: String) {
-    if (value.isBlank()) return
-    Text(
-        buildAnnotatedString {
-            withStyle(
-                SpanStyle(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-            ) { append("$label  ") }
-            append(value)
-        },
-        style = MaterialTheme.typography.bodyMedium
-    )
-}
-
-/** "spricht · sprach · hat gesprochen" or null if no verb forms. */
-private fun verbLine(word: VocabularyEntity): String? {
-    if (!word.isVerb) return null
-    val parts = listOf(word.verbPresent3rd, word.verbPast, word.verbPerfect)
-        .filter { it.isNotBlank() }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
-}
-
-/** "schneller · am schnellsten" or null. */
-private fun adjLine(word: VocabularyEntity): String? {
-    if (!word.isAdjective) return null
-    val parts = listOf(word.adjComparative, word.adjSuperlative).filter { it.isNotBlank() }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
-}
-
-/** "Verben mit Präposition · an + Akkusativ" or null. */
-private fun grammarLine(word: VocabularyEntity): String? {
-    val prep = listOf(word.preposition, word.governCase).filter { it.isNotBlank() }.joinToString(" + ")
-    val parts = listOf(word.grammarGroup, prep).filter { it.isNotBlank() }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
-}

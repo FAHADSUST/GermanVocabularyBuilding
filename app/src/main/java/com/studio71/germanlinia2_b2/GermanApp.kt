@@ -2,6 +2,9 @@ package com.studio71.germanlinia2_b2
 
 import android.app.Application
 import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
+import com.studio71.germanlinia2_b2.data.settings.SettingsStore
+import com.studio71.germanlinia2_b2.notify.NotificationHelper
+import com.studio71.germanlinia2_b2.notify.ReminderScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,12 +18,16 @@ class GermanApp : Application() {
 
     val repository: VocabularyRepository by lazy { VocabularyRepository(this) }
 
+    val settings: SettingsStore by lazy { SettingsStore(this) }
+
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
         instance = this
         appScope.launch { repository.seedIfEmpty() }
+        NotificationHelper.ensureChannel(this)
+        ReminderScheduler.apply(this, settings.state.value)
     }
 
     companion object {

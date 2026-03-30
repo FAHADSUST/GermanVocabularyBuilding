@@ -42,10 +42,11 @@ interface VocabularyDao {
         ORDER BY
           CASE WHEN :sortMode = 'ALPHA' THEN sortKey END ASC,
           CASE WHEN :sortMode = 'FREQUENCY' THEN frequencyRank END ASC,
+          CASE WHEN :sortMode = 'SOURCE' THEN orderIndex END ASC,
           CASE WHEN :sortMode = 'CHAPTER' THEN level END ASC,
           CASE WHEN :sortMode = 'CHAPTER' THEN book END ASC,
           CASE WHEN :sortMode = 'CHAPTER' THEN chapter END ASC,
-          id ASC
+          orderIndex ASC
         """
     )
     fun observeFiltered(

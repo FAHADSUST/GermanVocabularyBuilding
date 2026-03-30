@@ -10,6 +10,7 @@ data class VocabularyFilter(
 )
 
 enum class SortMode(val key: String, val label: String) {
+    SOURCE("SOURCE", "Wie im Kapitel"),
     ALPHA("ALPHA", "A–Z (ohne Artikel)"),
     FREQUENCY("FREQUENCY", "Häufigkeit"),
     CHAPTER("CHAPTER", "Nach Kapitel")

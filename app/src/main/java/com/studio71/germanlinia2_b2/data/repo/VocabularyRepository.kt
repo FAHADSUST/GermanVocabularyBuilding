@@ -65,6 +65,12 @@ class VocabularyRepository(
     fun observeDueCount(): Flow<Int> = progressDao.observeDueCount(today())
     fun observeLearnedCount(): Flow<Int> = progressDao.observeLearnedCount()
 
+    /** One-shot snapshot of today's due words, used to seed a review session. */
+    suspend fun getDueWords(): List<VocabularyEntity> = progressDao.getDue(today())
+
+    /** One-shot due count, used by the daily reminder worker. */
+    suspend fun dueCountNow(): Int = progressDao.dueCount(today())
+
     suspend fun markLearned(wordId: String) {
         val today = today()
         val existing = progressDao.getById(wordId)

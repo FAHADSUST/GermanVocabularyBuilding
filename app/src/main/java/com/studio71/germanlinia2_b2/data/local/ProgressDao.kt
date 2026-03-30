@@ -32,6 +32,20 @@ interface ProgressDao {
     @Query("SELECT COUNT(*) FROM progress WHERE nextDue <= :day")
     fun observeDueCount(day: Long): Flow<Int>
 
+    @Query("SELECT COUNT(*) FROM progress WHERE nextDue <= :day")
+    suspend fun dueCount(day: Long): Int
+
+    /** One-shot snapshot of due words for a review session. */
+    @Query(
+        """
+        SELECT v.* FROM vocabulary v
+        INNER JOIN progress p ON p.wordId = v.id
+        WHERE p.nextDue <= :day
+        ORDER BY p.nextDue ASC, v.sortKey ASC
+        """
+    )
+    suspend fun getDue(day: Long): List<VocabularyEntity>
+
     @Query("SELECT COUNT(*) FROM progress")
     fun observeLearnedCount(): Flow<Int>
 }

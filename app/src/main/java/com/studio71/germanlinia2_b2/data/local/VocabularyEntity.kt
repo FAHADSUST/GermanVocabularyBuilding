@@ -36,7 +36,9 @@ data class VocabularyEntity(
     val verbAux: String = "",
     val adjComparative: String = "",
     val adjSuperlative: String = "",
-    val tags: String = ""
+    val tags: String = "",
+    /** Position of the word in the original book/chapter order (for "Wie im Kapitel" sort). */
+    val orderIndex: Int = 0
 ) {
     val displayWord: String
         get() = if (article.isBlank()) word else "$article $word"

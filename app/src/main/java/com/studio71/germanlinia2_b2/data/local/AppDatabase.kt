@@ -11,7 +11,7 @@ import androidx.room.RoomDatabase
         ProgressEntity::class,
         DailyStatEntity::class
     ],
-    version = 1,
+    version = 7,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -21,6 +21,9 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -54,7 +57,9 @@ import com.studio71.germanlinia2_b2.ui.tts.rememberGermanSpeaker
 fun VocabularyListScreen(
     viewModel: VocabularyListViewModel,
     onOpenCard: (String) -> Unit,
-    onOpenStats: () -> Unit
+    onOpenStats: () -> Unit,
+    onStartReview: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
     val words by viewModel.words.collectAsStateWithLifecycle()
     val options by viewModel.options.collectAsStateWithLifecycle()
@@ -62,7 +67,6 @@ fun VocabularyListScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
     val sortMode by viewModel.sortMode.collectAsStateWithLifecycle()
     val dueCount by viewModel.dueCount.collectAsStateWithLifecycle()
-    val dueWords by viewModel.dueWords.collectAsStateWithLifecycle()
     val learnedCount by viewModel.learnedCount.collectAsStateWithLifecycle()
     val speaker = rememberGermanSpeaker()
 
@@ -71,8 +75,20 @@ fun VocabularyListScreen(
             TopAppBar(
                 title = { Text("Wortschatz · A2–B2") },
                 actions = {
+                    IconButton(onClick = onStartReview, enabled = dueCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                if (dueCount > 0) Badge { Text("$dueCount") }
+                            }
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = "Wiederholen")
+                        }
+                    }
                     IconButton(onClick = onOpenStats) {
                         Icon(Icons.Default.BarChart, contentDescription = "Statistik")
+                    }
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "Einstellungen")
                     }
                 }
             )
@@ -90,13 +106,8 @@ fun VocabularyListScreen(
                     modifier = Modifier.weight(1f)
                 )
                 Button(
-                    onClick = {
-                        if (dueWords.isNotEmpty()) {
-                            CardDeck.setDeck(dueWords.map { it.id })
-                            onOpenCard(dueWords.first().id)
-                        }
-                    },
-                    enabled = dueWords.isNotEmpty(),
+                    onClick = onStartReview,
+                    enabled = dueCount > 0,
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null, Modifier.size(18.dp))

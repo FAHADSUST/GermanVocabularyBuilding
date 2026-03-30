@@ -35,7 +35,7 @@ class VocabularyListViewModel(
     private val _filter = MutableStateFlow(VocabularyFilter())
     val filter: StateFlow<VocabularyFilter> = _filter.asStateFlow()
 
-    private val _sortMode = MutableStateFlow(SortMode.CHAPTER)
+    private val _sortMode = MutableStateFlow(SortMode.SOURCE)
     val sortMode: StateFlow<SortMode> = _sortMode.asStateFlow()
 
     val words: StateFlow<List<VocabularyEntity>> =
