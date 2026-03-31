@@ -1,0 +1,65 @@
+Sehr gerne! Dativ-Verben sind ein extrem wichtiges Thema für eine korrekte deutsche Grammatik. Ich habe alle Verben aus der Datei **verb_mit_dativ.jpeg** für dich extrahiert.
+
+Die Tabellenstruktur habe ich genau wie zuvor aufgebaut: Du findest den Infinitiv, die englische Bedeutung, eine einfache Erklärung auf dem **A2-Niveau** und den Beispielsatz aus dem Buch, bei dem ich das jeweilige Dativ-Objekt und das Verb zur besseren Orientierung **fett markiert** habe.
+
+Hier ist deine Übersicht:
+
+---
+
+## Verben mit Dativ
+
+### Verben: abraten bis folgen
+
+| Infinitiv | English Meaning | German Definition (A2) | Example Sentence (from book) |
+| --- | --- | --- | --- |
+| abraten | to advise against | Jemandem sagen, dass eine Idee oder ein Plan nicht gut ist. | Der Job ist nichts für dich. Ich **rate dir ab**. |
+| ähneln | to resemble / look like | Fast so aussehen oder so sein wie eine andere Sache oder Person. | Meine neue Tätigkeit **ähnelt** sehr **meiner bisherigen**. |
+| antworten | to answer / reply | Jemandem eine Antwort auf eine Frage geben. | Bitte **antworten Sie mir** so schnell wie möglich. |
+| auffallen | to stand out / notice | Wenn man wegen einer Besonderheit sofort gesehen oder bemerkt wird. | **Mir fällt auf**, dass Herr Kranz in letzter Zeit viel fröhlicher wirkt. |
+| ausweichen | to avoid / dodge | Einer Gefahr oder einem Hindernis auf dem Weg schnell Platz machen. | Der Radfahrer konnte **dem Lkw** gerade noch **ausweichen**. |
+| begegnen | to meet by chance | Eine Person zufällig auf der Straße oder im Haus treffen. | Jeden Morgen **begegne ich meiner Nachbarin** im Aufzug. |
+| beistehen | to stand by / support | Jemandem in einer schweren Situation aktiv helfen und Support geben. | Meine Kollegen **stehen mir** immer **bei**, wenn ich Probleme habe. |
+| beitreten | to join (a club) | Offiziell ein Mitglied in einem Verein, Club oder einer Gruppe werden. | Sie können **unserem Sportverein** ohne Grundgebühr **beitreten**. |
+| danken | to thank | "Danke" zu einer Person für eine Hilfe oder ein Geschenk sagen. | Du hast mir sehr geholfen. Ich **danke dir**. |
+| dienen | to serve / serve as | Eine bestimmte Funktion oder ein Ziel für eine Sache haben. | Das Treffen **dient dem gegenseitigen Kennenlernen**. |
+| drohen | to threaten | Wenn eine negative Konsequenz oder Gefahr für jemanden aktiv wird. | **Ihm droht** die Kündigung, wenn er weiter so unpünktlich ist. |
+| einfallen | to come to mind | Wenn man eine Idee oder Information plötzlich wieder im Kopf weiß. | **Mir fällt** einfach **nichts ein**, was ich Dana zum Geburtstag schenken könnte. |
+| entfallen | to slip one's mind | Vergessen werden; eine Information ist plötzlich aus dem Kopf weg. | **Mir ist sein Name entfallen**. |
+| fehlen | to miss / be lacking | Wenn man traurig ist, weil eine liebe Person nicht hier ist. | Du **fehlst mir** so sehr!. |
+| folgen | to follow | Hinter einer Person hergehen, um den Weg zu finden. | Bitte **folgen Sie mir**. Ich bringe Sie jetzt zu unserer Chefin. |
+
+---
+
+### Verben: gefallen bis nützen
+
+| Infinitiv | English Meaning | German Definition (A2) | Example Sentence (from book) |
+| --- | --- | --- | --- |
+| gefallen | to please / like | Wenn man ein Design, ein Projekt oder eine Sache schön findet. | Ihre Projektskizze **gefällt mir** sehr gut. |
+| gehören | to belong to | Wenn eine Sache das Eigentum von einer bestimmten Person ist. | Die Jacke **gehört mir**. |
+| gelingen | to succeed | Wenn eine kulinarische oder praktische Aufgabe perfekt klappt. | Dieser Kuchen **gelingt mir** immer besonders gut. |
+| genügen | to be enough / suffice | Ausreichend sein; genug Informationen oder Essen für ein Ziel sein. | Ihre Antwort **genügt mir** nicht. Da bleiben noch viele Fragen offen. |
+| gratulieren | to congratulate | Jemandem "Herzlichen Glückwunsch" zu einem Erfolg sagen. | Wir **gratulieren dir** ganz herzlich zum neuen Job!. |
+| helfen | to help | Jemandem bei einer Arbeit oder Vorbereitung nützlich sein. | Ich **helfe dir** gerne bei den Vorbereitungen für die Präsentation. |
+| kündigen | to terminate / fire | Einem Vertragspartner oder Arbeiter offiziell die Beendigung mitteilen. | Wir **kündigen Ihnen** hiermit fristgerecht zum Ende des Quartals. |
+| leichtfallen | to come easy to | Wenn eine Aufgabe (z. B. Lernen) absolut gar kein Problem macht. | Wörterlernen ist **mir** immer **leichtgefallen**. |
+| leidtun | to be sorry | "Entschuldigung" sagen, weil man traurig über eine Situation ist. | Es **tut mir leid**, dass ich schon wieder zu spät komme. Mein Sohn ist krank. |
+| missfallen | to displease / dislike | Das Gegenteil von gefallen; eine Aktion oder einen Stil nicht gut finden. | **Mir missfällt**, wie Sie mit mir sprechen. |
+| misslingen | to fail | Das Gegenteil von gelingen; wenn das Essen oder ein Projekt fehlschlägt. | Der Kuchen ist **mir** leider **misslungen**. |
+| nützen | to be useful / benefit | Sehr nützlich sein; einer Person einen großen Vorteil bringen. | Diese Information **nützt mir** sehr viel. Vielen Dank!. |
+
+---
+
+### Verben: passen bis zustimmen
+
+| Infinitiv | English Meaning | German Definition (A2) | Example Sentence (from book) |
+| --- | --- | --- | --- |
+| passen | to fit / suit | Die perfekte Größe bei Kleidung haben ODER zeitlich perfekt sein. | Der Anzug **passt Ihnen** perfekt. |
+| schaden | to harm / damage | Schlecht oder ungesund für den Körper oder eine Situation sein. | Ein bisschen mehr Sport zu machen, würde **dir** gar nicht **schaden**. |
+| schmecken | to taste | Einen guten oder schlechten Geschmack im Mund beim Essen haben. | **Schmeckt Ihnen** die Suppe nicht?. |
+| schwerfallen | to be difficult for | Wenn eine Aktivität sehr anstrengend ist und viel Kraft kostet. | Es **fällt mir** manchmal **schwer**, mich zu konzentrieren. |
+| stehen | to suit (clothing) | Wenn ein Kleidungsstück optisch perfekt zu einer Person passt. | Der Mantel **steht dir** ausgezeichnet. |
+| tun | to do / cause (harm) | Eine Aktion machen, die einer anderen Person oft Schmerzen bringt. | Was habe ich **dir getan**, dass du mich so schlecht behandelst?. |
+| vertrauen | to trust | Das sichere Gefühl haben, dass eine Person ehrlich und treu ist. | **Meinen Kolleginnen** kann ich immer **vertrauen**. |
+| widersprechen | to contradict / disagree | Sagen, dass die Meinung einer anderen Person absolut falsch ist. | Da muss ich **Ihnen** wirklich **widersprechen**. |
+| zuhören | to listen to | Aktiv, konzentriert und aufmerksam mit den Ohren zuhören. | Könnten Sie **mir** bitte mal **zuhören**?. |
+| zustimmen | to agree with | Sagen, dass man exakt derselben Meinung wie der Partner ist. | Da kann ich **Ihnen** nur **zustimmen**. |

@@ -1,0 +1,78 @@
+Sehr gerne! Adjektive mit festen Präpositionen sind ein fantastisches Thema, um Sätze noch genauer zu bauen. Ich habe alle Einträge aus der Datei **adjective_mit_preposition.jpeg** für dich extrahiert.
+
+Die Tabellenstruktur ist genau wie bei den vorherigen Listen aufgebaut: Du findest das Adjektiv, die feste Präposition, die englische Bedeutung, eine einfache Erklärung auf dem **A2-Niveau** und den originalen Beispielsatz aus dem Buch, bei dem ich die **Präposition** und das passende **Objekt** fett markiert habe.
+
+Hier ist deine komplette Übersicht, aufgeteilt in Akkusativ- und Dativ-Präpositionen:
+
+---
+
+## Adjektive mit Präpositionen
+
+### Mit Akkusativ (allergisch bis glücklich)
+
+| Adjektiv | Präp. | English Meaning | German Definition (A2) | Example Sentence (from book) |
+| --- | --- | --- | --- | --- |
+| allergisch | **auf** | allergic to | Wenn der Körper negativ auf eine Sache (z. B. Nüsse) reagiert. | Alice reagiert allergisch **auf Erdnüsse**. |
+| allergisch | **gegen** | allergic to | Eine biologische Allergie gegen ein Tier oder Essen haben. | Ist sie auch allergisch **gegen Fisch**? |
+| angewiesen | **auf** | dependent on | Wenn man die Hilfe von einer Person unbedingt braucht. | Er ist **auf Ihre Hilfe** angewiesen. |
+| bekannt | **für** | famous for | Berühmt sein; eine Stadt ist für eine Besonderheit bekannt. | Wofür ist Heidelberg bekannt? *(Hinweis: "Wofür" enthält "für")* |
+| dankbar | **für** | grateful for | "Danke" sagen wollen für Tipps oder gute Vorschläge. | Wir sind dankbar **für Verbesserungsvorschläge**. |
+| erstaunt | **über** | astonished at | Sehr überrascht über eine neue Information sein. | Beppo war **über die Information** erstaunt. |
+| froh | **über** | happy about | Glücklich und zufrieden über eine Situation oder das Wetter sein. | Bist du auch so froh **über das schöne Wetter**? |
+| geeignet | **für** | suitable for | Passend oder perfekt für eine bestimmte Situation (z. B. Regen) sein. | Diese Jacke ist **für Regenwetter** geeignet. |
+| gewöhnt | **an** | used to | Eine neue Situation völlig normal und alltäglich finden. | Er ist daran gewöhnt, dass er nicht alles versteht. *(Hinweis: "daran" enthält "an")* |
+| glücklich | **über** | happy about | Sehr große Freude über eine Situation oder den Job haben. | Eleni ist glücklich **über ihren Job**. |
+
+---
+
+### Mit Akkusativ (informiert bis zuständig)
+
+| Adjektiv | Präp. | English Meaning | German Definition (A2) | Example Sentence (from book) |
+| --- | --- | --- | --- | --- |
+| informiert | **über** | informed about | Die wichtigen Fakten oder Bedingungen über ein Thema wissen. | Bist du **über die Teilnahmebedingungen** informiert? |
+| spezialisiert | **auf** | specialized in | Ein Experte für ein ganz bestimmtes Fachgebiet (z. B. Literatur) sein. | Er ist **auf italienische Literatur** spezialisiert. |
+| stolz | **auf** | proud of | Ein sehr glückliches Gefühl über den Erfolg der Tochter haben. | Gabriela ist stolz **auf ihre Tochter**. |
+| traurig | **über** | sad about | Unglücklich und traurig wegen einer Situation oder Abreise sein. | Er ist traurig **über seine Abreise**. |
+| überrascht | **über** | surprised at | Erstaunt sein über eine plötzliche Entscheidung. | Ich bin überrascht **über deine Entscheidung**. |
+| verantwortlich | **für** | responsible for | Die Person sein, die die Pflicht für ein neues Projekt hat. | Sie ist **für das neue Projekt** verantwortlich. |
+| verärgert | **über** | annoyed about | Sauer und wütend über eine Person oder einen Anruf sein. | Er war verärgert **über ihren Anruf**. |
+| vorbereitet | **auf** | prepared for | Gut gelernt oder trainiert für ein Bewerbungsgespräch sein. | Bist du gut **auf das Bewerbungsgespräch** vorbereitet? |
+| wichtig | **für** | important for | Relevant und mit großer Bedeutung für ein Ziel oder die Arbeitssuche sein. | Das Ergebnis der Prüfung ist wichtig **für meine Arbeitssuche**. |
+| zuständig | **für** | in charge of | Die offizielle Person sein, die eine Aufgabe (z. B. Webseite) macht. | Eleni ist **für die Gestaltung der Webseite** zuständig. |
+
+---
+
+### Mit Dativ (abhängig bis einverstanden)
+
+| Adjektiv | Präp. | English Meaning | German Definition (A2) | Example Sentence (from book) |
+| --- | --- | --- | --- | --- |
+| abhängig | **von** | dependent on | Wenn man eine Sache (z. B. das Handy) unbedingt braucht. | Bist du abhängig **von deinem Handy**? |
+| alternativ | **zu** | alternative to | Als eine andere, gute Möglichkeit zu einem bestimmten Gerät existieren. | Was können wir Ihnen alternativ **zu diesem Gerät** anbieten? |
+| arm / reich | **an** | poor / rich in | Wenig Rohstoffe haben / sehr viele Optionen oder Technik besitzen. | Deutschland ist arm **an Rohstoffen**, aber reich **an Hochtechnologie**. |
+| ausgehend | **von** | based on | Eine Information oder Statistik als logische Basis für einen Plan nehmen. | Ausgehend **von der Statistik** haben wir uns zum Handeln entschlossen. |
+| begeistert | **von** | enthusiastic about | Eine Sache oder eine neue Kamera total fantastisch finden. | Gabriela ist begeistert **von ihrer neuen Kamera**. |
+| bereit | **zu** | ready for | Fertig sein, um mit einer Aufgabe oder Arbeit zu beginnen. | Bist du bereit **zu dieser Aufgabe**? |
+| beschäftigt | **mit** | busy with | Aktiv arbeiten an einer Sache; viel Zeit mit der Arbeit verbringen. | Ron ist **mit seiner Arbeit** beschäftigt. |
+| beteiligt | **an** | involved in | Aktiv bei einem Projekt oder einer Aktion mitmachen. | Warst du **an diesem Projekt** beteiligt? |
+| betroffen | **von** | affected by | Negative Konsequenzen durch eine Situation (z. B. Stromausfall) spüren. | Die Bewohner waren **von einem Stromausfall** betroffen. |
+| einverstanden | **mit** | in agreement with | "Ja" zu einem Vorschlag oder einer Meinung sagen; zustimmen. | Ich bin **mit deinem Vorschlag** einverstanden. |
+
+---
+
+### Mit Dativ (entschlossen bis zufrieden)
+
+| Adjektiv | Präp. | English Meaning | German Definition (A2) | Example Sentence (from book) |
+| --- | --- | --- | --- | --- |
+| entschlossen | **zu** | determined to | Eine feste Entscheidung für eine Aktion oder einen Schritt haben. | Er ist entschlossen **zu diesem Schritt**. |
+| enttäuscht | **von** | disappointed with | Traurig sein, weil ein Prüfungsergebnis nicht so gut ist wie gehofft. | Sie ist enttäuscht **von ihrem Prüfungsergebnis**. |
+| erfahren | **in** | experienced in | Sehr viel praktisches Wissen durch Arbeit in schwierigen Verhandlungen haben. | Er ist erfahren **in schwierigen Verhandlungen**. |
+| fähig | **zu** | capable of | Die Kompetenz besitzen, eine schwere Aufgabe gut zu leiten. | Eine Küchenchefin muss fähig **dazu** sein, andere anzuleiten. *(Hinweis: "dazu" enthält "zu")* |
+| interessiert | **an** | interested in | Ein persönliches Interesse an Büchern oder einem Thema haben. | Bist du **an den Büchern** interessiert? Ich schenke sie dir gerne. |
+| überrascht | **von** | surprised by | Erstaunt sein über eine plötzliche Aktion oder Entscheidung. | Ich bin überrascht **von deiner Entscheidung**. |
+| überzeugt | **von** | convinced of | Sich ganz sicher sein, dass eine neue Maschine exzellent ist. | Ich bin sehr überzeugt **von unserer neuen Maschine**. |
+| unabhängig | **von** | independent of | Frei sein; keine Hilfe von einer anderen Person brauchen. | Du solltest dich unabhängig **von mir** entscheiden. |
+| verbunden | **mit** | connected to | Telefonischen Kontakt mit einer Person (z. B. Herrn Carl) haben. | Bin ich **mit Herrn Carl** verbunden? |
+| verwandt | **mit** | related to | Zur selben Familie gehören. | Seid ihr **mit Herrn ...** verwandt? |
+| vorsichtig | **mit** | careful with | Sehr aufmerksam mit einer Sache (z. B. Glas) umgehen, damit nichts bricht. | Sei vorsichtig **mit dem Glas**, bitte. |
+| vorsichtig | **bei** | careful during | Aufmerksam handeln während einer Aktivität (z. B. Klettern). | Beim Klettern muss man sehr vorsichtig **bei ...** sein. *(Hinweis: Im Buch steht "Beim Klettern" = "Bei dem Klettern")* |
+| zufrieden | **mit** | satisfied with | Glücklich und ohne Klagen über seine Arbeit sein. | Faris ist zufrieden **mit seiner Arbeit**. |

@@ -1,0 +1,92 @@
+Das ist eine fantastische Ergänzung! Verben mit zwei Objekten (**Dativ** und **Akkusativ**) sind ein absoluter Klassiker in der deutschen Grammatik. Hier gilt fast immer die goldene Regel:
+
+* **Wer** bekommt es? $\rightarrow$ **Dativ** (meistens eine Person)
+* **Was** bekommt die Person? $\rightarrow$ **Akkusativ** (meistens eine Sache)
+
+Ich habe alle Verben aus der Datei **verb_mit_dativ_akku.jpeg** für dich extrahiert. Um dir das Lernen so leicht wie möglich zu machen, habe ich im Beispielsatz aus dem Buch das **Dativ-Objekt** und das **Akkusativ-Objekt** farblich markiert, damit du die Struktur sofort erkennst. Alle Definitionen sind wie gewohnt auf dem einfachen **A2-Niveau** verfasst.
+
+---
+
+## Verben mit Dativ und Akkusativ
+
+### Verben: abgewöhnen bis ermöglichen
+
+| Infinitiv | English Meaning | German Definition (A2) | Example Sentence (from book) <br>
+
+<br> *(**Dativ** / **Akkusativ**)* |
+| --- | --- | --- | --- |
+| abgewöhnen | to break a habit | Eine schlechte Gewohnheit (z. B. Rauchen) stoppen. | Du solltest **dir** **das Rauchen** wirklich abgewöhnen. |
+| angewöhnen | to adopt a habit | Eine neue, oft gute Gewohnheit im Alltag starten. | Wann hast du **dir** denn **das Joggen** angewöhnt? |
+| anbieten | to offer | Jemandem eine Hilfe, eine Ware oder einen Job vorschlagen. | Wir bieten **Ihnen** **eine gute Stelle** in unserem Unternehmen an. |
+| auffallen | to notice (something on someone) | Etwas Besonderes an einer Person bemerken. | Ist **Ihnen** **etwas** aufgefallen? |
+| beschreiben | to describe | Genau mit Worten erklären, wie ein Weg oder eine Sache aussieht. | Ich beschreibe **Ihnen** **den Weg** zu unserer Firma. |
+| bestätigen | to confirm | Offiziell sagen, dass eine Reservierung oder ein Termin korrekt ist. | Bitte bestätigen Sie **mir** **die Reservierung**. |
+| bieten | to offer / provide | Eine Leistung oder einen Service für Kunden bereithalten. | Die Firma K&L bietet **Ihnen** **einen kompletten Service**. |
+| borgen | to borrow / lend | Ein anderes Wort für leihen; eine Sache für kurze Zeit geben. | Kannst du **mir** mal **deine Schere** borgen? |
+| bringen | to bring | Eine Sache transportieren und einer Person geben. | Bringst du **mir** bitte mal **meine Brille**? |
+| empfehlen | to recommend | Jemandem einen guten Tipp für ein Produkt oder Restaurant geben. | Ich empfehle **Ihnen** **dieses E-Bike**, weil es sehr leicht ist. |
+| entziehen | to revoke / withdraw | Eine offizielle Erlaubnis (z. B. Führerschein) wegsperren. | Die Polizei hat **ihm** **die Fahrerlaubnis** entzogen. |
+| erklären | to explain | Eine schwere Aufgabe oder ein Programm einfach beschreiben. | Frau Rahimi, erklären Sie **mir** doch bitte **dieses neue Programm**. |
+| erlauben | to allow | Jemandem die Erlaubnis für eine Sache geben; das Gegenteil von verbieten. | Meine Firma erlaubt **ihren Mitarbeitern** **einen Tag Homeoffice** pro Woche. |
+| erleichtern | to make easier | Eine Arbeit einfacher oder weniger anstrengend machen. | Ihre Hilfe erleichtert **mir** **meine Arbeit** sehr. |
+| ermöglichen | to make possible | Die Chance oder das Geld für eine Aktivität bereitstellen. | Ein Stipendium hat **mir** **diesen Auslandsaufenthalt** ermöglicht. |
+
+---
+
+### Verben: erzählen bis präsentieren
+
+| Infinitiv | English Meaning | German Definition (A2) | Example Sentence (from book) <br>
+
+<br> *(**Dativ** / **Akkusativ**)* |
+| --- | --- | --- | --- |
+| erzählen | to tell / narrate | Eine Geschichte oder eine Information mit Worten mitteilen. | Das hat er **mir** selbst **erzählt**. *(Hinweis: Akkusativ "das" steht hier vorne)* |
+| geben | to give | Eine Sache mit der Hand an eine Person reichen. | Ich gebe **Ihnen** morgen **den Projektentwurf**. |
+| gestatten | to allow / permit | Ein offizielles Wort für erlauben. | Bitte gestatten Sie **mir** noch **eine Frage**: Wann kommt die Lieferung an? |
+| glauben | to believe (something from someone) | Denken, dass das Wort oder die Absicht einer Person ehrlich ist. | Ich glaube **ihm** **seinen guten Willen**, aber er schafft seine Aufgaben nicht. |
+| leihen | to lend | Eine Sache für kurze Zeit an eine Person geben. | Ich leihe **dir** **mein Tablet** für die Präsentation. |
+| liefern | to deliver | Eine Ware mit der Post oder einem Lkw zum Kunden bringen. | Die neue Nähmaschine wird **Ihnen** heute geliefert. *(Hinweis: Passivsatz, Akkusativ wird zum Subjekt)* |
+| mitteilen | to inform / communicate | Eine wichtige Information oder eine Nummer an jemanden schreiben oder sagen. | Bitte teilen Sie **mir** **Ihre Kontonummer** mit. |
+| nennen | to name / state | Eine Information, Beispiele oder Gründe laut sagen. | Können Sie **mir** bitte **die Gründe** für die Reklamation nennen? |
+| präsentieren | to present | Eine neue Maschine oder ein Projekt live vor Zuschauern zeigen. | Heute präsentiere ich **Ihnen** **unsere neue Bügelmaschine**. |
+
+---
+
+### Verben: schenken bis verdanken
+
+| Infinitiv | English Meaning | German Definition (A2) | Example Sentence (from book) <br>
+
+<br> *(**Dativ** / **Akkusativ**)* |
+| --- | --- | --- | --- |
+| schenken | to give a present | Eine Sache ohne Geld als Geschenk an eine Person übergeben. | Ich schenke **Fabian** **ein Buch** mit Ärzte-Cartoons zum Geburtstag. |
+| schicken | to send | Einen Brief, ein Paket oder eine E-Mail an jemanden senden. | Ich schicke **Ihnen** morgen **die Endfassung** der neuen Website. |
+| schreiben | to write | Einen Text mit der Hand oder am Computer für jemanden machen. | Mein Freund schreibt **mir** noch **Briefe** mit der Hand. |
+| schulden | to owe | Einer Person noch Geld oder eine Antwort zurückgeben müssen. | Du schuldest **mir** noch **das Geld** für den Betriebsausflug. |
+| senden | to send | Ein anderes Wort für schicken; Dokumente per Post senden. | Ich sende **dir** **die Unterlagen** für die Kalkulation per Post. |
+| servieren | to serve (food) | Das fertige Essen im Restaurant an den Tisch bringen. | Heute servieren wir **Ihnen** **eine Suppe** vom Rind. |
+| spenden | to donate | Geld oder Sachen an eine soziale Organisation (z. B. Amnesty) schenken. | Ahmed hat **Amnesty International** **20 Euro** gespendet. |
+| verbieten | to forbid | Sagen, dass eine Aktion oder ein Essen absolut nicht erlaubt ist. | Mein Arzt hat **mir** **die Erdnüsse und Kartoffelchips** am Abend verboten. |
+| verdanken | to owe to / thank for | Sagen, dass man einen Erfolg nur wegen einer bestimmten Person hat. | Mein gutes Deutsch verdanke ich **meiner Lehrerin**. *(Hinweis: Dativ steht hier am Ende)* |
+
+---
+
+### Verben: verheimlichen bis zurückbringen
+
+| Infinitiv | English Meaning | German Definition (A2) | Example Sentence (from book) <br>
+
+<br> *(**Dativ** / **Akkusativ**)* |
+| --- | --- | --- | --- |
+| verheimlichen | to hide / conceal from | Eine Information extra nicht sagen, damit es ein Geheimnis bleibt. | **Diesen Vorfall** hat sie **mir** verheimlicht. *(Akkusativ steht ganz vorne)* |
+| verkaufen | to sell | Eine Ware an einen Kunden geben und Geld dafür verlangen. | Wir verkaufen **Ihnen** **die neue Maschine** gern mit 20% Einführungsrabatt. |
+| vermitteln | to convey / mediate | Ein bestimmtes Gefühl oder Wissen an eine Person weitergeben. | Sie vermitteln **mir** oft **das Gefühl**, dass ich mich weiterentwickle. |
+| verraten | to reveal (a secret) | Ein Geheimnis ehrlich an eine Person weitererzählen. | Ich verrate **Ihnen** ja **kein Geheimnis**, wenn ich sage, dass wir Sie sehr schätzen. |
+| verschweigen | to keep secret from | Einem Mitarbeiter oder Partner eine Information oder ein Problem extra nicht sagen. | Auf keinen Fall dürfen Sie **Ihren Mitarbeitern** **die Probleme** verschweigen. |
+| versprechen | to promise | Jemandem sicher sagen, dass er eine Sache (z. B. einen Rabatt) bekommt. | Ich habe **den Kunden** **einen Rabatt** versprochen. |
+| verzeihen | to forgive | Einem Menschen einen Fehler nicht mehr böse nehmen. | Ich kann **mir** **diesen Fehler** einfach nicht verzeihen. |
+| vorlesen | to read aloud | Einen Text laut mit der Stimme für andere Personen lesen. | Unser Anwalt liest **Ihnen** **den Vertrag** noch einmal vor. |
+| vorschlagen | to suggest | Eine Idee oder eine Fortbildung als Option präsentieren. | Ich schlage **Ihnen** **eine Fortbildung** zum Thema „Gesprächsführung“ vor. |
+| wegnehmen | to take away from | Einer Person eine Sache ohne Erlaubnis aus der Hand nehmen. | Ich nehme **Ihnen** **das Projekt** nicht weg, sondern Sie bekommen Unterstützung. |
+| wiedergeben | to give back / return | Ein anderes Wort für zurückgeben; eine Sache (z. B. einen Kuli) wiedergeben. | Gib **mir** bitte **meinen Kuli** wieder. |
+| wünschen | to wish | Sagen, dass man einer Person viel Erfolg oder Glück erhofft. | Ich wünsche **Ihnen** **viel Erfolg** bei Ihren neuen Aufgaben! |
+| zeigen | to show | Einen Gegenstand so platzieren, dass eine Person ihn gut sehen kann. | Ich möchte **dir** **unsere neue Nähmaschine** zeigen. |
+| zuordnen | to assign / match | Eine Sache oder eine Überweisung passend zu einer Kategorie oder einem Konto legen. | Welchem Konto können Sie **diese Überweisung** zuordnen? *(Dativ steht ganz vorne)* |
+| zurückbringen | to return / bring back | Eine geliehene Sache (z. B. ein Tablet) wieder zu der Person bringen. | Bringst du **mir** bitte morgen **mein Tablet** zurück? |
