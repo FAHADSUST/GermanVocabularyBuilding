@@ -18,7 +18,11 @@ interface VocabularyDao {
     @Query("SELECT * FROM vocabulary WHERE id = :id")
     suspend fun getById(id: String): VocabularyEntity?
 
-    @Query("SELECT * FROM vocabulary WHERE word = :word OR (article || ' ' || word) = :word LIMIT 1")
+    @Query(
+        "SELECT * FROM vocabulary " +
+            "WHERE word = :word COLLATE NOCASE " +
+            "OR (article || ' ' || word) = :word COLLATE NOCASE LIMIT 1"
+    )
     suspend fun findByWord(word: String): VocabularyEntity?
 
     /**
