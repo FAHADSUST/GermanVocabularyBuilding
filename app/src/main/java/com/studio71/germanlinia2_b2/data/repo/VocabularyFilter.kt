@@ -1,12 +1,15 @@
 package com.studio71.germanlinia2_b2.data.repo
 
+import com.studio71.germanlinia2_b2.data.local.WordMarker
+
 /** Selected filters for the vocabulary list. Null means "no filter on this field". */
 data class VocabularyFilter(
     val level: String? = null,
     val book: String? = null,
     val chapter: String? = null,
     val pos: String? = null,
-    val grammarGroup: String? = null
+    val grammarGroup: String? = null,
+    val marker: WordMarker? = null
 )
 
 enum class SortMode(val key: String, val label: String) {

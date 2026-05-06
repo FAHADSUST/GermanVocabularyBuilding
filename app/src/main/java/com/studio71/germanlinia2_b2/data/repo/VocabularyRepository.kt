@@ -6,8 +6,11 @@ import com.studio71.germanlinia2_b2.data.local.AppDatabase
 import com.studio71.germanlinia2_b2.data.local.DailyStatEntity
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.local.WordMarkEntity
+import com.studio71.germanlinia2_b2.data.local.WordMarker
 import com.studio71.germanlinia2_b2.domain.srs.SrsScheduler
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
 /**
@@ -22,6 +25,7 @@ class VocabularyRepository(
     private val vocabularyDao = db.vocabularyDao()
     private val progressDao = db.progressDao()
     private val statsDao = db.statsDao()
+    private val wordMarkDao = db.wordMarkDao()
 
     fun today(): Long = LocalDate.now().toEpochDay()
 
@@ -45,6 +49,7 @@ class VocabularyRepository(
         chapter = filter.chapter,
         pos = filter.pos,
         grammarGroup = filter.grammarGroup,
+        marker = filter.marker?.takeIf { it != WordMarker.NONE }?.value,
         query = query,
         sortMode = sortMode.key
     )
@@ -92,6 +97,30 @@ class VocabularyRepository(
         val current = progressDao.getById(wordId) ?: return
         progressDao.upsert(SrsScheduler.onReviewFail(current, today))
         bumpStat(today, reviewed = 1)
+    }
+
+    // ---- Difficulty markers (hard / medium / easy) ----
+
+    /** Live marker for one word; emits [WordMarker.NONE] when unmarked. */
+    fun observeMarker(wordId: String): Flow<WordMarker> =
+        progressMarkerFlow(wordId)
+
+    private fun progressMarkerFlow(wordId: String): Flow<WordMarker> =
+        wordMarkDao.observeMarker(wordId).map { WordMarker.fromValue(it) }
+
+    /** Live map of wordId -> marker, used by the list to show colored stars. */
+    fun observeMarks(): Flow<Map<String, WordMarker>> =
+        wordMarkDao.observeAll().map { marks ->
+            marks.associate { it.wordId to WordMarker.fromValue(it.marker) }
+        }
+
+    /** Set or clear a word's marker. Passing [WordMarker.NONE] removes the mark. */
+    suspend fun setMarker(wordId: String, marker: WordMarker) {
+        if (marker == WordMarker.NONE) {
+            wordMarkDao.delete(wordId)
+        } else {
+            wordMarkDao.upsert(WordMarkEntity(wordId, marker.value))
+        }
     }
 
     // ---- Stats ----

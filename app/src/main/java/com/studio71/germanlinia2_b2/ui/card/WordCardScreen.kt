@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.ui.components.MarkerStarsRow
 import com.studio71.germanlinia2_b2.ui.components.WordDetailDialog
 import com.studio71.germanlinia2_b2.ui.tts.rememberGermanSpeaker
 import kotlinx.coroutines.launch
@@ -50,6 +51,7 @@ fun WordCardScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val progress by viewModel.progress.collectAsStateWithLifecycle()
+    val marker by viewModel.marker.collectAsStateWithLifecycle()
     val speaker = rememberGermanSpeaker()
     val scope = rememberCoroutineScope()
     var detailWord by remember { mutableStateOf<VocabularyEntity?>(null) }
@@ -64,6 +66,9 @@ fun WordCardScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zurück zur Liste")
                     }
+                },
+                actions = {
+                    MarkerStarsRow(current = marker, onSelect = viewModel::setMarker)
                 }
             )
         },

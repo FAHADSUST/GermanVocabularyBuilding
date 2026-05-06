@@ -31,12 +31,14 @@ interface VocabularyDao {
      */
     @Query(
         """
-        SELECT * FROM vocabulary
+        SELECT vocabulary.* FROM vocabulary
+        LEFT JOIN word_mark ON word_mark.wordId = vocabulary.id
         WHERE (:level IS NULL OR level = :level)
           AND (:book IS NULL OR book = :book)
           AND (:chapter IS NULL OR chapter = :chapter)
           AND (:pos IS NULL OR pos = :pos)
           AND (:grammarGroup IS NULL OR grammarGroup = :grammarGroup)
+          AND (:marker IS NULL OR word_mark.marker = :marker)
           AND (
                 :query = '' OR
                 word LIKE '%' || :query || '%' OR
@@ -59,6 +61,7 @@ interface VocabularyDao {
         chapter: String?,
         pos: String?,
         grammarGroup: String?,
+        marker: Int?,
         query: String,
         sortMode: String
     ): Flow<List<VocabularyEntity>>

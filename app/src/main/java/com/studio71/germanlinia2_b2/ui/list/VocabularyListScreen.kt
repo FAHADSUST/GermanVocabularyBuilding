@@ -47,9 +47,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.local.WordMarker
 import com.studio71.germanlinia2_b2.data.repo.SortMode
 import com.studio71.germanlinia2_b2.ui.card.CardDeck
 import com.studio71.germanlinia2_b2.ui.components.FilterDropdown
+import com.studio71.germanlinia2_b2.ui.components.MarkerFilterChip
+import com.studio71.germanlinia2_b2.ui.components.MarkerStar
 import com.studio71.germanlinia2_b2.ui.tts.rememberGermanSpeaker
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +71,7 @@ fun VocabularyListScreen(
     val sortMode by viewModel.sortMode.collectAsStateWithLifecycle()
     val dueCount by viewModel.dueCount.collectAsStateWithLifecycle()
     val learnedCount by viewModel.learnedCount.collectAsStateWithLifecycle()
+    val marks by viewModel.marks.collectAsStateWithLifecycle()
     val speaker = rememberGermanSpeaker()
 
     Scaffold(
@@ -141,6 +145,9 @@ fun VocabularyListScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 SortChip(sortMode, viewModel::setSortMode)
+                MarkerFilterChip(filter.marker) {
+                    viewModel.setFilter(filter.copy(marker = it))
+                }
                 FilterDropdown("Niveau", options.levels, filter.level) {
                     viewModel.setFilter(filter.copy(level = it))
                 }
@@ -166,6 +173,7 @@ fun VocabularyListScreen(
                 items(words, key = { it.id }) { word ->
                     WordListItem(
                         word = word,
+                        marker = marks[word.id] ?: WordMarker.NONE,
                         onClick = {
                             CardDeck.setDeck(words.map { it.id })
                             onOpenCard(word.id)
@@ -199,6 +207,7 @@ private fun SortChip(current: SortMode, onSelect: (SortMode) -> Unit) {
 @Composable
 private fun WordListItem(
     word: VocabularyEntity,
+    marker: WordMarker,
     onClick: () -> Unit,
     onSpeak: () -> Unit
 ) {
@@ -210,7 +219,12 @@ private fun WordListItem(
             verticalAlignment = Alignment.Top
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(word.displayWord, style = MaterialTheme.typography.titleMedium)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(word.displayWord, style = MaterialTheme.typography.titleMedium)
+                    if (marker != WordMarker.NONE) {
+                        MarkerStar(marker, modifier = Modifier.padding(start = 6.dp))
+                    }
+                }
                 Text(
                     word.english,
                     style = MaterialTheme.typography.bodyMedium,

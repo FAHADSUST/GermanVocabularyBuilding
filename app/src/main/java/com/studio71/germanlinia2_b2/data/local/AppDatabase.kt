@@ -9,15 +9,17 @@ import androidx.room.RoomDatabase
     entities = [
         VocabularyEntity::class,
         ProgressEntity::class,
-        DailyStatEntity::class
+        DailyStatEntity::class,
+        WordMarkEntity::class
     ],
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun vocabularyDao(): VocabularyDao
     abstract fun progressDao(): ProgressDao
     abstract fun statsDao(): StatsDao
+    abstract fun wordMarkDao(): WordMarkDao
 
     companion object {
         @Volatile

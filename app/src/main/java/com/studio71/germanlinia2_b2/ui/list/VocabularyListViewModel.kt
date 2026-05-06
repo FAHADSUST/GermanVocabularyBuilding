@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.local.WordMarker
 import com.studio71.germanlinia2_b2.data.repo.SortMode
 import com.studio71.germanlinia2_b2.data.repo.VocabularyFilter
 import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
@@ -62,6 +63,10 @@ class VocabularyListViewModel(
 
     val learnedCount: StateFlow<Int> =
         repo.observeLearnedCount().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    /** Map of wordId -> difficulty marker, used to show a colored star on each item. */
+    val marks: StateFlow<Map<String, WordMarker>> =
+        repo.observeMarks().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     fun onQueryChange(value: String) { _query.value = value }
     fun setFilter(filter: VocabularyFilter) { _filter.value = filter }

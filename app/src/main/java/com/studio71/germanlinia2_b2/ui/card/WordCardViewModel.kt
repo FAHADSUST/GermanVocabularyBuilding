@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.local.WordMarker
 import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -48,6 +49,11 @@ class WordCardViewModel(
         _currentId.flatMapLatest { id -> repo.observeProgress(id) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    /** Live difficulty marker (red/yellow/blue star) for the current word. */
+    val marker: StateFlow<WordMarker> =
+        _currentId.flatMapLatest { id -> repo.observeMarker(id) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WordMarker.NONE)
+
     init {
         load(startId)
     }
@@ -80,6 +86,11 @@ class WordCardViewModel(
     }
 
     suspend fun lookup(wordOrPhrase: String): VocabularyEntity? = repo.findByWord(wordOrPhrase)
+
+    /** Set or clear the difficulty marker for the current word. */
+    fun setMarker(marker: WordMarker) {
+        viewModelScope.launch { repo.setMarker(_currentId.value, marker) }
+    }
 
     class Factory(
         private val repo: VocabularyRepository,
