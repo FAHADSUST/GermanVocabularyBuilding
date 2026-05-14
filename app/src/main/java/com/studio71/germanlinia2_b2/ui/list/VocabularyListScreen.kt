@@ -1,6 +1,7 @@
 package com.studio71.germanlinia2_b2.ui.list
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,21 +20,30 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -43,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,6 +64,8 @@ import com.studio71.germanlinia2_b2.ui.card.CardDeck
 import com.studio71.germanlinia2_b2.ui.components.FilterDropdown
 import com.studio71.germanlinia2_b2.ui.components.MarkerFilterChip
 import com.studio71.germanlinia2_b2.ui.components.MarkerStar
+import com.studio71.germanlinia2_b2.ui.tts.TtsController
+import com.studio71.germanlinia2_b2.ui.tts.TtsPlaybackState
 import com.studio71.germanlinia2_b2.ui.tts.rememberGermanSpeaker
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,12 +86,22 @@ fun VocabularyListScreen(
     val learnedCount by viewModel.learnedCount.collectAsStateWithLifecycle()
     val marks by viewModel.marks.collectAsStateWithLifecycle()
     val speaker = rememberGermanSpeaker()
+    val context = LocalContext.current
+
+    val playbackState by TtsController.playbackState.collectAsStateWithLifecycle()
+    val playingWordId by TtsController.currentWordId.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Wortschatz · A2–B2") },
                 actions = {
+                    IconButton(
+                        onClick = { TtsController.start(context, words, 0) },
+                        enabled = words.isNotEmpty()
+                    ) {
+                        Icon(Icons.Default.PlayCircle, contentDescription = "Liste vorlesen")
+                    }
                     IconButton(onClick = onStartReview, enabled = dueCount > 0) {
                         BadgedBox(
                             badge = {
@@ -96,6 +119,18 @@ fun VocabularyListScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (playbackState != TtsPlaybackState.IDLE) {
+                PlaybackBar(
+                    state = playbackState,
+                    currentWord = words.firstOrNull { it.id == playingWordId },
+                    onPrevious = { TtsController.previous(context) },
+                    onToggle = { TtsController.togglePlayPause(context) },
+                    onNext = { TtsController.next(context) },
+                    onStop = { TtsController.stop(context) }
+                )
+            }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -170,17 +205,68 @@ fun VocabularyListScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(words, key = { it.id }) { word ->
+                itemsIndexed(words, key = { _, item -> item.id }) { index, word ->
                     WordListItem(
                         word = word,
                         marker = marks[word.id] ?: WordMarker.NONE,
+                        isPlaying = word.id == playingWordId,
                         onClick = {
                             CardDeck.setDeck(words.map { it.id })
                             onOpenCard(word.id)
                         },
+                        onLongClick = { TtsController.start(context, words, index) },
                         onSpeak = { speaker.speak(word.word) }
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlaybackBar(
+    state: TtsPlaybackState,
+    currentWord: VocabularyEntity?,
+    onPrevious: () -> Unit,
+    onToggle: () -> Unit,
+    onNext: () -> Unit,
+    onStop: () -> Unit
+) {
+    Surface(tonalElevation = 3.dp, shadowElevation = 8.dp) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    currentWord?.displayWord ?: "Wiedergabe",
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1
+                )
+                Text(
+                    if (state == TtsPlaybackState.PAUSED) "Pausiert"
+                    else currentWord?.english.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+            }
+            IconButton(onClick = onPrevious) {
+                Icon(Icons.Default.SkipPrevious, contentDescription = "Zurück")
+            }
+            FilledIconButton(onClick = onToggle) {
+                if (state == TtsPlaybackState.PLAYING) {
+                    Icon(Icons.Default.Pause, contentDescription = "Pause")
+                } else {
+                    Icon(Icons.Default.PlayArrow, contentDescription = "Abspielen")
+                }
+            }
+            IconButton(onClick = onNext) {
+                Icon(Icons.Default.SkipNext, contentDescription = "Weiter")
+            }
+            IconButton(onClick = onStop) {
+                Icon(Icons.Default.Stop, contentDescription = "Stopp")
             }
         }
     }
@@ -204,15 +290,25 @@ private fun SortChip(current: SortMode, onSelect: (SortMode) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WordListItem(
     word: VocabularyEntity,
     marker: WordMarker,
+    isPlaying: Boolean,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     onSpeak: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        colors = if (isPlaying) {
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        } else {
+            CardDefaults.cardColors()
+        }
     ) {
         Row(
             Modifier.fillMaxWidth().padding(12.dp),
@@ -220,6 +316,14 @@ private fun WordListItem(
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isPlaying) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.VolumeUp,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp).padding(end = 4.dp)
+                        )
+                    }
                     Text(word.displayWord, style = MaterialTheme.typography.titleMedium)
                     if (marker != WordMarker.NONE) {
                         MarkerStar(marker, modifier = Modifier.padding(start = 6.dp))

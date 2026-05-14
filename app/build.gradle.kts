@@ -72,6 +72,9 @@ dependencies {
     // WorkManager (daily review reminder)
     implementation(libs.androidx.work.runtime.ktx)
 
+    // Media (MediaStyle notification for the TTS playback controller)
+    implementation(libs.androidx.media)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
