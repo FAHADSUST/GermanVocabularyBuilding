@@ -23,6 +23,7 @@ enum class TtsPlaybackState { IDLE, PLAYING, PAUSED }
 object TtsController {
 
     const val ACTION_START = "com.studio71.germanlinia2_b2.tts.START"
+    const val ACTION_JUMP = "com.studio71.germanlinia2_b2.tts.JUMP"
     const val ACTION_TOGGLE = "com.studio71.germanlinia2_b2.tts.TOGGLE"
     const val ACTION_PAUSE = "com.studio71.germanlinia2_b2.tts.PAUSE"
     const val ACTION_RESUME = "com.studio71.germanlinia2_b2.tts.RESUME"
@@ -52,6 +53,15 @@ object TtsController {
         if (words.isEmpty()) return
         playlist = words
         send(context, ACTION_START, startIndex.coerceIn(0, words.lastIndex))
+    }
+
+    /**
+     * Jump within the already-loaded [playlist] to [index] and start speaking from there.
+     * Keeps the current queue intact (unlike [start], which replaces it).
+     */
+    fun jumpTo(context: Context, index: Int) {
+        if (index !in playlist.indices) return
+        send(context, ACTION_JUMP, index)
     }
 
     fun togglePlayPause(context: Context) = send(context, ACTION_TOGGLE)

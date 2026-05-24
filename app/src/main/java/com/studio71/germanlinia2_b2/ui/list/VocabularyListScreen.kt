@@ -1,21 +1,28 @@
 package com.studio71.germanlinia2_b2.ui.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.BarChart
@@ -29,6 +36,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -38,6 +46,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +54,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -90,6 +100,7 @@ fun VocabularyListScreen(
 
     val playbackState by TtsController.playbackState.collectAsStateWithLifecycle()
     val playingWordId by TtsController.currentWordId.collectAsStateWithLifecycle()
+    var showJumpDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -128,6 +139,7 @@ fun VocabularyListScreen(
                     onPrevious = { TtsController.previous(context) },
                     onToggle = { TtsController.togglePlayPause(context) },
                     onNext = { TtsController.next(context) },
+                    onJump = { showJumpDialog = true },
                     onStop = { TtsController.stop(context) }
                 )
             }
@@ -221,6 +233,22 @@ fun VocabularyListScreen(
             }
         }
     }
+
+    if (showJumpDialog) {
+        JumpToWordDialog(
+            words = words,
+            currentWordId = playingWordId,
+            onJump = { index ->
+                if (playbackState == TtsPlaybackState.IDLE) {
+                    TtsController.start(context, words, index)
+                } else {
+                    TtsController.jumpTo(context, index)
+                }
+                showJumpDialog = false
+            },
+            onDismiss = { showJumpDialog = false }
+        )
+    }
 }
 
 @Composable
@@ -230,6 +258,7 @@ private fun PlaybackBar(
     onPrevious: () -> Unit,
     onToggle: () -> Unit,
     onNext: () -> Unit,
+    onJump: () -> Unit,
     onStop: () -> Unit
 ) {
     Surface(tonalElevation = 3.dp, shadowElevation = 8.dp) {
@@ -265,11 +294,105 @@ private fun PlaybackBar(
             IconButton(onClick = onNext) {
                 Icon(Icons.Default.SkipNext, contentDescription = "Weiter")
             }
+            IconButton(onClick = onJump) {
+                Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Zu Wort springen")
+            }
             IconButton(onClick = onStop) {
                 Icon(Icons.Default.Stop, contentDescription = "Stopp")
             }
         }
     }
+}
+
+@Composable
+private fun JumpToWordDialog(
+    words: List<VocabularyEntity>,
+    currentWordId: String?,
+    onJump: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var query by remember { mutableStateOf("") }
+    val matches = remember(query, words) {
+        val indexed = words.mapIndexed { index, word -> index to word }
+        if (query.isBlank()) indexed
+        else indexed.filter { (_, word) ->
+            word.displayWord.contains(query, ignoreCase = true) ||
+                word.english.contains(query, ignoreCase = true) ||
+                word.germanMeaning.contains(query, ignoreCase = true)
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Schließen") }
+        },
+        title = { Text("Zu Wort springen") },
+        text = {
+            Column(Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Suchen …") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                )
+                Spacer(Modifier.height(8.dp))
+                if (matches.isEmpty()) {
+                    Text(
+                        "Keine Treffer",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    LazyColumn(Modifier.fillMaxWidth().heightIn(max = 360.dp)) {
+                        items(matches, key = { it.first }) { (index, word) ->
+                            val selected = word.id == currentWordId
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onJump(index) }
+                                    .padding(vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "${index + 1}.",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.width(40.dp)
+                                )
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        word.displayWord,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = if (selected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    if (word.english.isNotBlank()) {
+                                        Text(
+                                            word.english,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+                                if (selected) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.VolumeUp,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                            HorizontalDivider()
+                        }
+                    }
+                }
+            }
+        }
+    )
 }
 
 @Composable

@@ -84,6 +84,11 @@ class TtsPlaybackService : Service() {
                 startForegroundSafely()
                 if (ttsReady) playFrom(idx) else pendingStartIndex = idx
             }
+            TtsController.ACTION_JUMP -> {
+                val idx = intent.getIntExtra(TtsController.EXTRA_START_INDEX, 0)
+                startForegroundSafely()
+                if (ttsReady) playFrom(idx) else pendingStartIndex = idx
+            }
             TtsController.ACTION_TOGGLE -> {
                 when (TtsController.playbackState.value) {
                     TtsPlaybackState.PLAYING -> pause()
