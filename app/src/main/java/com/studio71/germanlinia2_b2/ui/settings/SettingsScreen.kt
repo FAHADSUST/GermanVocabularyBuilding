@@ -5,14 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
 import android.provider.Settings
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,20 +31,28 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.data.settings.SettingsStore
+import com.studio71.germanlinia2_b2.data.settings.ThemePreset
 import com.studio71.germanlinia2_b2.notify.ReminderScheduler
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,25 +63,70 @@ fun SettingsScreen(
 ) {
     val state by settings.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var showThemeSubSettings by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Einstellungen") },
+                title = { Text(if (showThemeSubSettings) "Design" else "Einstellungen") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        if (showThemeSubSettings) showThemeSubSettings = false else onBack()
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zurück")
                     }
                 }
             )
         }
     ) { padding ->
-        Column(
-            Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // --- Reminder ---
-            Card(Modifier.fillMaxWidth()) {
+        if (showThemeSubSettings) {
+            Column(
+                Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("Themes", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                        ThemePreset.entries.forEach { preset ->
+                            ThemeOptionRow(
+                                title = preset.uiTitle(),
+                                subtitle = preset.uiSubtitle(),
+                                selected = state.themePreset == preset,
+                                onClick = { settings.setThemePreset(preset) }
+                            )
+                        }
+
+                        if (state.themePreset == ThemePreset.CUSTOM) {
+                            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                            CustomThemeEditor(
+                                initialPrimary = state.themeCustomPrimary,
+                                initialSecondary = state.themeCustomSecondary,
+                                initialTertiary = state.themeCustomTertiary,
+                                onApply = { p, s, t -> settings.setCustomThemeColors(p, s, t) }
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            Column(
+                Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // --- Appearance ---
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Darstellung", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                        SettingNavigationRow(
+                            title = "Theme auswählen",
+                            subtitle = "Hell, Eye Friendly, Dark, Custom und weitere",
+                            onClick = { showThemeSubSettings = true }
+                        )
+                    }
+                }
+
+                // --- Reminder ---
+                Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Erinnerung", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
 
@@ -228,7 +285,139 @@ fun SettingsScreen(
                     }
                 }
             }
+            }
         }
+    }
+}
+
+@Composable
+private fun CustomThemeEditor(
+    initialPrimary: String,
+    initialSecondary: String,
+    initialTertiary: String,
+    onApply: (String, String, String) -> Unit
+) {
+    var primaryInput by rememberSaveable(initialPrimary) { mutableStateOf(initialPrimary) }
+    var secondaryInput by rememberSaveable(initialSecondary) { mutableStateOf(initialSecondary) }
+    var tertiaryInput by rememberSaveable(initialTertiary) { mutableStateOf(initialTertiary) }
+
+    val primaryValid = isValidColorHex(primaryInput)
+    val secondaryValid = isValidColorHex(secondaryInput)
+    val tertiaryValid = isValidColorHex(tertiaryInput)
+    val canApply = primaryValid && secondaryValid && tertiaryValid
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            "Eigene Farben (#RRGGBB oder #AARRGGBB)",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        OutlinedTextField(
+            value = primaryInput,
+            onValueChange = { primaryInput = it },
+            label = { Text("Primärfarbe") },
+            singleLine = true,
+            isError = !primaryValid,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = secondaryInput,
+            onValueChange = { secondaryInput = it },
+            label = { Text("Sekundärfarbe") },
+            singleLine = true,
+            isError = !secondaryValid,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = tertiaryInput,
+            onValueChange = { tertiaryInput = it },
+            label = { Text("Tertiärfarbe") },
+            singleLine = true,
+            isError = !tertiaryValid,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ThemeColorPreview(
+                modifier = Modifier.weight(1f),
+                color = parseColorOrNull(primaryInput),
+                fallback = MaterialTheme.colorScheme.primary
+            )
+            ThemeColorPreview(
+                modifier = Modifier.weight(1f),
+                color = parseColorOrNull(secondaryInput),
+                fallback = MaterialTheme.colorScheme.secondary
+            )
+            ThemeColorPreview(
+                modifier = Modifier.weight(1f),
+                color = parseColorOrNull(tertiaryInput),
+                fallback = MaterialTheme.colorScheme.tertiary
+            )
+        }
+
+        FilledTonalButton(
+            onClick = {
+                onApply(
+                    normalizeColorHex(primaryInput),
+                    normalizeColorHex(secondaryInput),
+                    normalizeColorHex(tertiaryInput)
+                )
+            },
+            enabled = canApply,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Eigene Farben übernehmen")
+        }
+    }
+}
+
+@Composable
+private fun ThemeColorPreview(modifier: Modifier = Modifier, color: Color?, fallback: Color) {
+    Box(
+        modifier
+            .height(30.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(color ?: fallback)
+    )
+}
+
+@Composable
+private fun ThemeOptionRow(
+    title: String,
+    subtitle: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f).padding(end = 12.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        RadioButton(selected = selected, onClick = onClick)
+    }
+}
+
+@Composable
+private fun SettingNavigationRow(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f).padding(end = 12.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Text("Öffnen", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -307,5 +496,55 @@ private fun requestIgnoreBatteryOptimizations(context: Context) {
             context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
         }
     }
+}
+
+private fun ThemePreset.uiTitle(): String = when (this) {
+    ThemePreset.SYSTEM -> "System"
+    ThemePreset.LIGHT -> "Hell"
+    ThemePreset.DARK -> "Dunkel"
+    ThemePreset.LIGHT_EYE_CARE -> "Eye Friendly (Light)"
+    ThemePreset.LIGHT_MINT -> "Light Mint"
+    ThemePreset.LIGHT_LAVENDER -> "Light Lavender"
+    ThemePreset.LIGHT_PEACH -> "Light Peach"
+    ThemePreset.OCEAN -> "Ocean"
+    ThemePreset.SUNSET -> "Sunset"
+    ThemePreset.FOREST -> "Forest"
+    ThemePreset.AMOLED -> "AMOLED"
+    ThemePreset.CUSTOM -> "Custom"
+}
+
+private fun ThemePreset.uiSubtitle(): String = when (this) {
+    ThemePreset.SYSTEM -> "Folgt automatisch den Geräteeinstellungen"
+    ThemePreset.LIGHT -> "Immer im hellen Standard-Design"
+    ThemePreset.DARK -> "Immer im dunklen Standard-Design"
+    ThemePreset.LIGHT_EYE_CARE -> "Helles, augenschonendes warmes Design"
+    ThemePreset.LIGHT_MINT -> "Heller Mint-Look"
+    ThemePreset.LIGHT_LAVENDER -> "Heller Violett-Look"
+    ThemePreset.LIGHT_PEACH -> "Heller warmer Peach-Look"
+    ThemePreset.OCEAN -> "Eigene Blau-/Türkisfarben (hell/dunkel automatisch)"
+    ThemePreset.SUNSET -> "Eigene warme Farben (hell/dunkel automatisch)"
+    ThemePreset.FOREST -> "Natürlicher Grün-Look (hell/dunkel automatisch)"
+    ThemePreset.AMOLED -> "Sehr dunkles Schwarz für OLED-Displays"
+    ThemePreset.CUSTOM -> "Definiere Primär-/Sekundär-/Tertiärfarben selbst"
+}
+
+private fun isValidColorHex(raw: String): Boolean {
+    val value = raw.trim().removePrefix("#")
+    return (value.length == 6 || value.length == 8) && value.all { it.uppercaseChar() in "0123456789ABCDEF" }
+}
+
+private fun normalizeColorHex(raw: String): String {
+    return "#${raw.trim().removePrefix("#").uppercase()}"
+}
+
+private fun parseColorOrNull(raw: String): Color? {
+    val normalized = raw.trim().removePrefix("#")
+    val argb = when (normalized.length) {
+        6 -> "FF$normalized"
+        8 -> normalized
+        else -> return null
+    }
+    val parsed = argb.toLongOrNull(16) ?: return null
+    return Color(parsed.toInt())
 }
 

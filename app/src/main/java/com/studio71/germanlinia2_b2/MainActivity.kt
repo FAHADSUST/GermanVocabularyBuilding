@@ -10,8 +10,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.ui.nav.AppNav
 import com.studio71.germanlinia2_b2.ui.theme.GermanVocabTheme
 
@@ -26,7 +28,13 @@ class MainActivity : ComponentActivity() {
         maybeRequestNotificationPermission()
         val app = application as GermanApp
         setContent {
-            GermanVocabTheme {
+            val settingsState by app.settings.state.collectAsStateWithLifecycle()
+            GermanVocabTheme(
+                themePreset = settingsState.themePreset,
+                customPrimaryHex = settingsState.themeCustomPrimary,
+                customSecondaryHex = settingsState.themeCustomSecondary,
+                customTertiaryHex = settingsState.themeCustomTertiary
+            ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     AppNav(repository = app.repository, settings = app.settings)
                 }

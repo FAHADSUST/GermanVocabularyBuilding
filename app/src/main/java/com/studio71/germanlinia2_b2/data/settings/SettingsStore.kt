@@ -5,6 +5,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+private const val DEFAULT_CUSTOM_PRIMARY = "#3F51B5"
+private const val DEFAULT_CUSTOM_SECONDARY = "#00897B"
+private const val DEFAULT_CUSTOM_TERTIARY = "#EF6C00"
+
+enum class ThemePreset(val storageValue: String) {
+    SYSTEM("system"),
+    LIGHT("light"),
+    DARK("dark"),
+    LIGHT_EYE_CARE("light_eye_care"),
+    LIGHT_MINT("light_mint"),
+    LIGHT_LAVENDER("light_lavender"),
+    LIGHT_PEACH("light_peach"),
+    OCEAN("ocean"),
+    SUNSET("sunset"),
+    FOREST("forest"),
+    AMOLED("amoled"),
+    CUSTOM("custom");
+
+    companion object {
+        fun fromStorage(value: String?): ThemePreset {
+            return entries.firstOrNull { it.storageValue == value } ?: SYSTEM
+        }
+    }
+}
+
 data class AppSettings(
     val reminderEnabled: Boolean = true,
     val reminderHour: Int = 19,
@@ -23,7 +48,15 @@ data class AppSettings(
     /** Pause (milliseconds) inserted between two spoken parts. */
     val ttsGapMs: Int = 350,
     /** Playback speech rate (1.0 = normal). */
-    val ttsSpeechRate: Float = 1.0f
+    val ttsSpeechRate: Float = 1.0f,
+    /** Active app theme preset. */
+    val themePreset: ThemePreset = ThemePreset.SYSTEM,
+    /** Custom primary theme color as #RRGGBB or #AARRGGBB. */
+    val themeCustomPrimary: String = DEFAULT_CUSTOM_PRIMARY,
+    /** Custom secondary theme color as #RRGGBB or #AARRGGBB. */
+    val themeCustomSecondary: String = DEFAULT_CUSTOM_SECONDARY,
+    /** Custom tertiary theme color as #RRGGBB or #AARRGGBB. */
+    val themeCustomTertiary: String = DEFAULT_CUSTOM_TERTIARY
 ) {
     val reminderTimeLabel: String
         get() = "%02d:%02d".format(reminderHour, reminderMinute)
@@ -49,7 +82,11 @@ class SettingsStore(context: Context) {
         ttsVerbFormRepeat = prefs.getInt(KEY_TTS_VERB, 1),
         ttsLoopCount = prefs.getInt(KEY_TTS_LOOP, 2),
         ttsGapMs = prefs.getInt(KEY_TTS_GAP, 350),
-        ttsSpeechRate = prefs.getFloat(KEY_TTS_RATE, 1.0f)
+        ttsSpeechRate = prefs.getFloat(KEY_TTS_RATE, 1.0f),
+        themePreset = ThemePreset.fromStorage(prefs.getString(KEY_THEME, ThemePreset.SYSTEM.storageValue)),
+        themeCustomPrimary = prefs.getString(KEY_THEME_CUSTOM_PRIMARY, DEFAULT_CUSTOM_PRIMARY) ?: DEFAULT_CUSTOM_PRIMARY,
+        themeCustomSecondary = prefs.getString(KEY_THEME_CUSTOM_SECONDARY, DEFAULT_CUSTOM_SECONDARY) ?: DEFAULT_CUSTOM_SECONDARY,
+        themeCustomTertiary = prefs.getString(KEY_THEME_CUSTOM_TERTIARY, DEFAULT_CUSTOM_TERTIARY) ?: DEFAULT_CUSTOM_TERTIARY
     )
 
     fun setReminderEnabled(enabled: Boolean) {
@@ -109,6 +146,36 @@ class SettingsStore(context: Context) {
         _state.value = _state.value.copy(ttsSpeechRate = v)
     }
 
+    fun setThemePreset(value: ThemePreset) {
+        prefs.edit().putString(KEY_THEME, value.storageValue).apply()
+        _state.value = _state.value.copy(themePreset = value)
+    }
+
+    fun setCustomThemeColors(primary: String, secondary: String, tertiary: String) {
+        val current = _state.value
+        val normalizedPrimary = normalizeColorHex(primary, current.themeCustomPrimary)
+        val normalizedSecondary = normalizeColorHex(secondary, current.themeCustomSecondary)
+        val normalizedTertiary = normalizeColorHex(tertiary, current.themeCustomTertiary)
+
+        prefs.edit()
+            .putString(KEY_THEME_CUSTOM_PRIMARY, normalizedPrimary)
+            .putString(KEY_THEME_CUSTOM_SECONDARY, normalizedSecondary)
+            .putString(KEY_THEME_CUSTOM_TERTIARY, normalizedTertiary)
+            .apply()
+
+        _state.value = current.copy(
+            themeCustomPrimary = normalizedPrimary,
+            themeCustomSecondary = normalizedSecondary,
+            themeCustomTertiary = normalizedTertiary
+        )
+    }
+
+    private fun normalizeColorHex(input: String, fallback: String): String {
+        val cleaned = input.trim().removePrefix("#").uppercase()
+        val isValid = (cleaned.length == 6 || cleaned.length == 8) && cleaned.all { it in "0123456789ABCDEF" }
+        return if (isValid) "#$cleaned" else fallback
+    }
+
     private companion object {
         const val KEY_ENABLED = "reminder_enabled"
         const val KEY_HOUR = "reminder_hour"
@@ -121,6 +188,10 @@ class SettingsStore(context: Context) {
         const val KEY_TTS_LOOP = "tts_loop_count"
         const val KEY_TTS_GAP = "tts_gap_ms"
         const val KEY_TTS_RATE = "tts_speech_rate"
+        const val KEY_THEME = "theme_preset"
+        const val KEY_THEME_CUSTOM_PRIMARY = "theme_custom_primary"
+        const val KEY_THEME_CUSTOM_SECONDARY = "theme_custom_secondary"
+        const val KEY_THEME_CUSTOM_TERTIARY = "theme_custom_tertiary"
     }
 }
 
