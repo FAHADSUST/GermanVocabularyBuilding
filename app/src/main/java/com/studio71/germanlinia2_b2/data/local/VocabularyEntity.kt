@@ -51,6 +51,16 @@ data class VocabularyEntity(
     val isAdjective: Boolean get() = pos.equals("adj", ignoreCase = true)
     val isNoun: Boolean get() = pos.equals("n", ignoreCase = true)
 
+    /** Tiny POS label used by list/detail headers (e.g. v, adv, adj, N). */
+    val posTinyLabel: String
+        get() = when (pos.trim().lowercase()) {
+            "v" -> "v"
+            "adv" -> "adv"
+            "adj" -> "adj"
+            "n" -> "N"
+            else -> pos.trim()
+        }
+
     companion object {
         fun splitPipes(value: String): List<String> =
             value.split('|').map { it.trim() }.filter { it.isNotEmpty() }

@@ -76,7 +76,11 @@ fun AppNav(repository: VocabularyRepository, settings: SettingsStore) {
         }
 
         composable(Routes.SETTINGS) {
-            SettingsScreen(settings = settings, onBack = { navController.popBackStack() })
+            SettingsScreen(
+                settings = settings,
+                repository = repository,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

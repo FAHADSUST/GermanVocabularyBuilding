@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -76,7 +77,9 @@ import com.studio71.germanlinia2_b2.ui.components.MarkerFilterChip
 import com.studio71.germanlinia2_b2.ui.components.MarkerStar
 import com.studio71.germanlinia2_b2.ui.tts.TtsController
 import com.studio71.germanlinia2_b2.ui.tts.TtsPlaybackState
+import com.studio71.germanlinia2_b2.ui.tts.TtsSessionSeed
 import com.studio71.germanlinia2_b2.ui.tts.rememberGermanSpeaker
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,6 +104,12 @@ fun VocabularyListScreen(
     val playbackState by TtsController.playbackState.collectAsStateWithLifecycle()
     val playingWordId by TtsController.currentWordId.collectAsStateWithLifecycle()
     var showJumpDialog by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+
+    val sessionSeed = remember(filter, query, sortMode) {
+        TtsSessionSeed(filter = filter, query = query, sortMode = sortMode)
+    }
 
     Scaffold(
         topBar = {
@@ -108,7 +117,7 @@ fun VocabularyListScreen(
                 title = { Text("Wortschatz · A2–B2") },
                 actions = {
                     IconButton(
-                        onClick = { TtsController.start(context, words, 0) },
+                        onClick = { TtsController.start(context, words, 0, sessionSeed) },
                         enabled = words.isNotEmpty()
                     ) {
                         Icon(Icons.Default.PlayCircle, contentDescription = "Liste vorlesen")
@@ -140,7 +149,15 @@ fun VocabularyListScreen(
                     onToggle = { TtsController.togglePlayPause(context) },
                     onNext = { TtsController.next(context) },
                     onJump = { showJumpDialog = true },
-                    onStop = { TtsController.stop(context) }
+                    onStop = { TtsController.stop(context) },
+                    onWordTitleDoubleTap = if (playbackState == TtsPlaybackState.PLAYING && playingWordId != null) {
+                        {
+                            val index = words.indexOfFirst { it.id == playingWordId }
+                            if (index >= 0) scope.launch { listState.animateScrollToItem(index) }
+                        }
+                    } else {
+                        null
+                    }
                 )
             }
         }
@@ -214,11 +231,13 @@ fun VocabularyListScreen(
 
             LazyColumn(
                 Modifier.fillMaxSize(),
+                state = listState,
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 itemsIndexed(words, key = { _, item -> item.id }) { index, word ->
                     WordListItem(
+                        itemNumber = index + 1,
                         word = word,
                         marker = marks[word.id] ?: WordMarker.NONE,
                         isPlaying = word.id == playingWordId,
@@ -226,7 +245,7 @@ fun VocabularyListScreen(
                             CardDeck.setDeck(words.map { it.id })
                             onOpenCard(word.id)
                         },
-                        onLongClick = { TtsController.start(context, words, index) },
+                        onLongClick = { TtsController.start(context, words, index, sessionSeed) },
                         onSpeak = { speaker.speak(word.word) }
                     )
                 }
@@ -240,7 +259,7 @@ fun VocabularyListScreen(
             currentWordId = playingWordId,
             onJump = { index ->
                 if (playbackState == TtsPlaybackState.IDLE) {
-                    TtsController.start(context, words, index)
+                    TtsController.start(context, words, index, sessionSeed)
                 } else {
                     TtsController.jumpTo(context, index)
                 }
@@ -252,6 +271,7 @@ fun VocabularyListScreen(
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun PlaybackBar(
     state: TtsPlaybackState,
     currentWord: VocabularyEntity?,
@@ -259,7 +279,8 @@ private fun PlaybackBar(
     onToggle: () -> Unit,
     onNext: () -> Unit,
     onJump: () -> Unit,
-    onStop: () -> Unit
+    onStop: () -> Unit,
+    onWordTitleDoubleTap: (() -> Unit)?
 ) {
     Surface(tonalElevation = 3.dp, shadowElevation = 8.dp) {
         Row(
@@ -271,7 +292,12 @@ private fun PlaybackBar(
                 Text(
                     currentWord?.displayWord ?: "Wiedergabe",
                     style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1
+                    maxLines = 1,
+                    modifier = Modifier.combinedClickable(
+                        enabled = onWordTitleDoubleTap != null,
+                        onClick = {},
+                        onDoubleClick = { onWordTitleDoubleTap?.invoke() }
+                    )
                 )
                 Text(
                     if (state == TtsPlaybackState.PAUSED) "Pausiert"
@@ -416,6 +442,7 @@ private fun SortChip(current: SortMode, onSelect: (SortMode) -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WordListItem(
+    itemNumber: Int,
     word: VocabularyEntity,
     marker: WordMarker,
     isPlaying: Boolean,
@@ -439,6 +466,12 @@ private fun WordListItem(
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "$itemNumber.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 6.dp)
+                    )
                     if (isPlaying) {
                         Icon(
                             Icons.AutoMirrored.Filled.VolumeUp,
@@ -448,6 +481,13 @@ private fun WordListItem(
                         )
                     }
                     Text(word.displayWord, style = MaterialTheme.typography.titleMedium)
+                    if (word.posTinyLabel.isNotBlank()) {
+                        Text(
+                            "  ${word.posTinyLabel}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     if (marker != WordMarker.NONE) {
                         MarkerStar(marker, modifier = Modifier.padding(start = 6.dp))
                     }

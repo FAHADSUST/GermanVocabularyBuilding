@@ -16,8 +16,11 @@ import androidx.core.app.ServiceCompat
 import com.studio71.germanlinia2_b2.GermanApp
 import com.studio71.germanlinia2_b2.MainActivity
 import com.studio71.germanlinia2_b2.R
+import com.studio71.germanlinia2_b2.data.local.WordMarker
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.repo.SortMode
 import com.studio71.germanlinia2_b2.data.settings.AppSettings
+import com.studio71.germanlinia2_b2.data.settings.TtsHistoryEntry
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,9 +57,11 @@ class TtsPlaybackService : Service() {
 
     private val pending = ConcurrentHashMap<String, CancellableContinuation<Unit>>()
     private val idGen = AtomicInteger(0)
+    private var historyEntry: TtsHistoryEntry? = null
 
     private val playlist: List<VocabularyEntity> get() = TtsController.playlist
     private val settings get() = (application as GermanApp).settings.state.value
+    private val settingsStore get() = (application as GermanApp).settings
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -82,18 +87,23 @@ class TtsPlaybackService : Service() {
             TtsController.ACTION_START -> {
                 val idx = intent.getIntExtra(TtsController.EXTRA_START_INDEX, 0)
                 startForegroundSafely()
+                beginHistorySession(idx)
                 if (ttsReady) playFrom(idx) else pendingStartIndex = idx
             }
             TtsController.ACTION_JUMP -> {
                 val idx = intent.getIntExtra(TtsController.EXTRA_START_INDEX, 0)
                 startForegroundSafely()
+                if (historyEntry == null) beginHistorySession(idx)
                 if (ttsReady) playFrom(idx) else pendingStartIndex = idx
             }
             TtsController.ACTION_TOGGLE -> {
                 when (TtsController.playbackState.value) {
                     TtsPlaybackState.PLAYING -> pause()
                     TtsPlaybackState.PAUSED -> resume()
-                    TtsPlaybackState.IDLE -> if (ttsReady) playFrom(0) else pendingStartIndex = 0
+                    TtsPlaybackState.IDLE -> {
+                        beginHistorySession(0)
+                        if (ttsReady) playFrom(0) else pendingStartIndex = 0
+                    }
                 }
             }
             TtsController.ACTION_PAUSE -> pause()
@@ -130,6 +140,7 @@ class TtsPlaybackService : Service() {
     private suspend fun playWord(word: VocabularyEntity) {
         currentIndex = playlist.indexOfFirst { it.id == word.id }.let { if (it >= 0) it else currentIndex }
         TtsController.publishCurrent(currentIndex, word.id)
+        updateHistoryProgress(currentIndex)
         updateNotification()
         val s = settings
         val gap = s.ttsGapMs.toLong()
@@ -179,6 +190,7 @@ class TtsPlaybackService : Service() {
     }
 
     private fun stopPlayback() {
+        persistHistorySession()
         playbackJob?.cancel()
         paused.value = false
         currentIndex = -1
@@ -343,6 +355,7 @@ class TtsPlaybackService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        persistHistorySession()
         playbackJob?.cancel()
         scope.coroutineContext[Job]?.cancel()
         if (::tts.isInitialized) {
@@ -359,6 +372,43 @@ class TtsPlaybackService : Service() {
         fun stop(context: Context) {
             context.stopService(Intent(context, TtsPlaybackService::class.java))
         }
+    }
+
+    private fun beginHistorySession(startIndex: Int) {
+        persistHistorySession()
+        val seed = TtsController.takePendingSessionSeed()
+        val startedAt = System.currentTimeMillis()
+        val safeIndex = startIndex.coerceIn(0, (playlist.size - 1).coerceAtLeast(0))
+        historyEntry = TtsHistoryEntry(
+            id = startedAt,
+            playedAtEpochMs = startedAt,
+            level = seed?.filter?.level,
+            book = seed?.filter?.book,
+            chapter = seed?.filter?.chapter,
+            pos = seed?.filter?.pos,
+            grammarGroup = seed?.filter?.grammarGroup,
+            markerValue = seed?.filter?.marker?.takeIf { it != WordMarker.NONE }?.value,
+            query = seed?.query.orEmpty(),
+            sortModeKey = seed?.sortMode?.key ?: SortMode.SOURCE.key,
+            startIndex = safeIndex,
+            lastIndex = safeIndex,
+            totalCount = playlist.size
+        )
+    }
+
+    private fun updateHistoryProgress(index: Int) {
+        val entry = historyEntry ?: return
+        val safeIndex = index.coerceAtLeast(entry.startIndex)
+        historyEntry = entry.copy(
+            lastIndex = safeIndex,
+            totalCount = playlist.size
+        )
+    }
+
+    private fun persistHistorySession() {
+        val entry = historyEntry ?: return
+        settingsStore.addTtsHistory(entry)
+        historyEntry = null
     }
 }
 

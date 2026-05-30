@@ -102,7 +102,11 @@ private fun HeaderCard(word: VocabularyEntity, onSpeak: () -> Unit) {
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    "${word.level} · ${word.chapter}",
+                    listOfNotNull(
+                        word.level,
+                        word.chapter,
+                        word.posTinyLabel.takeIf { it.isNotBlank() }
+                    ).joinToString(" · "),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

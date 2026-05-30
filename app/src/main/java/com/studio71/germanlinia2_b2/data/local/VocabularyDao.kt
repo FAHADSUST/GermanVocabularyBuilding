@@ -66,6 +66,43 @@ interface VocabularyDao {
         sortMode: String
     ): Flow<List<VocabularyEntity>>
 
+    @Query(
+        """
+        SELECT vocabulary.* FROM vocabulary
+        LEFT JOIN word_mark ON word_mark.wordId = vocabulary.id
+        WHERE (:level IS NULL OR level = :level)
+          AND (:book IS NULL OR book = :book)
+          AND (:chapter IS NULL OR chapter = :chapter)
+          AND (:pos IS NULL OR pos = :pos)
+          AND (:grammarGroup IS NULL OR grammarGroup = :grammarGroup)
+          AND (:marker IS NULL OR word_mark.marker = :marker)
+          AND (
+                :query = '' OR
+                word LIKE '%' || :query || '%' OR
+                english LIKE '%' || :query || '%' OR
+                germanMeaning LIKE '%' || :query || '%'
+          )
+        ORDER BY
+          CASE WHEN :sortMode = 'ALPHA' THEN sortKey END ASC,
+          CASE WHEN :sortMode = 'FREQUENCY' THEN frequencyRank END ASC,
+          CASE WHEN :sortMode = 'SOURCE' THEN orderIndex END ASC,
+          CASE WHEN :sortMode = 'CHAPTER' THEN level END ASC,
+          CASE WHEN :sortMode = 'CHAPTER' THEN book END ASC,
+          CASE WHEN :sortMode = 'CHAPTER' THEN chapter END ASC,
+          orderIndex ASC
+        """
+    )
+    suspend fun getFiltered(
+        level: String?,
+        book: String?,
+        chapter: String?,
+        pos: String?,
+        grammarGroup: String?,
+        marker: Int?,
+        query: String,
+        sortMode: String
+    ): List<VocabularyEntity>
+
     @Query("SELECT DISTINCT level FROM vocabulary ORDER BY level")
     fun observeLevels(): Flow<List<String>>
 

@@ -37,7 +37,16 @@ fun WordDetailDialog(
         },
         title = {
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Text(word.displayWord, style = MaterialTheme.typography.titleLarge)
+                Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                    Text(word.displayWord, style = MaterialTheme.typography.titleLarge)
+                    if (word.posTinyLabel.isNotBlank()) {
+                        Text(
+                            word.posTinyLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
                 IconButton(onClick = { onSpeak(word.word) }) {
                     Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Vorlesen")
                 }
@@ -55,7 +64,9 @@ fun WordDetailDialog(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     AssistChip(onClick = {}, label = { Text(word.level) })
-                    if (word.pos.isNotBlank()) AssistChip(onClick = {}, label = { Text(word.pos) })
+                    if (word.posTinyLabel.isNotBlank()) {
+                        AssistChip(onClick = {}, label = { Text(word.posTinyLabel) })
+                    }
                 }
             }
         }

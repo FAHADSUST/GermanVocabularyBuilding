@@ -4,12 +4,21 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.repo.SortMode
+import com.studio71.germanlinia2_b2.data.repo.VocabularyFilter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** High-level playback status shared between the foreground service and the UI. */
 enum class TtsPlaybackState { IDLE, PLAYING, PAUSED }
+
+/** Snapshot of list context used to build resumable TTS history entries. */
+data class TtsSessionSeed(
+    val filter: VocabularyFilter = VocabularyFilter(),
+    val query: String = "",
+    val sortMode: SortMode = SortMode.SOURCE
+)
 
 /**
  * Process-wide bridge between the UI (Compose) and the [TtsPlaybackService].
@@ -37,6 +46,9 @@ object TtsController {
     var playlist: List<VocabularyEntity> = emptyList()
         private set
 
+    @Volatile
+    private var pendingSessionSeed: TtsSessionSeed? = null
+
     private val _playbackState = MutableStateFlow(TtsPlaybackState.IDLE)
     val playbackState: StateFlow<TtsPlaybackState> = _playbackState.asStateFlow()
 
@@ -49,9 +61,15 @@ object TtsController {
     // ---- Commands from the UI ------------------------------------------------
 
     /** Start (or restart) playback of [words], beginning at [startIndex]. */
-    fun start(context: Context, words: List<VocabularyEntity>, startIndex: Int) {
+    fun start(
+        context: Context,
+        words: List<VocabularyEntity>,
+        startIndex: Int,
+        sessionSeed: TtsSessionSeed? = null
+    ) {
         if (words.isEmpty()) return
         playlist = words
+        pendingSessionSeed = sessionSeed
         send(context, ACTION_START, startIndex.coerceIn(0, words.lastIndex))
     }
 
@@ -84,6 +102,12 @@ object TtsController {
     internal fun publishCurrent(index: Int, wordId: String?) {
         _currentIndex.value = index
         _currentWordId.value = wordId
+    }
+
+    internal fun takePendingSessionSeed(): TtsSessionSeed? {
+        val seed = pendingSessionSeed
+        pendingSessionSeed = null
+        return seed
     }
 
     internal fun reset() {

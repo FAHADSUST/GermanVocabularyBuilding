@@ -1,9 +1,14 @@
 package com.studio71.germanlinia2_b2.data.settings
 
 import android.content.Context
+import com.studio71.germanlinia2_b2.data.local.WordMarker
+import com.studio71.germanlinia2_b2.data.repo.SortMode
+import com.studio71.germanlinia2_b2.data.repo.VocabularyFilter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONArray
+import org.json.JSONObject
 
 private const val DEFAULT_CUSTOM_PRIMARY = "#3F51B5"
 private const val DEFAULT_CUSTOM_SECONDARY = "#00897B"
@@ -27,6 +32,56 @@ enum class ThemePreset(val storageValue: String) {
         fun fromStorage(value: String?): ThemePreset {
             return entries.firstOrNull { it.storageValue == value } ?: SYSTEM
         }
+    }
+}
+
+data class TtsHistoryEntry(
+    val id: Long,
+    val playedAtEpochMs: Long,
+    val level: String? = null,
+    val book: String? = null,
+    val chapter: String? = null,
+    val pos: String? = null,
+    val grammarGroup: String? = null,
+    val markerValue: Int? = null,
+    val query: String = "",
+    val sortModeKey: String = SortMode.SOURCE.key,
+    val startIndex: Int = 0,
+    val lastIndex: Int = 0,
+    val totalCount: Int = 0
+) {
+    val fromPosition: Int get() = (startIndex + 1).coerceAtLeast(1)
+    val toPosition: Int get() = (lastIndex + 1).coerceAtLeast(fromPosition)
+    val resumeIndex: Int get() = lastIndex.coerceAtLeast(startIndex)
+
+    fun toFilter(): VocabularyFilter = VocabularyFilter(
+        level = level,
+        book = book,
+        chapter = chapter,
+        pos = pos,
+        grammarGroup = grammarGroup,
+        marker = WordMarker.fromValue(markerValue).takeIf { it != WordMarker.NONE }
+    )
+
+    fun toSortMode(): SortMode = SortMode.entries.firstOrNull { it.key == sortModeKey } ?: SortMode.SOURCE
+
+    fun filterSummary(): String {
+        val parts = listOfNotNull(
+            level,
+            book,
+            chapter,
+            pos?.let { "POS $it" },
+            grammarGroup,
+            markerValue?.let { "Marker ${WordMarker.fromValue(it).name}" },
+            query.takeIf { it.isNotBlank() }?.let { "Suche \"$it\"" },
+            toSortMode().label
+        )
+        return parts.joinToString(" | ").ifBlank { "Keine Filter" }
+    }
+
+    fun rangeSummary(): String {
+        val total = if (totalCount > 0) " / $totalCount" else ""
+        return "$fromPosition -> $toPosition$total"
     }
 }
 
@@ -56,7 +111,9 @@ data class AppSettings(
     /** Custom secondary theme color as #RRGGBB or #AARRGGBB. */
     val themeCustomSecondary: String = DEFAULT_CUSTOM_SECONDARY,
     /** Custom tertiary theme color as #RRGGBB or #AARRGGBB. */
-    val themeCustomTertiary: String = DEFAULT_CUSTOM_TERTIARY
+    val themeCustomTertiary: String = DEFAULT_CUSTOM_TERTIARY,
+    /** Recently played TTS sessions (newest first). */
+    val ttsHistory: List<TtsHistoryEntry> = emptyList()
 ) {
     val reminderTimeLabel: String
         get() = "%02d:%02d".format(reminderHour, reminderMinute)
@@ -86,7 +143,8 @@ class SettingsStore(context: Context) {
         themePreset = ThemePreset.fromStorage(prefs.getString(KEY_THEME, ThemePreset.SYSTEM.storageValue)),
         themeCustomPrimary = prefs.getString(KEY_THEME_CUSTOM_PRIMARY, DEFAULT_CUSTOM_PRIMARY) ?: DEFAULT_CUSTOM_PRIMARY,
         themeCustomSecondary = prefs.getString(KEY_THEME_CUSTOM_SECONDARY, DEFAULT_CUSTOM_SECONDARY) ?: DEFAULT_CUSTOM_SECONDARY,
-        themeCustomTertiary = prefs.getString(KEY_THEME_CUSTOM_TERTIARY, DEFAULT_CUSTOM_TERTIARY) ?: DEFAULT_CUSTOM_TERTIARY
+        themeCustomTertiary = prefs.getString(KEY_THEME_CUSTOM_TERTIARY, DEFAULT_CUSTOM_TERTIARY) ?: DEFAULT_CUSTOM_TERTIARY,
+        ttsHistory = parseHistory(prefs.getString(KEY_TTS_HISTORY, "[]"))
     )
 
     fun setReminderEnabled(enabled: Boolean) {
@@ -170,6 +228,75 @@ class SettingsStore(context: Context) {
         )
     }
 
+    fun addTtsHistory(entry: TtsHistoryEntry) {
+        val updated = listOf(entry) + _state.value.ttsHistory.filterNot { it.id == entry.id }
+        persistHistory(updated.take(HISTORY_LIMIT))
+    }
+
+    fun clearTtsHistory() {
+        persistHistory(emptyList())
+    }
+
+    private fun persistHistory(entries: List<TtsHistoryEntry>) {
+        prefs.edit().putString(KEY_TTS_HISTORY, historyToJson(entries)).apply()
+        _state.value = _state.value.copy(ttsHistory = entries)
+    }
+
+    private fun parseHistory(raw: String?): List<TtsHistoryEntry> {
+        if (raw.isNullOrBlank()) return emptyList()
+        return runCatching {
+            val array = JSONArray(raw)
+            buildList {
+                for (i in 0 until array.length()) {
+                    val obj = array.optJSONObject(i) ?: continue
+                    add(
+                        TtsHistoryEntry(
+                            id = obj.optLong("id", 0L),
+                            playedAtEpochMs = obj.optLong("playedAtEpochMs", 0L),
+                            level = obj.optNullableString("level"),
+                            book = obj.optNullableString("book"),
+                            chapter = obj.optNullableString("chapter"),
+                            pos = obj.optNullableString("pos"),
+                            grammarGroup = obj.optNullableString("grammarGroup"),
+                            markerValue = obj.optNullableInt("markerValue"),
+                            query = obj.optString("query", ""),
+                            sortModeKey = obj.optString("sortModeKey", SortMode.SOURCE.key),
+                            startIndex = obj.optInt("startIndex", 0),
+                            lastIndex = obj.optInt("lastIndex", 0),
+                            totalCount = obj.optInt("totalCount", 0)
+                        )
+                    )
+                }
+            }
+        }.getOrDefault(emptyList())
+            .filter { it.id > 0L }
+            .sortedByDescending { it.playedAtEpochMs }
+            .take(HISTORY_LIMIT)
+    }
+
+    private fun historyToJson(entries: List<TtsHistoryEntry>): String {
+        val array = JSONArray()
+        entries.forEach { e ->
+            array.put(
+                JSONObject()
+                    .put("id", e.id)
+                    .put("playedAtEpochMs", e.playedAtEpochMs)
+                    .putOpt("level", e.level)
+                    .putOpt("book", e.book)
+                    .putOpt("chapter", e.chapter)
+                    .putOpt("pos", e.pos)
+                    .putOpt("grammarGroup", e.grammarGroup)
+                    .putOpt("markerValue", e.markerValue)
+                    .put("query", e.query)
+                    .put("sortModeKey", e.sortModeKey)
+                    .put("startIndex", e.startIndex)
+                    .put("lastIndex", e.lastIndex)
+                    .put("totalCount", e.totalCount)
+            )
+        }
+        return array.toString()
+    }
+
     private fun normalizeColorHex(input: String, fallback: String): String {
         val cleaned = input.trim().removePrefix("#").uppercase()
         val isValid = (cleaned.length == 6 || cleaned.length == 8) && cleaned.all { it in "0123456789ABCDEF" }
@@ -192,6 +319,14 @@ class SettingsStore(context: Context) {
         const val KEY_THEME_CUSTOM_PRIMARY = "theme_custom_primary"
         const val KEY_THEME_CUSTOM_SECONDARY = "theme_custom_secondary"
         const val KEY_THEME_CUSTOM_TERTIARY = "theme_custom_tertiary"
+        const val KEY_TTS_HISTORY = "tts_history"
+        const val HISTORY_LIMIT = 20
     }
 }
+
+private fun JSONObject.optNullableString(key: String): String? =
+    if (isNull(key)) null else optString(key).ifBlank { null }
+
+private fun JSONObject.optNullableInt(key: String): Int? =
+    if (isNull(key)) null else optInt(key)
 

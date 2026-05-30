@@ -54,6 +54,21 @@ class VocabularyRepository(
         sortMode = sortMode.key
     )
 
+    suspend fun getFilteredSnapshot(
+        filter: VocabularyFilter,
+        query: String,
+        sortMode: SortMode
+    ): List<VocabularyEntity> = vocabularyDao.getFiltered(
+        level = filter.level,
+        book = filter.book,
+        chapter = filter.chapter,
+        pos = filter.pos,
+        grammarGroup = filter.grammarGroup,
+        marker = filter.marker?.takeIf { it != WordMarker.NONE }?.value,
+        query = query,
+        sortMode = sortMode.key
+    )
+
     fun observeLevels() = vocabularyDao.observeLevels()
     fun observeBooks() = vocabularyDao.observeBooks()
     fun observeChapters() = vocabularyDao.observeChapters()

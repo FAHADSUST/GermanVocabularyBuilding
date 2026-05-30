@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -51,19 +52,29 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
 import com.studio71.germanlinia2_b2.data.settings.SettingsStore
+import com.studio71.germanlinia2_b2.data.settings.TtsHistoryEntry
 import com.studio71.germanlinia2_b2.data.settings.ThemePreset
 import com.studio71.germanlinia2_b2.notify.ReminderScheduler
+import com.studio71.germanlinia2_b2.ui.tts.TtsController
+import com.studio71.germanlinia2_b2.ui.tts.TtsSessionSeed
+import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     settings: SettingsStore,
+    repository: VocabularyRepository,
     onBack: () -> Unit
 ) {
     val state by settings.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showThemeSubSettings by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -261,6 +272,64 @@ fun SettingsScreen(
             // --- Background playback / battery ---
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Vorlese-Verlauf", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        "Zeigt Filter und bereits gespielten Bereich. Tippen startet wieder ab der letzten Position.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (state.ttsHistory.isEmpty()) {
+                        Text(
+                            "Noch kein Verlauf vorhanden.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        state.ttsHistory.forEachIndexed { idx, entry ->
+                            TtsHistoryRow(
+                                entry = entry,
+                                onResume = {
+                                    scope.launch {
+                                        val filter = entry.toFilter()
+                                        val sortMode = entry.toSortMode()
+                                        val words = repository.getFilteredSnapshot(
+                                            filter = filter,
+                                            query = entry.query,
+                                            sortMode = sortMode
+                                        )
+                                        if (words.isNotEmpty()) {
+                                            val resumeIndex = entry.resumeIndex.coerceIn(0, words.lastIndex)
+                                            TtsController.start(
+                                                context = context,
+                                                words = words,
+                                                startIndex = resumeIndex,
+                                                sessionSeed = TtsSessionSeed(
+                                                    filter = filter,
+                                                    query = entry.query,
+                                                    sortMode = sortMode
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                            if (idx < state.ttsHistory.lastIndex) HorizontalDivider()
+                        }
+
+                        FilledTonalButton(
+                            onClick = { settings.clearTtsHistory() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Verlauf leeren")
+                        }
+                    }
+                }
+            }
+
+            // --- Background playback / battery ---
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Hintergrundwiedergabe", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
                     Text(
                         "Damit das Vorlesen bei ausgeschaltetem Bildschirm weiterläuft, sollte die " +
@@ -287,6 +356,36 @@ fun SettingsScreen(
             }
             }
         }
+    }
+}
+
+@Composable
+private fun TtsHistoryRow(
+    entry: TtsHistoryEntry,
+    onResume: () -> Unit
+) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onResume).padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Column(Modifier.weight(1f).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                entry.filterSummary(),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2
+            )
+            Text(
+                "Bereich: ${entry.rangeSummary()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Text(
+            formatHistoryTime(entry.playedAtEpochMs),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -546,5 +645,12 @@ private fun parseColorOrNull(raw: String): Color? {
     }
     val parsed = argb.toLongOrNull(16) ?: return null
     return Color(parsed.toInt())
+}
+
+private fun formatHistoryTime(epochMs: Long): String {
+    if (epochMs <= 0L) return ""
+    return DateTimeFormatter.ofPattern("dd.MM HH:mm")
+        .withZone(ZoneId.systemDefault())
+        .format(Instant.ofEpochMilli(epochMs))
 }
 
