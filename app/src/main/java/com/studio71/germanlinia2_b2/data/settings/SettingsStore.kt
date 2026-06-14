@@ -90,6 +90,7 @@ data class AppSettings(
     val reminderHour: Int = 19,
     val reminderMinute: Int = 0,
     val autoSpeakOnReveal: Boolean = false,
+    val autoAddSeenToReview: Boolean = false,
     /** How often the headword itself is spoken within one loop. */
     val ttsWordRepeat: Int = 1,
     /** How often the (English) meaning is spoken within one loop. */
@@ -133,6 +134,7 @@ class SettingsStore(context: Context) {
         reminderHour = prefs.getInt(KEY_HOUR, 19),
         reminderMinute = prefs.getInt(KEY_MINUTE, 0),
         autoSpeakOnReveal = prefs.getBoolean(KEY_AUTOSPEAK, false),
+        autoAddSeenToReview = prefs.getBoolean(KEY_AUTO_ADD_SEEN, false),
         ttsWordRepeat = prefs.getInt(KEY_TTS_WORD, 1),
         ttsMeaningRepeat = prefs.getInt(KEY_TTS_MEANING, 1),
         ttsExampleRepeat = prefs.getInt(KEY_TTS_EXAMPLE, 1),
@@ -160,6 +162,11 @@ class SettingsStore(context: Context) {
     fun setAutoSpeakOnReveal(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_AUTOSPEAK, enabled).apply()
         _state.value = _state.value.copy(autoSpeakOnReveal = enabled)
+    }
+
+    fun setAutoAddSeenToReview(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_AUTO_ADD_SEEN, enabled).apply()
+        _state.value = _state.value.copy(autoAddSeenToReview = enabled)
     }
 
     fun setTtsWordRepeat(value: Int) {
@@ -308,6 +315,7 @@ class SettingsStore(context: Context) {
         const val KEY_HOUR = "reminder_hour"
         const val KEY_MINUTE = "reminder_minute"
         const val KEY_AUTOSPEAK = "auto_speak_on_reveal"
+        const val KEY_AUTO_ADD_SEEN = "auto_add_seen_to_review"
         const val KEY_TTS_WORD = "tts_word_repeat"
         const val KEY_TTS_MEANING = "tts_meaning_repeat"
         const val KEY_TTS_EXAMPLE = "tts_example_repeat"

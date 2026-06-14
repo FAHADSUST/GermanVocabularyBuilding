@@ -26,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +48,7 @@ import java.time.LocalDate
 @Composable
 fun WordCardScreen(
     viewModel: WordCardViewModel,
+    autoAddSeenToReview: Boolean,
     onBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -57,6 +59,12 @@ fun WordCardScreen(
     var detailWord by remember { mutableStateOf<VocabularyEntity?>(null) }
 
     val word = state.word
+
+    LaunchedEffect(word?.id, autoAddSeenToReview) {
+        if (word != null) {
+            viewModel.onWordSeen(autoAddSeenToReview)
+        }
+    }
 
     Scaffold(
         topBar = {

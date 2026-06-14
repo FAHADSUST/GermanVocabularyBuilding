@@ -206,6 +206,13 @@ fun SettingsScreen(
                         checked = state.autoSpeakOnReveal,
                         onCheckedChange = { settings.setAutoSpeakOnReveal(it) }
                     )
+                    HorizontalDivider()
+                    SettingSwitchRow(
+                        title = "Beim Öffnen zur Wiederholung hinzufügen",
+                        subtitle = "Öffnet man Wortdetails, kommt das Wort automatisch in den 2/3/7/15/30-Tage-Plan",
+                        checked = state.autoAddSeenToReview,
+                        onCheckedChange = { settings.setAutoAddSeenToReview(it) }
+                    )
                 }
             }
 

@@ -58,7 +58,11 @@ fun AppNav(repository: VocabularyRepository, settings: SettingsStore) {
                 key = wordId,
                 factory = WordCardViewModel.Factory(repository, wordId)
             )
-            WordCardScreen(viewModel = vm, onBack = { navController.popBackStack() })
+            WordCardScreen(
+                viewModel = vm,
+                autoAddSeenToReview = appSettings.autoAddSeenToReview,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Routes.STATS) {

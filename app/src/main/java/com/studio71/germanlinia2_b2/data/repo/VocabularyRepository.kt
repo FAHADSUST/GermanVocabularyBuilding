@@ -5,6 +5,8 @@ import com.studio71.germanlinia2_b2.data.csv.CsvVocabularyImporter
 import com.studio71.germanlinia2_b2.data.local.AppDatabase
 import com.studio71.germanlinia2_b2.data.local.DailyStatEntity
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
+import com.studio71.germanlinia2_b2.data.local.SeenWordEntity
+import com.studio71.germanlinia2_b2.data.local.SeenWordItem
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarkEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarker
@@ -26,6 +28,7 @@ class VocabularyRepository(
     private val progressDao = db.progressDao()
     private val statsDao = db.statsDao()
     private val wordMarkDao = db.wordMarkDao()
+    private val seenWordDao = db.seenWordDao()
 
     fun today(): Long = LocalDate.now().toEpochDay()
 
@@ -100,6 +103,38 @@ class VocabularyRepository(
         }
     }
 
+    /**
+     * Record that a word detail page was opened.
+     * The same word is counted once per day for "seen" stats.
+     */
+    suspend fun recordWordSeen(wordId: String, autoAddToReview: Boolean) {
+        val today = today()
+        val inserted = seenWordDao.insert(
+            SeenWordEntity(
+                date = today,
+                wordId = wordId,
+                seenAtEpochMs = System.currentTimeMillis()
+            )
+        )
+        if (inserted != -1L) {
+            bumpStat(today, seen = 1)
+        }
+
+        if (autoAddToReview && progressDao.getById(wordId) == null) {
+            // Auto-add starts at the "day 2" reminder, then follows 3/7/15/30.
+            progressDao.upsert(
+                ProgressEntity(
+                    wordId = wordId,
+                    firstLearned = today,
+                    lastReviewed = today,
+                    nextDue = today + 2,
+                    intervalIndex = 1,
+                    box = 1
+                )
+            )
+        }
+    }
+
     suspend fun reviewSuccess(wordId: String) {
         val today = today()
         val current = progressDao.getById(wordId) ?: return
@@ -142,10 +177,15 @@ class VocabularyRepository(
 
     fun observeAllStats(): Flow<List<DailyStatEntity>> = statsDao.observeAll()
 
-    private suspend fun bumpStat(date: Long, learned: Int = 0, reviewed: Int = 0) {
+    fun observeSeenWords(date: Long): Flow<List<SeenWordItem>> = seenWordDao.observeByDate(date)
+
+    fun observeDistinctSeenWordsCount(): Flow<Int> = seenWordDao.observeDistinctWordCount()
+
+    private suspend fun bumpStat(date: Long, seen: Int = 0, learned: Int = 0, reviewed: Int = 0) {
         val existing = statsDao.getByDate(date) ?: DailyStatEntity(date)
         statsDao.upsert(
             existing.copy(
+                wordsSeen = existing.wordsSeen + seen,
                 wordsLearned = existing.wordsLearned + learned,
                 wordsReviewed = existing.wordsReviewed + reviewed
             )

@@ -10,6 +10,7 @@ import androidx.room.PrimaryKey
 data class DailyStatEntity(
     /** epoch day */
     @PrimaryKey val date: Long,
+    val wordsSeen: Int = 0,
     val wordsLearned: Int = 0,
     val wordsReviewed: Int = 0
 )

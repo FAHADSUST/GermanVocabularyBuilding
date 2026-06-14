@@ -85,6 +85,10 @@ class WordCardViewModel(
         viewModelScope.launch { repo.reviewFail(_currentId.value) }
     }
 
+    fun onWordSeen(autoAddToReview: Boolean) {
+        viewModelScope.launch { repo.recordWordSeen(_currentId.value, autoAddToReview) }
+    }
+
     suspend fun lookup(wordOrPhrase: String): VocabularyEntity? = repo.findByWord(wordOrPhrase)
 
     /** Set or clear the difficulty marker for the current word. */
