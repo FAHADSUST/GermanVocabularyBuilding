@@ -177,6 +177,8 @@ class VocabularyRepository(
 
     fun observeAllStats(): Flow<List<DailyStatEntity>> = statsDao.observeAll()
 
+    fun observeSeenDates(): Flow<List<Long>> = seenWordDao.observeSeenDates()
+
     fun observeSeenWords(date: Long): Flow<List<SeenWordItem>> = seenWordDao.observeByDate(date)
 
     fun observeDistinctSeenWordsCount(): Flow<Int> = seenWordDao.observeDistinctWordCount()

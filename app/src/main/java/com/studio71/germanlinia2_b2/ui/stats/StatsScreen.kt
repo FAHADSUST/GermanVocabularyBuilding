@@ -1,8 +1,6 @@
 package com.studio71.germanlinia2_b2.ui.stats
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +16,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,23 +31,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatsScreen(
     viewModel: StatsViewModel,
+    onOpenSeenHistory: () -> Unit,
     onBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val primary = MaterialTheme.colorScheme.primary
     val secondary = MaterialTheme.colorScheme.secondary
     val tertiary = MaterialTheme.colorScheme.tertiary
-    val outline = MaterialTheme.colorScheme.outline
 
     Scaffold(
         topBar = {
@@ -104,12 +99,9 @@ fun StatsScreen(
                     Spacer(Modifier.height(12.dp))
                     BarChart(
                         bars = state.bars,
-                        selectedDate = state.selectedDate,
                         seenColor = tertiary,
                         learnedColor = primary,
                         reviewedColor = secondary,
-                        outlineColor = outline,
-                        onBarClick = viewModel::selectDate,
                         modifier = Modifier.fillMaxWidth().height(220.dp)
                     )
                     Spacer(Modifier.height(8.dp))
@@ -121,57 +113,16 @@ fun StatsScreen(
                 }
             }
 
-            // Clickable table fallback (same behavior as tapping bars)
-            ElevatedCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Tagesübersicht", style = MaterialTheme.typography.titleSmall)
-                    val activeBars = state.bars.filter { (it.seen + it.learned + it.reviewed) > 0 }
-                    if (activeBars.isEmpty()) {
-                        Text(
-                            "Noch keine Aktivität in diesem Zeitraum.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        activeBars.reversed().forEachIndexed { idx, bar ->
-                            DayRow(
-                                bar = bar,
-                                selected = bar.epochDay == state.selectedDate,
-                                onClick = { viewModel.selectDate(bar.epochDay) }
-                            )
-                            if (idx < activeBars.lastIndex) HorizontalDivider()
-                        }
-                    }
-                }
-            }
-
-            // Seen-word history for selected day
             ElevatedCard(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Ansichtsverlauf", style = MaterialTheme.typography.titleSmall)
                     Text(
-                        "Gesehene Wörter am ${formatEpochDay(state.selectedDate)}",
-                        style = MaterialTheme.typography.titleSmall
+                        "Offnet eine Datumsansicht. Danach kannst du ein Datum auswahlen, um die Wortliste zu sehen.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    if (state.seenWordsForSelectedDate.isEmpty()) {
-                        Text(
-                            "Keine geöffneten Wortdetails an diesem Tag.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        state.seenWordsForSelectedDate.forEachIndexed { idx, item ->
-                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                Text(item.displayWord, style = MaterialTheme.typography.bodyLarge)
-                                if (item.english.isNotBlank()) {
-                                    Text(
-                                        item.english,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                            if (idx < state.seenWordsForSelectedDate.lastIndex) HorizontalDivider()
-                        }
+                    FilledTonalButton(onClick = onOpenSeenHistory, modifier = Modifier.fillMaxWidth()) {
+                        Text("Verlauf nach Datum offnen")
                     }
                 }
             }
@@ -212,25 +163,13 @@ private fun LegendDot(color: Color) {
 @Composable
 private fun BarChart(
     bars: List<StatBar>,
-    selectedDate: Long,
     seenColor: Color,
     learnedColor: Color,
     reviewedColor: Color,
-    outlineColor: Color,
-    onBarClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val maxValue = (bars.maxOfOrNull { it.seen + it.learned + it.reviewed } ?: 0).coerceAtLeast(1)
-    Canvas(
-        modifier.pointerInput(bars) {
-            detectTapGestures { tapOffset ->
-                if (bars.isEmpty()) return@detectTapGestures
-                val slot = size.width.toFloat() / bars.size
-                val index = (tapOffset.x / slot).toInt().coerceIn(0, bars.lastIndex)
-                onBarClick(bars[index].epochDay)
-            }
-        }
-    ) {
+    Canvas(modifier) {
         if (bars.isEmpty()) return@Canvas
         val gap = size.width * 0.01f
         val slot = size.width / bars.size
@@ -258,47 +197,7 @@ private fun BarChart(
                 topLeft = Offset(x, size.height - seenH - learnedH - reviewedH),
                 size = Size(barWidth, reviewedH)
             )
-            if (bar.epochDay == selectedDate) {
-                drawRect(
-                    color = outlineColor,
-                    topLeft = Offset(x, 0f),
-                    size = Size(barWidth, size.height),
-                    style = Stroke(width = 2.dp.toPx())
-                )
-            }
         }
     }
-}
-
-@Composable
-private fun DayRow(
-    bar: StatBar,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            bar.label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            "S:${bar.seen}  L:${bar.learned}  R:${bar.reviewed}",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-private fun formatEpochDay(epochDay: Long): String {
-    val d = LocalDate.ofEpochDay(epochDay)
-    return "%02d.%02d.%d".format(d.dayOfMonth, d.monthValue, d.year)
 }
 

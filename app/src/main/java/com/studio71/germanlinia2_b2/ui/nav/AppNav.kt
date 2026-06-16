@@ -18,6 +18,10 @@ import com.studio71.germanlinia2_b2.ui.list.VocabularyListViewModel
 import com.studio71.germanlinia2_b2.ui.review.ReviewScreen
 import com.studio71.germanlinia2_b2.ui.review.ReviewViewModel
 import com.studio71.germanlinia2_b2.ui.settings.SettingsScreen
+import com.studio71.germanlinia2_b2.ui.stats.SeenDatesScreen
+import com.studio71.germanlinia2_b2.ui.stats.SeenDatesViewModel
+import com.studio71.germanlinia2_b2.ui.stats.SeenWordsByDateScreen
+import com.studio71.germanlinia2_b2.ui.stats.SeenWordsByDateViewModel
 import com.studio71.germanlinia2_b2.ui.stats.StatsScreen
 import com.studio71.germanlinia2_b2.ui.stats.StatsViewModel
 
@@ -25,9 +29,12 @@ object Routes {
     const val LIST = "list"
     const val CARD = "card/{wordId}"
     const val STATS = "stats"
+    const val SEEN_DATES = "seen_dates"
+    const val SEEN_WORDS = "seen_words/{epochDay}"
     const val REVIEW = "review"
     const val SETTINGS = "settings"
     fun card(wordId: String) = "card/$wordId"
+    fun seenWords(epochDay: Long) = "seen_words/$epochDay"
 }
 
 @Composable
@@ -67,7 +74,35 @@ fun AppNav(repository: VocabularyRepository, settings: SettingsStore) {
 
         composable(Routes.STATS) {
             val vm: StatsViewModel = viewModel(factory = StatsViewModel.Factory(repository))
-            StatsScreen(viewModel = vm, onBack = { navController.popBackStack() })
+            StatsScreen(
+                viewModel = vm,
+                onOpenSeenHistory = { navController.navigate(Routes.SEEN_DATES) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.SEEN_DATES) {
+            val vm: SeenDatesViewModel = viewModel(factory = SeenDatesViewModel.Factory(repository))
+            SeenDatesScreen(
+                viewModel = vm,
+                onBack = { navController.popBackStack() },
+                onOpenDate = { epochDay -> navController.navigate(Routes.seenWords(epochDay)) }
+            )
+        }
+
+        composable(
+            route = Routes.SEEN_WORDS,
+            arguments = listOf(navArgument("epochDay") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val epochDay = backStackEntry.arguments?.getLong("epochDay") ?: 0L
+            val vm: SeenWordsByDateViewModel = viewModel(
+                key = "seen-$epochDay",
+                factory = SeenWordsByDateViewModel.Factory(repository, epochDay)
+            )
+            SeenWordsByDateScreen(
+                viewModel = vm,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Routes.REVIEW) {
