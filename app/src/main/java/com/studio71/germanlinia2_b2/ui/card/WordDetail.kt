@@ -1,7 +1,10 @@
 package com.studio71.germanlinia2_b2.ui.card
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -10,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,6 +22,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -24,6 +33,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
 
@@ -39,11 +49,20 @@ fun WordDetail(
     word: VocabularyEntity,
     onSpeak: (String) -> Unit,
     onRelationClick: (String) -> Unit,
+    onCopyTextRequested: ((String) -> Unit)? = null,
+    onTranslateTextRequested: ((String) -> Unit)? = null,
+    onCommentRequested: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     revealed: Boolean = true
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        HeaderCard(word, onSpeak = { onSpeak(word.word) })
+        HeaderCard(
+            word = word,
+            onSpeak = { onSpeak(word.word) },
+            onCopyTextRequested = onCopyTextRequested,
+            onTranslateTextRequested = onTranslateTextRequested,
+            onCommentRequested = onCommentRequested
+        )
 
         if (!revealed) {
             InfoCard {
@@ -57,20 +76,45 @@ fun WordDetail(
         }
 
         InfoCard {
-            Labeled("EN", word.english)
-            Labeled("DE", word.germanMeaning)
+            Labeled(
+                label = "EN",
+                value = word.english,
+                onCopyTextRequested = onCopyTextRequested,
+                onTranslateTextRequested = onTranslateTextRequested
+            )
+            Labeled(
+                label = "DE",
+                value = word.germanMeaning,
+                onCopyTextRequested = onCopyTextRequested,
+                onTranslateTextRequested = onTranslateTextRequested
+            )
             if (word.exampleDe.isNotBlank()) {
-                Text(
-                    "„${word.exampleDe}“",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                LongPressMenuHost(
+                    textValue = word.exampleDe,
+                    onCopyTextRequested = onCopyTextRequested,
+                    onTranslateTextRequested = onTranslateTextRequested
+                ) { pressModifier ->
+                    Text(
+                        "„${word.exampleDe}“",
+                        modifier = pressModifier,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-            verbLine(word)?.let { Labeled("Formen", it) }
-            adjLine(word)?.let { Labeled("Steigerung", it) }
-            grammarLine(word)?.let { Labeled("Grammatik", it) }
-            if (word.memoryTrick.isNotBlank()) Labeled("Tipp", word.memoryTrick)
+            verbLine(word)?.let {
+                Labeled("Formen", it, onCopyTextRequested, onTranslateTextRequested)
+            }
+            adjLine(word)?.let {
+                Labeled("Steigerung", it, onCopyTextRequested, onTranslateTextRequested)
+            }
+            grammarLine(word)?.let {
+                Labeled("Grammatik", it, onCopyTextRequested, onTranslateTextRequested)
+            }
+            if (word.memoryTrick.isNotBlank()) {
+                Labeled("Tipp", word.memoryTrick, onCopyTextRequested, onTranslateTextRequested)
+            }
         }
 
         if (word.synonymList.isNotEmpty() || word.antonymList.isNotEmpty()) {
@@ -82,25 +126,39 @@ fun WordDetail(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun HeaderCard(word: VocabularyEntity, onSpeak: () -> Unit) {
+private fun HeaderCard(
+    word: VocabularyEntity,
+    onSpeak: () -> Unit,
+    onCopyTextRequested: ((String) -> Unit)?,
+    onTranslateTextRequested: ((String) -> Unit)?,
+    onCommentRequested: (() -> Unit)?
+) {
     ElevatedCard(Modifier.fillMaxWidth()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f)) {
-                Text(
-                    buildAnnotatedString {
-                        append(word.displayWord)
-                        if (word.plural.isNotBlank()) {
-                            withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
-                                append("  (Pl. ${word.plural})")
+                LongPressMenuHost(
+                    textValue = word.displayWord,
+                    onCopyTextRequested = onCopyTextRequested,
+                    onTranslateTextRequested = onTranslateTextRequested
+                ) { pressModifier ->
+                    Text(
+                        buildAnnotatedString {
+                            append(word.displayWord)
+                            if (word.plural.isNotBlank()) {
+                                withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append("  (Pl. ${word.plural})")
+                                }
                             }
-                        }
-                    },
-                    style = MaterialTheme.typography.titleLarge
-                )
+                        },
+                        modifier = pressModifier,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
                 Text(
                     listOfNotNull(
                         word.level,
@@ -110,6 +168,15 @@ private fun HeaderCard(word: VocabularyEntity, onSpeak: () -> Unit) {
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (onCommentRequested != null) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        SuggestionChip(onClick = onCommentRequested, label = { Text("Kommentar") })
+                    }
+                }
             }
             IconButton(onClick = onSpeak) {
                 Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Vorlesen")
@@ -155,18 +222,90 @@ internal fun InfoCard(content: @Composable () -> Unit) {
 @Composable
 internal fun Labeled(label: String, value: String) {
     if (value.isBlank()) return
-    Text(
-        buildAnnotatedString {
-            withStyle(
-                SpanStyle(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-            ) { append("$label  ") }
-            append(value)
-        },
-        style = MaterialTheme.typography.bodyMedium
+    Labeled(
+        label = label,
+        value = value,
+        onCopyTextRequested = null,
+        onTranslateTextRequested = null
     )
+}
+
+@Composable
+internal fun Labeled(
+    label: String,
+    value: String,
+    onCopyTextRequested: ((String) -> Unit)? = null,
+    onTranslateTextRequested: ((String) -> Unit)? = null
+) {
+    if (value.isBlank()) return
+    LongPressMenuHost(
+        textValue = value,
+        onCopyTextRequested = onCopyTextRequested,
+        onTranslateTextRequested = onTranslateTextRequested
+    ) { pressModifier ->
+        Text(
+            buildAnnotatedString {
+                withStyle(
+                    SpanStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                ) { append("$label  ") }
+                append(value)
+            },
+            modifier = pressModifier,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun LongPressMenuHost(
+    textValue: String,
+    onCopyTextRequested: ((String) -> Unit)?,
+    onTranslateTextRequested: ((String) -> Unit)?,
+    content: @Composable (Modifier) -> Unit
+) {
+    if (onCopyTextRequested == null && onTranslateTextRequested == null) {
+        content(Modifier)
+        return
+    }
+
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    Box {
+        content(
+            Modifier.combinedClickable(
+                onClick = {},
+                onLongClick = { menuExpanded = true }
+            )
+        )
+        DropdownMenu(
+            expanded = menuExpanded,
+            onDismissRequest = { menuExpanded = false },
+            offset = DpOffset(x = 0.dp, y = (-40).dp)
+        ) {
+            if (onCopyTextRequested != null) {
+                DropdownMenuItem(
+                    text = { Text("Kopieren") },
+                    onClick = {
+                        menuExpanded = false
+                        onCopyTextRequested(textValue)
+                    }
+                )
+            }
+            if (onTranslateTextRequested != null) {
+                DropdownMenuItem(
+                    text = { Text("Ubersetzen") },
+                    onClick = {
+                        menuExpanded = false
+                        onTranslateTextRequested(textValue)
+                    }
+                )
+            }
+        }
+    }
 }
 
 /** "spricht · sprach · hat gesprochen" or null if no verb forms. */

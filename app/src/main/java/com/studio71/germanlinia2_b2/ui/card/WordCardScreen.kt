@@ -1,5 +1,11 @@
 package com.studio71.germanlinia2_b2.ui.card
 
+import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,9 +27,11 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
@@ -54,9 +63,12 @@ fun WordCardScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val progress by viewModel.progress.collectAsStateWithLifecycle()
     val marker by viewModel.marker.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val speaker = rememberGermanSpeaker()
     val scope = rememberCoroutineScope()
     var detailWord by remember { mutableStateOf<VocabularyEntity?>(null) }
+    var showCommentDialog by remember { mutableStateOf(false) }
+    var commentDraft by remember { mutableStateOf("") }
 
     val word = state.word
 
@@ -121,10 +133,49 @@ fun WordCardScreen(
                 onSpeak = { speaker.speak(it) },
                 onRelationClick = { value ->
                     scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
+                },
+                onCopyTextRequested = { text ->
+                    copyTextToClipboard(context, word.displayWord, text)
+                },
+                onTranslateTextRequested = { text ->
+                    openTranslateIntent(context, text)
+                },
+                onCommentRequested = {
+                    commentDraft = ""
+                    showCommentDialog = true
                 }
             )
             ReviewCard(progress, viewModel)
         }
+    }
+
+    if (showCommentDialog && word != null) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showCommentDialog = false },
+            title = { Text("Kommentar") },
+            text = {
+                OutlinedTextField(
+                    value = commentDraft,
+                    onValueChange = { commentDraft = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Dein Kommentar") },
+                    minLines = 3
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        shareComment(context, word, commentDraft)
+                        showCommentDialog = false
+                    }
+                ) { Text("Teilen") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCommentDialog = false }) {
+                    Text("Abbrechen")
+                }
+            }
+        )
     }
 
     detailWord?.let { dw ->
@@ -174,6 +225,69 @@ private fun ReviewCard(progress: ProgressEntity?, viewModel: WordCardViewModel) 
                 }
             }
         }
+    }
+}
+
+private fun copyTextToClipboard(context: Context, label: String, text: String) {
+    val manager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    manager.setPrimaryClip(ClipData.newPlainText(label, text))
+    Toast.makeText(context, "Text kopiert", Toast.LENGTH_SHORT).show()
+}
+
+private fun openTranslateIntent(context: Context, text: String) {
+    val processIntent = Intent(Intent.ACTION_PROCESS_TEXT).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_PROCESS_TEXT, text)
+        putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true)
+    }
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, text)
+    }
+
+    val launchIntent = if (processIntent.resolveActivity(context.packageManager) != null) {
+        processIntent
+    } else {
+        Intent.createChooser(shareIntent, "Ubersetzen mit")
+    }
+
+    if (context !is Activity) launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching { context.startActivity(launchIntent) }
+        .onFailure {
+            Toast.makeText(context, "Keine App fur Ubersetzung gefunden", Toast.LENGTH_SHORT).show()
+        }
+}
+
+private fun shareComment(context: Context, word: VocabularyEntity, comment: String) {
+    val text = buildString {
+        append(buildWordExportText(word))
+        if (comment.isNotBlank()) {
+            append("\n\nKommentar:\n")
+            append(comment)
+        }
+    }
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, "Kommentar: ${word.displayWord}")
+        putExtra(Intent.EXTRA_TEXT, text)
+    }
+    val chooser = Intent.createChooser(intent, "Kommentieren mit")
+    if (context !is Activity) chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    runCatching { context.startActivity(chooser) }
+}
+
+private fun buildWordExportText(word: VocabularyEntity): String {
+    val forms = listOf(word.verbPresent3rd, word.verbPast, word.verbPerfect).filter { it.isNotBlank() }
+    val grammarPrep = listOf(word.preposition, word.governCase).filter { it.isNotBlank() }.joinToString(" + ")
+    val grammar = listOf(word.grammarGroup, grammarPrep).filter { it.isNotBlank() }
+
+    return buildString {
+        append(word.displayWord)
+        if (word.english.isNotBlank()) append("\nEN: ").append(word.english)
+        if (word.germanMeaning.isNotBlank()) append("\nDE: ").append(word.germanMeaning)
+        if (word.exampleDe.isNotBlank()) append("\nBeispiel: ").append(word.exampleDe)
+        if (forms.isNotEmpty()) append("\nFormen: ").append(forms.joinToString(" · "))
+        if (grammar.isNotEmpty()) append("\nGrammatik: ").append(grammar.joinToString(" · "))
     }
 }
 
