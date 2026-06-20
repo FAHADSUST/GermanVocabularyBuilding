@@ -54,6 +54,11 @@ class WordCardViewModel(
         _currentId.flatMapLatest { id -> repo.observeMarker(id) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WordMarker.NONE)
 
+    /** Live personal comment for the current word (blank when none). */
+    val comment: StateFlow<String> =
+        _currentId.flatMapLatest { id -> repo.observeComment(id) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
     init {
         load(startId)
     }
@@ -94,6 +99,10 @@ class WordCardViewModel(
     /** Set or clear the difficulty marker for the current word. */
     fun setMarker(marker: WordMarker) {
         viewModelScope.launch { repo.setMarker(_currentId.value, marker) }
+    }
+
+    fun setComment(comment: String) {
+        viewModelScope.launch { repo.setComment(_currentId.value, comment) }
     }
 
     class Factory(

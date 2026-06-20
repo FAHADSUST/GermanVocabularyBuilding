@@ -49,10 +49,11 @@ fun WordDetail(
     word: VocabularyEntity,
     onSpeak: (String) -> Unit,
     onRelationClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
     onCopyTextRequested: ((String) -> Unit)? = null,
     onTranslateTextRequested: ((String) -> Unit)? = null,
     onCommentRequested: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
+    comment: String = "",
     revealed: Boolean = true
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -114,6 +115,9 @@ fun WordDetail(
             }
             if (word.memoryTrick.isNotBlank()) {
                 Labeled("Tipp", word.memoryTrick, onCopyTextRequested, onTranslateTextRequested)
+            }
+            if (comment.isNotBlank()) {
+                Labeled("Kommentar", comment, onCopyTextRequested, onTranslateTextRequested)
             }
         }
 

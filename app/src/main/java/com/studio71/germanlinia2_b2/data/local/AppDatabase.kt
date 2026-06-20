@@ -11,9 +11,10 @@ import androidx.room.RoomDatabase
         ProgressEntity::class,
         DailyStatEntity::class,
         WordMarkEntity::class,
-        SeenWordEntity::class
+        SeenWordEntity::class,
+        WordCommentEntity::class
     ],
-    version = 14,
+    version = 15,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -22,6 +23,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun statsDao(): StatsDao
     abstract fun wordMarkDao(): WordMarkDao
     abstract fun seenWordDao(): SeenWordDao
+    abstract fun wordCommentDao(): WordCommentDao
 
     companion object {
         @Volatile

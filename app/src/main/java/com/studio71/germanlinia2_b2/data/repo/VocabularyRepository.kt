@@ -8,6 +8,7 @@ import com.studio71.germanlinia2_b2.data.local.ProgressEntity
 import com.studio71.germanlinia2_b2.data.local.SeenWordEntity
 import com.studio71.germanlinia2_b2.data.local.SeenWordItem
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.local.WordCommentEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarkEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarker
 import com.studio71.germanlinia2_b2.domain.srs.SrsScheduler
@@ -29,6 +30,7 @@ class VocabularyRepository(
     private val statsDao = db.statsDao()
     private val wordMarkDao = db.wordMarkDao()
     private val seenWordDao = db.seenWordDao()
+    private val wordCommentDao = db.wordCommentDao()
 
     fun today(): Long = LocalDate.now().toEpochDay()
 
@@ -182,6 +184,24 @@ class VocabularyRepository(
     fun observeSeenWords(date: Long): Flow<List<SeenWordItem>> = seenWordDao.observeByDate(date)
 
     fun observeDistinctSeenWordsCount(): Flow<Int> = seenWordDao.observeDistinctWordCount()
+
+    fun observeComment(wordId: String): Flow<String> =
+        wordCommentDao.observeComment(wordId).map { it.orEmpty() }
+
+    suspend fun setComment(wordId: String, comment: String) {
+        val normalized = comment.trim()
+        if (normalized.isBlank()) {
+            wordCommentDao.delete(wordId)
+        } else {
+            wordCommentDao.upsert(
+                WordCommentEntity(
+                    wordId = wordId,
+                    comment = normalized,
+                    updatedAtEpochMs = System.currentTimeMillis()
+                )
+            )
+        }
+    }
 
     private suspend fun bumpStat(date: Long, seen: Int = 0, learned: Int = 0, reviewed: Int = 0) {
         val existing = statsDao.getByDate(date) ?: DailyStatEntity(date)

@@ -63,6 +63,7 @@ fun WordCardScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val progress by viewModel.progress.collectAsStateWithLifecycle()
     val marker by viewModel.marker.collectAsStateWithLifecycle()
+    val comment by viewModel.comment.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val speaker = rememberGermanSpeaker()
     val scope = rememberCoroutineScope()
@@ -141,9 +142,10 @@ fun WordCardScreen(
                     openTranslateIntent(context, text)
                 },
                 onCommentRequested = {
-                    commentDraft = ""
+                    commentDraft = comment
                     showCommentDialog = true
-                }
+                },
+                comment = comment
             )
             ReviewCard(progress, viewModel)
         }
@@ -165,10 +167,10 @@ fun WordCardScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        shareComment(context, word, commentDraft)
+                        viewModel.setComment(commentDraft)
                         showCommentDialog = false
                     }
-                ) { Text("Teilen") }
+                ) { Text("Speichern") }
             },
             dismissButton = {
                 TextButton(onClick = { showCommentDialog = false }) {
@@ -256,38 +258,5 @@ private fun openTranslateIntent(context: Context, text: String) {
         .onFailure {
             Toast.makeText(context, "Keine App fur Ubersetzung gefunden", Toast.LENGTH_SHORT).show()
         }
-}
-
-private fun shareComment(context: Context, word: VocabularyEntity, comment: String) {
-    val text = buildString {
-        append(buildWordExportText(word))
-        if (comment.isNotBlank()) {
-            append("\n\nKommentar:\n")
-            append(comment)
-        }
-    }
-    val intent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_SUBJECT, "Kommentar: ${word.displayWord}")
-        putExtra(Intent.EXTRA_TEXT, text)
-    }
-    val chooser = Intent.createChooser(intent, "Kommentieren mit")
-    if (context !is Activity) chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    runCatching { context.startActivity(chooser) }
-}
-
-private fun buildWordExportText(word: VocabularyEntity): String {
-    val forms = listOf(word.verbPresent3rd, word.verbPast, word.verbPerfect).filter { it.isNotBlank() }
-    val grammarPrep = listOf(word.preposition, word.governCase).filter { it.isNotBlank() }.joinToString(" + ")
-    val grammar = listOf(word.grammarGroup, grammarPrep).filter { it.isNotBlank() }
-
-    return buildString {
-        append(word.displayWord)
-        if (word.english.isNotBlank()) append("\nEN: ").append(word.english)
-        if (word.germanMeaning.isNotBlank()) append("\nDE: ").append(word.germanMeaning)
-        if (word.exampleDe.isNotBlank()) append("\nBeispiel: ").append(word.exampleDe)
-        if (forms.isNotEmpty()) append("\nFormen: ").append(forms.joinToString(" · "))
-        if (grammar.isNotEmpty()) append("\nGrammatik: ").append(grammar.joinToString(" · "))
-    }
 }
 
