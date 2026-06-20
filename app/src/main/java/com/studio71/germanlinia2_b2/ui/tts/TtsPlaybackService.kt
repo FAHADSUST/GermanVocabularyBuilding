@@ -128,10 +128,16 @@ class TtsPlaybackService : Service() {
         TtsController.publishState(TtsPlaybackState.PLAYING)
         playbackJob = scope.launch {
             var i = startIndex
+            var wordsSpokenSinceStart = 0
             while (i in playlist.indices && isActive) {
                 currentIndex = i
                 playWord(playlist[i])
                 i++
+                wordsSpokenSinceStart++
+                maybeInsertRecallPause(
+                    wordsSpokenSinceStart = wordsSpokenSinceStart,
+                    hasNextWord = i in playlist.indices
+                )
             }
             if (isActive) finishPlayback()
         }
@@ -203,6 +209,25 @@ class TtsPlaybackService : Service() {
     private suspend fun awaitResumed() {
         if (!paused.value) return
         paused.first { !it }
+    }
+
+    private suspend fun maybeInsertRecallPause(
+        wordsSpokenSinceStart: Int,
+        hasNextWord: Boolean
+    ) {
+        if (!hasNextWord) return
+        val s = settings
+        if (!s.ttsRecallPauseEnabled) return
+        val interval = s.ttsRecallPauseEveryWords.coerceAtLeast(1)
+        if (wordsSpokenSinceStart % interval != 0) return
+
+        var remaining = s.ttsRecallPauseMs.toLong().coerceAtLeast(0L)
+        while (remaining > 0 && playbackJob?.isActive == true) {
+            awaitResumed()
+            val chunk = minOf(remaining, 250L)
+            delay(chunk)
+            remaining -= chunk
+        }
     }
 
     private suspend fun speakAndWait(step: Step): Unit = suspendCancellableCoroutine { cont ->

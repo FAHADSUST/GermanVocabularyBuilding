@@ -273,6 +273,29 @@ fun SettingsScreen(
                         min = 0,
                         step = 50
                     )
+
+                    HorizontalDivider()
+
+                    SettingSwitchRow(
+                        title = "Denkpause aktivieren",
+                        subtitle = "Nach jedem Wort-Intervall eine längere Pause zum Erinnern",
+                        checked = state.ttsRecallPauseEnabled,
+                        onCheckedChange = settings::setTtsRecallPauseEnabled
+                    )
+                    StepperRow(
+                        title = "Intervall (Wörter)",
+                        subtitle = "Nach wie vielen Wörtern eine Denkpause kommt",
+                        value = state.ttsRecallPauseEveryWords,
+                        onChange = settings::setTtsRecallPauseEveryWords,
+                        min = 1
+                    )
+                    StepperRow(
+                        title = "Denkpause (Sek.)",
+                        subtitle = "Dauer der Pause, z. B. 5 oder 10 Sekunden",
+                        value = (state.ttsRecallPauseMs / 1000).coerceAtLeast(1),
+                        onChange = { seconds -> settings.setTtsRecallPauseMs(seconds * 1000) },
+                        min = 1
+                    )
                 }
             }
 

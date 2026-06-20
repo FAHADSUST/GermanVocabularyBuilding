@@ -103,6 +103,12 @@ data class AppSettings(
     val ttsLoopCount: Int = 2,
     /** Pause (milliseconds) inserted between two spoken parts. */
     val ttsGapMs: Int = 350,
+    /** Insert a longer recall pause after every N spoken words. */
+    val ttsRecallPauseEnabled: Boolean = false,
+    /** Number of words between recall pauses. */
+    val ttsRecallPauseEveryWords: Int = 10,
+    /** Recall pause duration in milliseconds. */
+    val ttsRecallPauseMs: Int = 5000,
     /** Playback speech rate (1.0 = normal). */
     val ttsSpeechRate: Float = 1.0f,
     /** Active app theme preset. */
@@ -141,6 +147,9 @@ class SettingsStore(context: Context) {
         ttsVerbFormRepeat = prefs.getInt(KEY_TTS_VERB, 1),
         ttsLoopCount = prefs.getInt(KEY_TTS_LOOP, 2),
         ttsGapMs = prefs.getInt(KEY_TTS_GAP, 350),
+        ttsRecallPauseEnabled = prefs.getBoolean(KEY_TTS_RECALL_PAUSE_ENABLED, false),
+        ttsRecallPauseEveryWords = prefs.getInt(KEY_TTS_RECALL_PAUSE_EVERY_WORDS, 10),
+        ttsRecallPauseMs = prefs.getInt(KEY_TTS_RECALL_PAUSE_MS, 5000),
         ttsSpeechRate = prefs.getFloat(KEY_TTS_RATE, 1.0f),
         themePreset = ThemePreset.fromStorage(prefs.getString(KEY_THEME, ThemePreset.SYSTEM.storageValue)),
         themeCustomPrimary = prefs.getString(KEY_THEME_CUSTOM_PRIMARY, DEFAULT_CUSTOM_PRIMARY) ?: DEFAULT_CUSTOM_PRIMARY,
@@ -203,6 +212,23 @@ class SettingsStore(context: Context) {
         val v = value.coerceIn(0, 5000)
         prefs.edit().putInt(KEY_TTS_GAP, v).apply()
         _state.value = _state.value.copy(ttsGapMs = v)
+    }
+
+    fun setTtsRecallPauseEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_TTS_RECALL_PAUSE_ENABLED, enabled).apply()
+        _state.value = _state.value.copy(ttsRecallPauseEnabled = enabled)
+    }
+
+    fun setTtsRecallPauseEveryWords(value: Int) {
+        val v = value.coerceIn(1, 200)
+        prefs.edit().putInt(KEY_TTS_RECALL_PAUSE_EVERY_WORDS, v).apply()
+        _state.value = _state.value.copy(ttsRecallPauseEveryWords = v)
+    }
+
+    fun setTtsRecallPauseMs(value: Int) {
+        val v = value.coerceIn(1000, 60000)
+        prefs.edit().putInt(KEY_TTS_RECALL_PAUSE_MS, v).apply()
+        _state.value = _state.value.copy(ttsRecallPauseMs = v)
     }
 
     fun setTtsSpeechRate(value: Float) {
@@ -322,6 +348,9 @@ class SettingsStore(context: Context) {
         const val KEY_TTS_VERB = "tts_verb_repeat"
         const val KEY_TTS_LOOP = "tts_loop_count"
         const val KEY_TTS_GAP = "tts_gap_ms"
+        const val KEY_TTS_RECALL_PAUSE_ENABLED = "tts_recall_pause_enabled"
+        const val KEY_TTS_RECALL_PAUSE_EVERY_WORDS = "tts_recall_pause_every_words"
+        const val KEY_TTS_RECALL_PAUSE_MS = "tts_recall_pause_ms"
         const val KEY_TTS_RATE = "tts_speech_rate"
         const val KEY_THEME = "theme_preset"
         const val KEY_THEME_CUSTOM_PRIMARY = "theme_custom_primary"
