@@ -11,6 +11,7 @@ import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
 import com.studio71.germanlinia2_b2.data.local.WordCommentEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarkEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarker
+import com.studio71.germanlinia2_b2.data.sync.SyncStateTracker
 import com.studio71.germanlinia2_b2.domain.srs.SrsScheduler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -101,6 +102,7 @@ class VocabularyRepository(
         val existing = progressDao.getById(wordId)
         if (existing == null) {
             progressDao.upsert(SrsScheduler.onLearned(wordId, today))
+            SyncStateTracker.markLocalMutation(appContext)
             bumpStat(today, learned = 1)
         }
     }
@@ -134,6 +136,7 @@ class VocabularyRepository(
                     box = 1
                 )
             )
+            SyncStateTracker.markLocalMutation(appContext)
         }
     }
 
@@ -141,6 +144,7 @@ class VocabularyRepository(
         val today = today()
         val current = progressDao.getById(wordId) ?: return
         progressDao.upsert(SrsScheduler.onReviewSuccess(current, today))
+        SyncStateTracker.markLocalMutation(appContext)
         bumpStat(today, reviewed = 1)
     }
 
@@ -148,6 +152,7 @@ class VocabularyRepository(
         val today = today()
         val current = progressDao.getById(wordId) ?: return
         progressDao.upsert(SrsScheduler.onReviewFail(current, today))
+        SyncStateTracker.markLocalMutation(appContext)
         bumpStat(today, reviewed = 1)
     }
 
@@ -173,6 +178,7 @@ class VocabularyRepository(
         } else {
             wordMarkDao.upsert(WordMarkEntity(wordId, marker.value))
         }
+        SyncStateTracker.markLocalMutation(appContext)
     }
 
     // ---- Stats ----
@@ -201,6 +207,7 @@ class VocabularyRepository(
                 )
             )
         }
+        SyncStateTracker.markLocalMutation(appContext)
     }
 
     private suspend fun bumpStat(date: Long, seen: Int = 0, learned: Int = 0, reviewed: Int = 0) {

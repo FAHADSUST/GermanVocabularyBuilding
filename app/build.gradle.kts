@@ -5,6 +5,11 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+// Keep local builds working before Firebase is configured.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.studio71.germanlinia2_b2"
     compileSdk {
@@ -68,12 +73,18 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // WorkManager (daily review reminder)
     implementation(libs.androidx.work.runtime.ktx)
 
     // Media (MediaStyle notification for the TTS playback controller)
     implementation(libs.androidx.media)
+
+    // Firebase (Spark plan compatible)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

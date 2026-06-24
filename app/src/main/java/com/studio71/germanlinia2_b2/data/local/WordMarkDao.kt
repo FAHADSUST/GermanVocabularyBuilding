@@ -12,8 +12,17 @@ interface WordMarkDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(mark: WordMarkEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(items: List<WordMarkEntity>)
+
     @Query("DELETE FROM word_mark WHERE wordId = :wordId")
     suspend fun delete(wordId: String)
+
+    @Query("DELETE FROM word_mark")
+    suspend fun deleteAll()
+
+    @Query("SELECT * FROM word_mark")
+    suspend fun getAll(): List<WordMarkEntity>
 
     /** Live marker for a single word (null when unmarked). */
     @Query("SELECT marker FROM word_mark WHERE wordId = :wordId")

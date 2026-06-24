@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
                 customTertiaryHex = settingsState.themeCustomTertiary
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    AppNav(repository = app.repository, settings = app.settings)
+                    AppNav(repository = app.repository, settings = app.settings, cloudSync = app.cloudSync)
                 }
             }
         }

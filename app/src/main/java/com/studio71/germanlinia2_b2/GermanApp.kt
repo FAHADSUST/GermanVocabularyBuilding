@@ -3,6 +3,7 @@ package com.studio71.germanlinia2_b2
 import android.app.Application
 import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
 import com.studio71.germanlinia2_b2.data.settings.SettingsStore
+import com.studio71.germanlinia2_b2.data.sync.CloudSyncManager
 import com.studio71.germanlinia2_b2.notify.NotificationHelper
 import com.studio71.germanlinia2_b2.notify.ReminderScheduler
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +20,8 @@ class GermanApp : Application() {
     val repository: VocabularyRepository by lazy { VocabularyRepository(this) }
 
     val settings: SettingsStore by lazy { SettingsStore(this) }
+
+    val cloudSync: CloudSyncManager by lazy { CloudSyncManager(this, settings) }
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 

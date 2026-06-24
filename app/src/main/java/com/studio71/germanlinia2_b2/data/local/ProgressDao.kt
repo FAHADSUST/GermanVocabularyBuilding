@@ -12,8 +12,17 @@ interface ProgressDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(progress: ProgressEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(progress: List<ProgressEntity>)
+
     @Query("SELECT * FROM progress WHERE wordId = :wordId")
     suspend fun getById(wordId: String): ProgressEntity?
+
+    @Query("SELECT * FROM progress")
+    suspend fun getAll(): List<ProgressEntity>
+
+    @Query("DELETE FROM progress")
+    suspend fun deleteAll()
 
     @Query("SELECT * FROM progress WHERE wordId = :wordId")
     fun observeById(wordId: String): Flow<ProgressEntity?>

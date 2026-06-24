@@ -4,4 +4,5 @@ plugins {
     // AGP 9 has built-in Kotlin support, so the kotlin-android plugin is NOT applied.
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.google.gms.google.services) apply false
 }

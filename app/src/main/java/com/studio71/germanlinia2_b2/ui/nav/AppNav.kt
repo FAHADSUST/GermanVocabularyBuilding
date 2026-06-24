@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
 import com.studio71.germanlinia2_b2.data.settings.SettingsStore
+import com.studio71.germanlinia2_b2.data.sync.CloudSyncManager
 import com.studio71.germanlinia2_b2.ui.card.WordCardScreen
 import com.studio71.germanlinia2_b2.ui.card.WordCardViewModel
 import com.studio71.germanlinia2_b2.ui.list.VocabularyListScreen
@@ -38,7 +39,7 @@ object Routes {
 }
 
 @Composable
-fun AppNav(repository: VocabularyRepository, settings: SettingsStore) {
+fun AppNav(repository: VocabularyRepository, settings: SettingsStore, cloudSync: CloudSyncManager) {
     val navController = rememberNavController()
     val appSettings by settings.state.collectAsStateWithLifecycle()
 
@@ -118,6 +119,7 @@ fun AppNav(repository: VocabularyRepository, settings: SettingsStore) {
             SettingsScreen(
                 settings = settings,
                 repository = repository,
+                cloudSync = cloudSync,
                 onBack = { navController.popBackStack() }
             )
         }

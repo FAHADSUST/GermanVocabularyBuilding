@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -49,13 +50,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
 import com.studio71.germanlinia2_b2.data.settings.SettingsStore
 import com.studio71.germanlinia2_b2.data.settings.TtsHistoryEntry
 import com.studio71.germanlinia2_b2.data.settings.ThemePreset
+import com.studio71.germanlinia2_b2.data.sync.CloudSyncManager
 import com.studio71.germanlinia2_b2.notify.ReminderScheduler
 import com.studio71.germanlinia2_b2.ui.tts.TtsController
 import com.studio71.germanlinia2_b2.ui.tts.TtsSessionSeed
@@ -69,11 +74,15 @@ import java.time.format.DateTimeFormatter
 fun SettingsScreen(
     settings: SettingsStore,
     repository: VocabularyRepository,
+    cloudSync: CloudSyncManager,
     onBack: () -> Unit
 ) {
     val state by settings.state.collectAsStateWithLifecycle()
+    val syncState by cloudSync.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showThemeSubSettings by rememberSaveable { mutableStateOf(false) }
+    var cloudEmail by rememberSaveable { mutableStateOf("") }
+    var cloudPassword by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -133,6 +142,139 @@ fun SettingsScreen(
                             subtitle = "Hell, Eye Friendly, Dark, Custom und weitere",
                             onClick = { showThemeSubSettings = true }
                         )
+                    }
+                }
+
+                // --- Cloud sync ---
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Cloud-Sync (Firebase)", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                        Text(
+                            "Manueller Sync fur Kommentare, Markierungen, SRS-Fortschritt und TTS-Verlauf.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        if (!syncState.configured) {
+                            Text(
+                                "Firebase ist noch nicht aktiv. Lege eine Datei app/google-services.json ab und starte neu.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        } else if (syncState.isSignedIn) {
+                            Text(
+                                "Konto: ${syncState.email ?: syncState.uid.orEmpty()}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            FilledTonalButton(
+                                onClick = { scope.launch { cloudSync.syncNow() } },
+                                enabled = !syncState.isBusy,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Jetzt synchronisieren")
+                            }
+                            FilledTonalButton(
+                                onClick = { scope.launch { cloudSync.testConnection() } },
+                                enabled = !syncState.isBusy,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Verbindung testen")
+                            }
+                            FilledTonalButton(
+                                onClick = { cloudSync.signOut() },
+                                enabled = !syncState.isBusy,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Abmelden")
+                            }
+                        } else {
+                            OutlinedTextField(
+                                value = cloudEmail,
+                                onValueChange = { cloudEmail = it },
+                                label = { Text("E-Mail") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = cloudPassword,
+                                onValueChange = { cloudPassword = it },
+                                label = { Text("Passwort") },
+                                singleLine = true,
+                                visualTransformation = PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            FilledTonalButton(
+                                onClick = { scope.launch { cloudSync.signIn(cloudEmail, cloudPassword) } },
+                                enabled = !syncState.isBusy,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Anmelden")
+                            }
+                            FilledTonalButton(
+                                onClick = { scope.launch { cloudSync.register(cloudEmail, cloudPassword) } },
+                                enabled = !syncState.isBusy,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Konto erstellen")
+                            }
+                        }
+
+                        syncState.lastSyncedAtEpochMs?.let { syncedAt ->
+                            Text(
+                                "Letzter Sync: ${formatHistoryTime(syncedAt)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Text(
+                            syncState.statusMessage,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        syncState.errorMessage?.let { error ->
+                            Text(
+                                error,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+
+                        if (syncState.configured) {
+                            HorizontalDivider()
+                            var showDiagnostics by rememberSaveable { mutableStateOf(false) }
+                            Text(
+                                if (showDiagnostics) "Diagnose ausblenden" else "Diagnose anzeigen",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showDiagnostics = !showDiagnostics }
+                                    .padding(vertical = 4.dp)
+                            )
+                            if (showDiagnostics) {
+                                val diag = remember(syncState.isSignedIn, syncState.email) { cloudSync.diagnostics() }
+                                DiagnosticRow("Firebase aktiv", if (diag.firebaseConfigured) "Ja" else "Nein")
+                                DiagnosticRow("Projekt", diag.projectId ?: "-")
+                                DiagnosticRow("App-ID (Firebase)", diag.applicationId ?: "-")
+                                DiagnosticRow("Paketname", diag.packageName)
+                                DiagnosticRow("Firestore-DB", diag.firestoreDatabaseId)
+                                DiagnosticRow(
+                                    "Play-Dienste",
+                                    if (diag.playServicesOk) "OK" else "${diag.playServicesStatusText} (${diag.playServicesStatusCode})"
+                                )
+                                DiagnosticRow("Angemeldet", if (diag.isSignedIn) (diag.email ?: "Ja") else "Nein")
+                                Text(
+                                    "Hinweis: Die Logzeile \"Failed to get service from broker / Unknown calling package name 'com.google.android.gms'\" " +
+                                        "ist ein interner Play-Dienste-Hinweis und stoppt die Synchronisierung nicht. " +
+                                        "Nutze \"Verbindung testen\", um den echten Status zu prufen.",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -386,6 +528,28 @@ fun SettingsScreen(
             }
             }
         }
+    }
+}
+
+@Composable
+private fun DiagnosticRow(label: String, value: String) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(end = 12.dp)
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

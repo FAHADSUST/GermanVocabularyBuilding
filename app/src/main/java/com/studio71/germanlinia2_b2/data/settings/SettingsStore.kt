@@ -4,6 +4,7 @@ import android.content.Context
 import com.studio71.germanlinia2_b2.data.local.WordMarker
 import com.studio71.germanlinia2_b2.data.repo.SortMode
 import com.studio71.germanlinia2_b2.data.repo.VocabularyFilter
+import com.studio71.germanlinia2_b2.data.sync.SyncStateTracker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -129,8 +130,10 @@ data class AppSettings(
 /** Simple SharedPreferences-backed settings, exposed reactively for Compose. */
 class SettingsStore(context: Context) {
 
+    private val appContext = context.applicationContext
+
     private val prefs =
-        context.applicationContext.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        appContext.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
 
     private val _state = MutableStateFlow(load())
     val state: StateFlow<AppSettings> = _state.asStateFlow()
@@ -263,16 +266,21 @@ class SettingsStore(context: Context) {
 
     fun addTtsHistory(entry: TtsHistoryEntry) {
         val updated = listOf(entry) + _state.value.ttsHistory.filterNot { it.id == entry.id }
-        persistHistory(updated.take(HISTORY_LIMIT))
+        persistHistory(updated.take(HISTORY_LIMIT), markDirty = true)
     }
 
     fun clearTtsHistory() {
-        persistHistory(emptyList())
+        persistHistory(emptyList(), markDirty = true)
     }
 
-    private fun persistHistory(entries: List<TtsHistoryEntry>) {
+    fun replaceTtsHistoryFromSync(entries: List<TtsHistoryEntry>) {
+        persistHistory(entries.take(HISTORY_LIMIT), markDirty = false)
+    }
+
+    private fun persistHistory(entries: List<TtsHistoryEntry>, markDirty: Boolean) {
         prefs.edit().putString(KEY_TTS_HISTORY, historyToJson(entries)).apply()
         _state.value = _state.value.copy(ttsHistory = entries)
+        if (markDirty) SyncStateTracker.markLocalMutation(appContext)
     }
 
     private fun parseHistory(raw: String?): List<TtsHistoryEntry> {
