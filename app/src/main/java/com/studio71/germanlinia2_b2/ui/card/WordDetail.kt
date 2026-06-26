@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -21,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,9 +36,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.repo.WordImageState
 
 /**
  * Reusable compact word body (header + meaning/forms/grammar + synonyms/antonyms).
@@ -54,8 +60,12 @@ fun WordDetail(
     onTranslateTextRequested: ((String) -> Unit)? = null,
     onCommentRequested: (() -> Unit)? = null,
     comment: String = "",
+    imageState: WordImageState = WordImageState(),
+    onRetryImage: (() -> Unit)? = null,
     revealed: Boolean = true
 ) {
+    var imageLoadFailed by remember(imageState.imageUrl) { mutableStateOf(false) }
+
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         HeaderCard(
             word = word,
@@ -74,6 +84,68 @@ fun WordDetail(
                 )
             }
             return@Column
+        }
+
+        when {
+            imageState.imageUrl != null && !imageLoadFailed -> {
+                ElevatedCard(Modifier.fillMaxWidth()) {
+                    AsyncImage(
+                        model = imageState.imageUrl,
+                        contentDescription = "Bedeutungsbild",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentScale = ContentScale.Crop,
+                        onError = { imageLoadFailed = true }
+                    )
+                }
+            }
+
+            imageLoadFailed -> {
+                InfoCard {
+                    Text(
+                        "Bedeutungsbild konnte nicht dargestellt werden.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (onRetryImage != null) {
+                        TextButton(onClick = onRetryImage) {
+                            Text("Bild erneut suchen")
+                        }
+                    }
+                }
+            }
+
+            imageState.isLoading -> {
+                InfoCard {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.height(18.dp), strokeWidth = 2.dp)
+                        Text(
+                            "Bedeutungsbild wird geladen …",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            imageState.message.isNotBlank() -> {
+                InfoCard {
+                    Text(
+                        imageState.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (imageState.canRetry && onRetryImage != null) {
+                        TextButton(onClick = onRetryImage) {
+                            Text("Bild erneut suchen")
+                        }
+                    }
+                }
+            }
         }
 
         InfoCard {

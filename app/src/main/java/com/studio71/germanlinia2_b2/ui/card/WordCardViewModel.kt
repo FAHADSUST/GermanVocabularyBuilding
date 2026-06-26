@@ -6,9 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarker
+import com.studio71.germanlinia2_b2.data.repo.WordImageState
 import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -59,13 +61,20 @@ class WordCardViewModel(
         _currentId.flatMapLatest { id -> repo.observeComment(id) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
+    val imageState: StateFlow<WordImageState> =
+        _currentId.flatMapLatest { id -> repo.observeWordImage(id) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), WordImageState())
+
     init {
         load(startId)
     }
 
     private fun load(id: String) {
         _currentId.value = id
-        viewModelScope.launch { _word.value = repo.getById(id) }
+        viewModelScope.launch {
+            _word.value = repo.getById(id)
+            repo.ensureWordImage(id)
+        }
     }
 
     fun next() {
@@ -103,6 +112,20 @@ class WordCardViewModel(
 
     fun setComment(comment: String) {
         viewModelScope.launch { repo.setComment(_currentId.value, comment) }
+    }
+
+    fun retryImage() {
+        viewModelScope.launch { repo.retryWordImage(_currentId.value) }
+    }
+
+    fun observeWordImage(wordId: String): Flow<WordImageState> = repo.observeWordImage(wordId)
+
+    fun ensureWordImage(wordId: String) {
+        viewModelScope.launch { repo.ensureWordImage(wordId) }
+    }
+
+    fun retryWordImage(wordId: String) {
+        viewModelScope.launch { repo.retryWordImage(wordId) }
     }
 
     class Factory(

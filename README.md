@@ -19,6 +19,8 @@ The app now includes manual cloud sync (Settings -> Cloud-Sync) for:
 - word comments (`word_comment`)
 - TTS playback history
 
+Meaning-image URLs are intentionally **local-only** and are not part of cloud sync.
+
 Setup:
 1. Create a Firebase project (Spark plan is enough for early usage).
 2. Add an Android app with package `com.studio71.germanlinia2_b2`.
@@ -65,6 +67,20 @@ The diagnostics panel (Settings -> Cloud-Sync -> Diagnose anzeigen) shows the ac
   current filtered list. Shows verb forms (3rd person, Präteritum, Perfekt),
   adjective comparative/superlative, grammar group + preposition + case,
   memory trick, synonyms/antonyms as chips.
+- **Meaning image per word**: the app looks up the first Google Image result via
+  Google Custom Search Image API (German-first query), stores the URL in Room,
+  and caches image bytes on-device via Coil. Failed/no-result lookups can be
+  retried manually.
+
+### Google image API setup
+Add these properties (for local dev) to your global Gradle properties file:
+
+`%USERPROFILE%\\.gradle\\gradle.properties`
+
+```
+googleImageApiKey=YOUR_API_KEY
+googleImageSearchCx=YOUR_SEARCH_ENGINE_ID
+```
 - **Synonym/antonym popup**: tap a chip to open a quick detail dialog for that word.
 - **Text-to-speech** (German) on list items, cards, and the popup.
 - **Spaced repetition**: schedule Day 1 → 2 → 3 → 7 → 15 → 30 (`SrsScheduler`).

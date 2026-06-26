@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
+import com.studio71.germanlinia2_b2.data.repo.WordImageState
 import com.studio71.germanlinia2_b2.ui.components.MarkerStarsRow
 import com.studio71.germanlinia2_b2.ui.components.WordDetailDialog
 import com.studio71.germanlinia2_b2.ui.tts.rememberGermanSpeaker
@@ -64,6 +65,7 @@ fun WordCardScreen(
     val progress by viewModel.progress.collectAsStateWithLifecycle()
     val marker by viewModel.marker.collectAsStateWithLifecycle()
     val comment by viewModel.comment.collectAsStateWithLifecycle()
+    val imageState by viewModel.imageState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val speaker = rememberGermanSpeaker()
     val scope = rememberCoroutineScope()
@@ -145,7 +147,9 @@ fun WordCardScreen(
                     commentDraft = comment
                     showCommentDialog = true
                 },
-                comment = comment
+                comment = comment,
+                imageState = imageState,
+                onRetryImage = viewModel::retryImage
             )
             ReviewCard(progress, viewModel)
         }
@@ -181,10 +185,20 @@ fun WordCardScreen(
     }
 
     detailWord?.let { dw ->
+        val detailImageState by remember(dw.id) {
+            viewModel.observeWordImage(dw.id)
+        }.collectAsStateWithLifecycle(initialValue = WordImageState())
+
+        LaunchedEffect(dw.id) {
+            viewModel.ensureWordImage(dw.id)
+        }
+
         WordDetailDialog(
             word = dw,
             onDismiss = { detailWord = null },
-            onSpeak = { speaker.speak(it) }
+            onSpeak = { speaker.speak(it) },
+            imageState = detailImageState,
+            onRetryImage = { viewModel.retryWordImage(dw.id) }
         )
     }
 }

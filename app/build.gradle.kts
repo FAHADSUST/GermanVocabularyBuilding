@@ -5,6 +5,12 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+fun quoted(value: String): String =
+    "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
+val googleImageApiKey = providers.gradleProperty("googleImageApiKey").orNull ?: ""
+val googleImageSearchCx = providers.gradleProperty("googleImageSearchCx").orNull ?: ""
+
 // Keep local builds working before Firebase is configured.
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
@@ -25,6 +31,10 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        // Google Custom Search Image API config (set via Gradle properties, not in source).
+        buildConfigField("String", "GOOGLE_IMAGE_API_KEY", quoted(googleImageApiKey))
+        buildConfigField("String", "GOOGLE_IMAGE_SEARCH_CX", quoted(googleImageSearchCx))
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -43,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -85,6 +96,15 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+
+    // Networking / JSON (Google image lookup)
+    implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.retrofit.moshi)
+    implementation(libs.squareup.moshi.kotlin)
+
+    // Image loading + disk/memory caching
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

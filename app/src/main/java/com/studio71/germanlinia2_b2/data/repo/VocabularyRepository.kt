@@ -2,6 +2,7 @@ package com.studio71.germanlinia2_b2.data.repo
 
 import android.content.Context
 import com.studio71.germanlinia2_b2.data.csv.CsvVocabularyImporter
+import com.studio71.germanlinia2_b2.data.image.GoogleImageSearchClient
 import com.studio71.germanlinia2_b2.data.local.AppDatabase
 import com.studio71.germanlinia2_b2.data.local.DailyStatEntity
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
@@ -9,6 +10,7 @@ import com.studio71.germanlinia2_b2.data.local.SeenWordEntity
 import com.studio71.germanlinia2_b2.data.local.SeenWordItem
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
 import com.studio71.germanlinia2_b2.data.local.WordCommentEntity
+import com.studio71.germanlinia2_b2.data.local.WordImageEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarkEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarker
 import com.studio71.germanlinia2_b2.data.sync.SyncStateTracker
@@ -23,7 +25,8 @@ import java.time.LocalDate
  */
 class VocabularyRepository(
     context: Context,
-    private val db: AppDatabase = AppDatabase.get(context)
+    private val db: AppDatabase = AppDatabase.get(context),
+    private val imageSearchClient: GoogleImageSearchClient = GoogleImageSearchClient()
 ) {
     private val appContext = context.applicationContext
     private val vocabularyDao = db.vocabularyDao()
@@ -32,6 +35,7 @@ class VocabularyRepository(
     private val wordMarkDao = db.wordMarkDao()
     private val seenWordDao = db.seenWordDao()
     private val wordCommentDao = db.wordCommentDao()
+    private val wordImageDao = db.wordImageDao()
 
     fun today(): Long = LocalDate.now().toEpochDay()
 
@@ -83,6 +87,77 @@ class VocabularyRepository(
 
     suspend fun getById(id: String): VocabularyEntity? = vocabularyDao.getById(id)
     suspend fun findByWord(word: String): VocabularyEntity? = vocabularyDao.findByWord(word)
+
+    fun observeWordImage(wordId: String): Flow<WordImageState> =
+        wordImageDao.observeById(wordId).map(::toWordImageState)
+
+    suspend fun ensureWordImage(wordId: String, force: Boolean = false) {
+        val word = vocabularyDao.getById(wordId) ?: return
+        val existing = wordImageDao.getById(wordId)
+
+        if (!force && existing?.status == WordImageEntity.STATUS_READY) return
+        if (!force && existing?.status in setOf(WordImageEntity.STATUS_LOADING, WordImageEntity.STATUS_NO_RESULT, WordImageEntity.STATUS_ERROR)) return
+
+        val now = System.currentTimeMillis()
+        wordImageDao.upsert(
+            WordImageEntity(
+                wordId = wordId,
+                imageUrl = existing?.imageUrl,
+                query = existing?.query.orEmpty(),
+                status = WordImageEntity.STATUS_LOADING,
+                lastTriedAtEpochMs = now,
+                updatedAtEpochMs = now
+            )
+        )
+
+        try {
+            val result = imageSearchClient.findMeaningImage(word)
+            val finalUrl = result.imageUrl ?: existing?.imageUrl
+            val status = if (finalUrl.isNullOrBlank()) {
+                WordImageEntity.STATUS_NO_RESULT
+            } else {
+                WordImageEntity.STATUS_READY
+            }
+
+            wordImageDao.upsert(
+                WordImageEntity(
+                    wordId = wordId,
+                    imageUrl = finalUrl,
+                    query = result.queryUsed,
+                    status = status,
+                    lastTriedAtEpochMs = now,
+                    updatedAtEpochMs = System.currentTimeMillis()
+                )
+            )
+        } catch (_: Exception) {
+            val fallbackStatus = if (existing?.imageUrl.isNullOrBlank()) {
+                WordImageEntity.STATUS_ERROR
+            } else {
+                WordImageEntity.STATUS_READY
+            }
+
+            wordImageDao.upsert(
+                WordImageEntity(
+                    wordId = wordId,
+                    imageUrl = existing?.imageUrl,
+                    query = existing?.query.orEmpty(),
+                    status = fallbackStatus,
+                    lastTriedAtEpochMs = now,
+                    updatedAtEpochMs = System.currentTimeMillis()
+                )
+            )
+        }
+    }
+
+    suspend fun retryWordImage(wordId: String) {
+        ensureWordImage(wordId, force = true)
+    }
+
+    suspend fun prefetchMissingImages(limit: Int = 20) {
+        wordImageDao.nextMissingWordIds(limit = limit).forEach { wordId ->
+            ensureWordImage(wordId = wordId, force = false)
+        }
+    }
 
     // ---- Progress / SRS ----
 
@@ -219,6 +294,26 @@ class VocabularyRepository(
                 wordsReviewed = existing.wordsReviewed + reviewed
             )
         )
+    }
+
+    private fun toWordImageState(entity: WordImageEntity?): WordImageState {
+        val safeUrl = entity?.imageUrl?.trim().orEmpty().takeIf { it.isNotBlank() }
+        return when (entity?.status) {
+            WordImageEntity.STATUS_READY -> {
+                if (safeUrl != null) WordImageState(imageUrl = safeUrl)
+                else WordImageState(canRetry = true, message = "Bildlink war ungültig. Bitte erneut suchen.")
+            }
+            WordImageEntity.STATUS_LOADING -> WordImageState(imageUrl = safeUrl, isLoading = safeUrl == null)
+            WordImageEntity.STATUS_NO_RESULT -> WordImageState(
+                canRetry = true,
+                message = "Kein passendes Bedeutungsbild gefunden."
+            )
+            WordImageEntity.STATUS_ERROR -> WordImageState(
+                canRetry = true,
+                message = "Bild konnte nicht geladen werden."
+            )
+            else -> WordImageState()
+        }
     }
 }
 
