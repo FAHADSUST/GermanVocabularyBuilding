@@ -10,6 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Style
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -51,6 +57,8 @@ import kotlinx.coroutines.launch
 fun ReviewScreen(
     viewModel: ReviewViewModel,
     autoSpeakOnReveal: Boolean,
+    reviewAsList: Boolean,
+    onToggleReviewAsList: (Boolean) -> Unit,
     onBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -63,7 +71,7 @@ fun ReviewScreen(
 
     // Optionally pronounce the word as soon as it is revealed.
     LaunchedEffect(state.index, revealed) {
-        if (revealed && autoSpeakOnReveal) {
+        if (!reviewAsList && revealed && autoSpeakOnReveal) {
             state.word?.let { speaker.speak(it.word) }
         }
     }
@@ -76,40 +84,51 @@ fun ReviewScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Zurück")
                     }
+                },
+                actions = {
+                    IconButton(onClick = { onToggleReviewAsList(!reviewAsList) }) {
+                        if (reviewAsList) {
+                            Icon(Icons.Default.Style, contentDescription = "Als Karten anzeigen")
+                        } else {
+                            Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Als Liste anzeigen")
+                        }
+                    }
                 }
             )
         },
         bottomBar = {
-            val word = state.word
-            if (!state.finished && word != null) {
-                if (!revealed) {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        Button(
-                            onClick = { revealed = true },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(Icons.Default.Visibility, contentDescription = null, Modifier.size(18.dp))
-                            Text(" Antwort zeigen")
+            if (!reviewAsList) {
+                val word = state.word
+                if (!state.finished && word != null) {
+                    if (!revealed) {
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+                            Button(
+                                onClick = { revealed = true },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(Icons.Default.Visibility, contentDescription = null, Modifier.size(18.dp))
+                                Text(" Antwort zeigen")
+                            }
                         }
-                    }
-                } else {
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = { viewModel.grade(false) },
-                            modifier = Modifier.weight(1f)
+                    } else {
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(Icons.Default.Close, contentDescription = null, Modifier.size(18.dp))
-                            Text(" Nochmal")
-                        }
-                        Button(
-                            onClick = { viewModel.grade(true) },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.Check, contentDescription = null, Modifier.size(18.dp))
-                            Text(" Gewusst")
+                            OutlinedButton(
+                                onClick = { viewModel.grade(false) },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = null, Modifier.size(18.dp))
+                                Text(" Nochmal")
+                            }
+                            Button(
+                                onClick = { viewModel.grade(true) },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Check, contentDescription = null, Modifier.size(18.dp))
+                                Text(" Gewusst")
+                            }
                         }
                     }
                 }
@@ -132,35 +151,110 @@ fun ReviewScreen(
             )
 
             else -> {
-                val word = state.word!!
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    // Progress through the session.
-                    Text(
-                        "${state.index + 1} / ${state.total}",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    LinearProgressIndicator(
-                        progress = { (state.index).toFloat() / state.total.coerceAtLeast(1) },
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
-                    )
-                    Column(Modifier.verticalScroll(rememberScrollState())) {
-                        WordDetail(
-                            word = word,
-                            onSpeak = { speaker.speak(it) },
-                            onRelationClick = { value ->
-                                scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
-                            },
-                            modifier = Modifier.clickable(enabled = !revealed) { revealed = true },
-                            imageState = imageState,
-                            onRetryImage = viewModel::retryImage,
-                            revealed = revealed
+                if (reviewAsList) {
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            "${state.index} / ${state.total}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        LinearProgressIndicator(
+                            progress = { (state.index).toFloat() / state.total.coerceAtLeast(1) },
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+                        )
+
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize().padding(top = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            items(state.items, key = { it.word.id }) { item ->
+                                val itemWord = item.word
+                                val itemImageState by remember(itemWord.id) {
+                                    viewModel.observeWordImage(itemWord.id)
+                                }.collectAsStateWithLifecycle(initialValue = WordImageState())
+
+                                LaunchedEffect(itemWord.id) {
+                                    viewModel.ensureWordImage(itemWord.id)
+                                }
+
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                                    )
+                                ) {
+                                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        WordDetail(
+                                            word = itemWord,
+                                            onSpeak = { speaker.speak(it) },
+                                            onRelationClick = { value ->
+                                                scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
+                                            },
+                                            modifier = Modifier.clickable(enabled = !item.isReviewed) {
+                                                viewModel.revealAndReviewListWord(itemWord.id)
+                                                if (autoSpeakOnReveal) {
+                                                    speaker.speak(itemWord.word)
+                                                }
+                                            },
+                                            imageState = itemImageState,
+                                            onRetryImage = { viewModel.retryWordImage(itemWord.id) },
+                                            revealed = item.isReviewed
+                                        )
+                                        if (!item.isReviewed) {
+                                            Button(
+                                                onClick = {
+                                                    viewModel.revealAndReviewListWord(itemWord.id)
+                                                    if (autoSpeakOnReveal) {
+                                                        speaker.speak(itemWord.word)
+                                                    }
+                                                },
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Icon(Icons.Default.Visibility, contentDescription = null, Modifier.size(18.dp))
+                                                Text(" Tap to show")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    val word = state.word!!
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        // Progress through the session.
+                        Text(
+                            "${state.index + 1} / ${state.total}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        LinearProgressIndicator(
+                            progress = { (state.index).toFloat() / state.total.coerceAtLeast(1) },
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+                        )
+                        Column(Modifier.verticalScroll(rememberScrollState())) {
+                            WordDetail(
+                                word = word,
+                                onSpeak = { speaker.speak(it) },
+                                onRelationClick = { value ->
+                                    scope.launch { detailWord = viewModel.lookup(value) ?: detailWord }
+                                },
+                                modifier = Modifier.clickable(enabled = !revealed) { revealed = true },
+                                imageState = imageState,
+                                onRetryImage = viewModel::retryImage,
+                                revealed = revealed
+                            )
+                        }
                     }
                 }
             }

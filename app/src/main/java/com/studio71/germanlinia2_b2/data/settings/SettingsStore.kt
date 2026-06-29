@@ -121,7 +121,9 @@ data class AppSettings(
     /** Custom tertiary theme color as #RRGGBB or #AARRGGBB. */
     val themeCustomTertiary: String = DEFAULT_CUSTOM_TERTIARY,
     /** Recently played TTS sessions (newest first). */
-    val ttsHistory: List<TtsHistoryEntry> = emptyList()
+    val ttsHistory: List<TtsHistoryEntry> = emptyList(),
+    /** Active review screen view mode (false = card, true = list). */
+    val reviewAsList: Boolean = false
 ) {
     val reminderTimeLabel: String
         get() = "%02d:%02d".format(reminderHour, reminderMinute)
@@ -158,7 +160,8 @@ class SettingsStore(context: Context) {
         themeCustomPrimary = prefs.getString(KEY_THEME_CUSTOM_PRIMARY, DEFAULT_CUSTOM_PRIMARY) ?: DEFAULT_CUSTOM_PRIMARY,
         themeCustomSecondary = prefs.getString(KEY_THEME_CUSTOM_SECONDARY, DEFAULT_CUSTOM_SECONDARY) ?: DEFAULT_CUSTOM_SECONDARY,
         themeCustomTertiary = prefs.getString(KEY_THEME_CUSTOM_TERTIARY, DEFAULT_CUSTOM_TERTIARY) ?: DEFAULT_CUSTOM_TERTIARY,
-        ttsHistory = parseHistory(prefs.getString(KEY_TTS_HISTORY, "[]"))
+        ttsHistory = parseHistory(prefs.getString(KEY_TTS_HISTORY, "[]")),
+        reviewAsList = prefs.getBoolean(KEY_REVIEW_AS_LIST, false)
     )
 
     fun setReminderEnabled(enabled: Boolean) {
@@ -179,6 +182,11 @@ class SettingsStore(context: Context) {
     fun setAutoAddSeenToReview(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_AUTO_ADD_SEEN, enabled).apply()
         _state.value = _state.value.copy(autoAddSeenToReview = enabled)
+    }
+
+    fun setReviewAsList(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_REVIEW_AS_LIST, enabled).apply()
+        _state.value = _state.value.copy(reviewAsList = enabled)
     }
 
     fun setTtsWordRepeat(value: Int) {
@@ -365,6 +373,7 @@ class SettingsStore(context: Context) {
         const val KEY_THEME_CUSTOM_SECONDARY = "theme_custom_secondary"
         const val KEY_THEME_CUSTOM_TERTIARY = "theme_custom_tertiary"
         const val KEY_TTS_HISTORY = "tts_history"
+        const val KEY_REVIEW_AS_LIST = "review_as_list"
         const val HISTORY_LIMIT = 20
     }
 }

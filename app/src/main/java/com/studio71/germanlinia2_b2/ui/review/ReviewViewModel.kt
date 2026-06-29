@@ -17,6 +17,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+data class ReviewItemState(
+    val word: VocabularyEntity,
+    val isReviewed: Boolean = false,
+    val isKnown: Boolean? = null
+)
+
 data class ReviewUiState(
     val loading: Boolean = true,
     val word: VocabularyEntity? = null,
@@ -24,7 +30,8 @@ data class ReviewUiState(
     val total: Int = 0,
     val knownCount: Int = 0,
     val againCount: Int = 0,
-    val finished: Boolean = false
+    val finished: Boolean = false,
+    val items: List<ReviewItemState> = emptyList()
 ) {
     val reviewed: Int get() = knownCount + againCount
 }
@@ -38,7 +45,7 @@ class ReviewViewModel(
     private val repo: VocabularyRepository
 ) : ViewModel() {
 
-    private var deck: List<VocabularyEntity> = emptyList()
+    private var reviewItems: List<ReviewItemState> = emptyList()
 
     private val _state = MutableStateFlow(ReviewUiState())
     val state: StateFlow<ReviewUiState> = _state.asStateFlow()
@@ -55,15 +62,17 @@ class ReviewViewModel(
 
     init {
         viewModelScope.launch {
-            deck = repo.getDueWords()
+            val deck = repo.getDueWords()
+            reviewItems = deck.map { ReviewItemState(it) }
             _state.value = ReviewUiState(
                 loading = false,
-                word = deck.firstOrNull(),
+                word = reviewItems.firstOrNull()?.word,
                 index = 0,
-                total = deck.size,
-                finished = deck.isEmpty()
+                total = reviewItems.size,
+                finished = reviewItems.isEmpty(),
+                items = reviewItems
             )
-            val firstId = deck.firstOrNull()?.id
+            val firstId = reviewItems.firstOrNull()?.word?.id
             _currentWordId.value = firstId
             if (firstId != null) repo.ensureWordImage(firstId)
         }
@@ -76,15 +85,55 @@ class ReviewViewModel(
         viewModelScope.launch {
             if (known) repo.reviewSuccess(word.id) else repo.reviewFail(word.id)
 
-            val nextIndex = current.index + 1
+            reviewItems = reviewItems.map {
+                if (it.word.id == word.id) it.copy(isReviewed = true, isKnown = known) else it
+            }
+
+            val nextWord = reviewItems.firstOrNull { !it.isReviewed }?.word
+            val revisedKnownCount = current.knownCount + if (known) 1 else 0
+            val revisedAgainCount = current.againCount + if (known) 0 else 1
+            val reviewedCount = reviewItems.count { it.isReviewed }
+
             _state.value = current.copy(
-                index = nextIndex,
-                word = deck.getOrNull(nextIndex),
-                knownCount = current.knownCount + if (known) 1 else 0,
-                againCount = current.againCount + if (known) 0 else 1,
-                finished = nextIndex >= deck.size
+                index = reviewedCount,
+                word = nextWord,
+                knownCount = revisedKnownCount,
+                againCount = revisedAgainCount,
+                finished = reviewItems.all { it.isReviewed },
+                items = reviewItems
             )
-            val nextWordId = deck.getOrNull(nextIndex)?.id
+            val nextWordId = nextWord?.id
+            _currentWordId.value = nextWordId
+            if (nextWordId != null) repo.ensureWordImage(nextWordId)
+        }
+    }
+
+    /** Tap-to-show: reveal the meaning and count it as a successful review. */
+    fun revealAndReviewListWord(wordId: String) {
+        val current = _state.value
+        val existingItem = reviewItems.firstOrNull { it.word.id == wordId } ?: return
+        if (existingItem.isReviewed) return
+
+        viewModelScope.launch {
+            repo.reviewSuccess(wordId)
+
+            reviewItems = reviewItems.map {
+                if (it.word.id == wordId) it.copy(isReviewed = true, isKnown = true) else it
+            }
+
+            val nextWordForCard = reviewItems.firstOrNull { !it.isReviewed }?.word
+            val revisedKnownCount = current.knownCount + 1
+            val reviewedCount = reviewItems.count { it.isReviewed }
+
+            _state.value = current.copy(
+                index = reviewedCount,
+                word = nextWordForCard,
+                knownCount = revisedKnownCount,
+                finished = reviewItems.all { it.isReviewed },
+                items = reviewItems
+            )
+
+            val nextWordId = nextWordForCard?.id
             _currentWordId.value = nextWordId
             if (nextWordId != null) repo.ensureWordImage(nextWordId)
         }

@@ -111,6 +111,8 @@ fun AppNav(repository: VocabularyRepository, settings: SettingsStore, cloudSync:
             ReviewScreen(
                 viewModel = vm,
                 autoSpeakOnReveal = appSettings.autoSpeakOnReveal,
+                reviewAsList = appSettings.reviewAsList,
+                onToggleReviewAsList = { settings.setReviewAsList(it) },
                 onBack = { navController.popBackStack() }
             )
         }
