@@ -188,6 +188,9 @@ fun WordDetail(
             if (word.memoryTrick.isNotBlank()) {
                 Labeled("Tipp", word.memoryTrick, onCopyTextRequested, onTranslateTextRequested)
             }
+            if (word.memoryTips.isNotBlank()) {
+                Labeled("Merkhilfe", word.memoryTips, onCopyTextRequested, onTranslateTextRequested)
+            }
             if (comment.isNotBlank()) {
                 Labeled("Kommentar", comment, onCopyTextRequested, onTranslateTextRequested)
             }

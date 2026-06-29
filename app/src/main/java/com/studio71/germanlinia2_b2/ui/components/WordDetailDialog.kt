@@ -128,6 +128,7 @@ fun WordDetailDialog(
                 if (word.exampleDe.isNotBlank()) {
                     Text("„${word.exampleDe}“", style = MaterialTheme.typography.bodyMedium)
                 }
+                LabeledLine("Merkhilfe", word.memoryTips)
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     AssistChip(onClick = {}, label = { Text(word.level) })
                     if (word.posTinyLabel.isNotBlank()) {

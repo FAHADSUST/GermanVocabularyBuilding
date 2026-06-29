@@ -53,6 +53,7 @@ object CsvVocabularyImporter {
                     synonyms = cells.col("synonyms"),
                     antonyms = cells.col("antonyms"),
                     memoryTrick = cells.col("memory_trick"),
+                    memoryTips = cells.col("memory_tips"),
                     frequencyRank = cells.col("frequency_rank").toIntOrNull(),
                     grammarGroup = cells.col("grammar_group"),
                     preposition = cells.col("preposition"),

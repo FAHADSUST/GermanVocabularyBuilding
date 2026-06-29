@@ -44,6 +44,15 @@ class VocabularyRepository(
         if (vocabularyDao.count() == 0) {
             val items = CsvVocabularyImporter.loadFromAssets(appContext)
             if (items.isNotEmpty()) vocabularyDao.insertAll(items)
+        } else if (vocabularyDao.countMissingMemoryTips() > 0) {
+            // Existing install (post-migration): backfill memory tips from the bundled
+            // CSV, updating ONLY that column so progress/comments/marks stay intact.
+            val items = CsvVocabularyImporter.loadFromAssets(appContext)
+            items.forEach { item ->
+                if (item.memoryTips.isNotBlank()) {
+                    vocabularyDao.updateMemoryTips(item.id, item.memoryTips)
+                }
+            }
         }
     }
 

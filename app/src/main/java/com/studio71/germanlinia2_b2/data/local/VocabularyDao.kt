@@ -15,6 +15,14 @@ interface VocabularyDao {
     @Query("SELECT COUNT(*) FROM vocabulary")
     suspend fun count(): Int
 
+    /** How many rows still have no memory tip (used to backfill existing installs). */
+    @Query("SELECT COUNT(*) FROM vocabulary WHERE memoryTips = '' OR memoryTips IS NULL")
+    suspend fun countMissingMemoryTips(): Int
+
+    /** Update only the memory tip column, preserving all other data + progress tables. */
+    @Query("UPDATE vocabulary SET memoryTips = :tips WHERE id = :id")
+    suspend fun updateMemoryTips(id: String, tips: String)
+
     @Query("SELECT * FROM vocabulary WHERE id = :id")
     suspend fun getById(id: String): VocabularyEntity?
 

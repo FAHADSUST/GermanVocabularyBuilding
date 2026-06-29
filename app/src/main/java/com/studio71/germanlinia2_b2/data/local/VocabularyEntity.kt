@@ -26,6 +26,8 @@ data class VocabularyEntity(
     val synonyms: String = "",
     val antonyms: String = "",
     val memoryTrick: String = "",
+    /** Learner-facing memory tip / mnemonic (mnemonic, English or Bangla hooks). */
+    val memoryTips: String = "",
     val frequencyRank: Int? = null,
     val grammarGroup: String = "",
     val preposition: String = "",

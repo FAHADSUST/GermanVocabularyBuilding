@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         WordCommentEntity::class,
         WordImageEntity::class
     ],
-    version = 16,
+    version = 17,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -48,6 +48,15 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Adds the learner-facing memory tip column without touching existing data. */
+        val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE vocabulary ADD COLUMN memoryTips TEXT NOT NULL DEFAULT ''"
+                )
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -58,7 +67,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "german_vocab.db"
                 )
-                    .addMigrations(MIGRATION_15_16)
+                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17)
                     .fallbackToDestructiveMigration(true)
                     .build()
                     .also { INSTANCE = it }
