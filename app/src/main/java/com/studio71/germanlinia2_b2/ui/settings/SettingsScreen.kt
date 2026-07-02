@@ -303,11 +303,11 @@ fun SettingsScreen(
                                 TimePickerDialog(
                                     context,
                                     { _, hour, minute ->
-                                        settings.setReminderTime(hour, minute)
+                                        settings.setReminderWindowStart(hour, minute)
                                         ReminderScheduler.apply(context, settings.state.value)
                                     },
-                                    state.reminderHour,
-                                    state.reminderMinute,
+                                    state.reminderWindowStartHour,
+                                    state.reminderWindowStartMinute,
                                     true
                                 ).show()
                             }
@@ -317,24 +317,87 @@ fun SettingsScreen(
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(
-                                "Uhrzeit",
+                                "Zeitfenster Start",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = if (timeEnabled) MaterialTheme.colorScheme.onSurface
                                 else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                "Erinnerung um diese Zeit",
+                                "Erste erlaubte Lernzeit",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         Text(
-                            state.reminderTimeLabel,
+                            "%02d:%02d".format(state.reminderWindowStartHour, state.reminderWindowStartMinute),
                             style = MaterialTheme.typography.headlineSmall,
                             color = if (timeEnabled) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable(enabled = timeEnabled) {
+                                TimePickerDialog(
+                                    context,
+                                    { _, hour, minute ->
+                                        settings.setReminderWindowEnd(hour, minute)
+                                        ReminderScheduler.apply(context, settings.state.value)
+                                    },
+                                    state.reminderWindowEndHour,
+                                    state.reminderWindowEndMinute,
+                                    true
+                                ).show()
+                            }
+                            .padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                "Zeitfenster Ende",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (timeEnabled) MaterialTheme.colorScheme.onSurface
+                                else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "Spateste erlaubte Lernzeit",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            "%02d:%02d".format(state.reminderWindowEndHour, state.reminderWindowEndMinute),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = if (timeEnabled) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    HorizontalDivider()
+
+                    StepperRow(
+                        title = "Intervall min (Stunden)",
+                        subtitle = "Kleinster Abstand zwischen Erinnerungen",
+                        value = state.reminderIntervalMinHours,
+                        onChange = {
+                            settings.setReminderIntervalMinHours(it)
+                            ReminderScheduler.apply(context, settings.state.value)
+                        },
+                        min = 1
+                    )
+                    StepperRow(
+                        title = "Intervall max (Stunden)",
+                        subtitle = "Grosster Abstand zwischen Erinnerungen",
+                        value = state.reminderIntervalMaxHours,
+                        onChange = {
+                            settings.setReminderIntervalMaxHours(it)
+                            ReminderScheduler.apply(context, settings.state.value)
+                        },
+                        min = 1
+                    )
                 }
             }
 
@@ -354,6 +417,13 @@ fun SettingsScreen(
                         subtitle = "Öffnet man Wortdetails, kommt das Wort automatisch in den 2/3/7/15/30-Tage-Plan",
                         checked = state.autoAddSeenToReview,
                         onCheckedChange = { settings.setAutoAddSeenToReview(it) }
+                    )
+                    HorizontalDivider()
+                    SettingSwitchRow(
+                        title = "Reverse Recall aktivieren",
+                        subtitle = "Optionales Spiel: Englisch sehen, deutsches Wort erinnern",
+                        checked = state.gameReverseRecallEnabled,
+                        onCheckedChange = { settings.setGameReverseRecallEnabled(it) }
                     )
                 }
             }

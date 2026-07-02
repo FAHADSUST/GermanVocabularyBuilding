@@ -14,7 +14,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.studio71.germanlinia2_b2.notify.NotificationHelper
 import com.studio71.germanlinia2_b2.ui.nav.AppNav
+import com.studio71.germanlinia2_b2.ui.nav.Routes
 import com.studio71.germanlinia2_b2.ui.theme.GermanVocabTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,6 +29,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         maybeRequestNotificationPermission()
         val app = application as GermanApp
+        val launchRoute = intent?.getStringExtra(NotificationHelper.EXTRA_OPEN_ROUTE)
+            ?.takeIf { it.isNotBlank() }
+            ?: Routes.LIST
         setContent {
             val settingsState by app.settings.state.collectAsStateWithLifecycle()
             GermanVocabTheme(
@@ -36,7 +41,12 @@ class MainActivity : ComponentActivity() {
                 customTertiaryHex = settingsState.themeCustomTertiary
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    AppNav(repository = app.repository, settings = app.settings, cloudSync = app.cloudSync)
+                    AppNav(
+                        repository = app.repository,
+                        settings = app.settings,
+                        cloudSync = app.cloudSync,
+                        startDestination = launchRoute
+                    )
                 }
             }
         }

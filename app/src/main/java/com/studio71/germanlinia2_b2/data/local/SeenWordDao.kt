@@ -46,5 +46,23 @@ interface SeenWordDao {
 
     @Query("SELECT COUNT(DISTINCT wordId) FROM seen_word")
     fun observeDistinctWordCount(): Flow<Int>
+
+    @Query(
+        """
+        SELECT
+            s.wordId AS wordId,
+            CASE
+                WHEN v.article = '' THEN v.word
+                ELSE (v.article || ' ' || v.word)
+            END AS displayWord,
+            v.english AS english,
+            s.seenAtEpochMs AS seenAtEpochMs
+        FROM seen_word s
+        INNER JOIN vocabulary v ON v.id = s.wordId
+        ORDER BY s.seenAtEpochMs DESC, v.sortKey ASC
+        LIMIT :limit
+        """
+    )
+    suspend fun getRecent(limit: Int): List<SeenWordItem>
 }
 

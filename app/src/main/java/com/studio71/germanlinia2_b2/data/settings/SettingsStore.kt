@@ -90,8 +90,20 @@ data class AppSettings(
     val reminderEnabled: Boolean = true,
     val reminderHour: Int = 19,
     val reminderMinute: Int = 0,
+    val reminderWindowStartHour: Int = 6,
+    val reminderWindowStartMinute: Int = 0,
+    val reminderWindowEndHour: Int = 23,
+    val reminderWindowEndMinute: Int = 0,
+    val reminderIntervalMinHours: Int = 2,
+    val reminderIntervalMaxHours: Int = 3,
     val autoSpeakOnReveal: Boolean = false,
     val autoAddSeenToReview: Boolean = false,
+    val gameMatchingEnabled: Boolean = true,
+    val gameClozeEnabled: Boolean = true,
+    val gameRecentEnabled: Boolean = true,
+    val gameReverseRecallEnabled: Boolean = false,
+    val nextGameModeIndex: Int = 0,
+    val gameCoverageCursor: Int = 0,
     /** How often the headword itself is spoken within one loop. */
     val ttsWordRepeat: Int = 1,
     /** How often the (English) meaning is spoken within one loop. */
@@ -127,6 +139,14 @@ data class AppSettings(
 ) {
     val reminderTimeLabel: String
         get() = "%02d:%02d".format(reminderHour, reminderMinute)
+
+    val reminderWindowLabel: String
+        get() = "%02d:%02d-%02d:%02d".format(
+            reminderWindowStartHour,
+            reminderWindowStartMinute,
+            reminderWindowEndHour,
+            reminderWindowEndMinute
+        )
 }
 
 /** Simple SharedPreferences-backed settings, exposed reactively for Compose. */
@@ -144,8 +164,20 @@ class SettingsStore(context: Context) {
         reminderEnabled = prefs.getBoolean(KEY_ENABLED, true),
         reminderHour = prefs.getInt(KEY_HOUR, 19),
         reminderMinute = prefs.getInt(KEY_MINUTE, 0),
+        reminderWindowStartHour = prefs.getInt(KEY_REMINDER_WINDOW_START_HOUR, 6),
+        reminderWindowStartMinute = prefs.getInt(KEY_REMINDER_WINDOW_START_MINUTE, 0),
+        reminderWindowEndHour = prefs.getInt(KEY_REMINDER_WINDOW_END_HOUR, 23),
+        reminderWindowEndMinute = prefs.getInt(KEY_REMINDER_WINDOW_END_MINUTE, 0),
+        reminderIntervalMinHours = prefs.getInt(KEY_REMINDER_INTERVAL_MIN_HOURS, 2).coerceIn(1, 12),
+        reminderIntervalMaxHours = prefs.getInt(KEY_REMINDER_INTERVAL_MAX_HOURS, 3).coerceIn(1, 12),
         autoSpeakOnReveal = prefs.getBoolean(KEY_AUTOSPEAK, false),
         autoAddSeenToReview = prefs.getBoolean(KEY_AUTO_ADD_SEEN, false),
+        gameMatchingEnabled = prefs.getBoolean(KEY_GAME_MATCHING_ENABLED, true),
+        gameClozeEnabled = prefs.getBoolean(KEY_GAME_CLOZE_ENABLED, true),
+        gameRecentEnabled = prefs.getBoolean(KEY_GAME_RECENT_ENABLED, true),
+        gameReverseRecallEnabled = prefs.getBoolean(KEY_GAME_REVERSE_RECALL_ENABLED, false),
+        nextGameModeIndex = prefs.getInt(KEY_NEXT_GAME_MODE_INDEX, 0).coerceAtLeast(0),
+        gameCoverageCursor = prefs.getInt(KEY_GAME_COVERAGE_CURSOR, 0).coerceAtLeast(0),
         ttsWordRepeat = prefs.getInt(KEY_TTS_WORD, 1),
         ttsMeaningRepeat = prefs.getInt(KEY_TTS_MEANING, 1),
         ttsExampleRepeat = prefs.getInt(KEY_TTS_EXAMPLE, 1),
@@ -174,6 +206,58 @@ class SettingsStore(context: Context) {
         _state.value = _state.value.copy(reminderHour = hour, reminderMinute = minute)
     }
 
+    fun setReminderWindowStart(hour: Int, minute: Int) {
+        val h = hour.coerceIn(0, 23)
+        val m = minute.coerceIn(0, 59)
+        prefs.edit()
+            .putInt(KEY_REMINDER_WINDOW_START_HOUR, h)
+            .putInt(KEY_REMINDER_WINDOW_START_MINUTE, m)
+            .apply()
+        _state.value = _state.value.copy(
+            reminderWindowStartHour = h,
+            reminderWindowStartMinute = m
+        )
+    }
+
+    fun setReminderWindowEnd(hour: Int, minute: Int) {
+        val h = hour.coerceIn(0, 23)
+        val m = minute.coerceIn(0, 59)
+        prefs.edit()
+            .putInt(KEY_REMINDER_WINDOW_END_HOUR, h)
+            .putInt(KEY_REMINDER_WINDOW_END_MINUTE, m)
+            .apply()
+        _state.value = _state.value.copy(
+            reminderWindowEndHour = h,
+            reminderWindowEndMinute = m
+        )
+    }
+
+    fun setReminderIntervalMinHours(hours: Int) {
+        val min = hours.coerceIn(1, 12)
+        val max = _state.value.reminderIntervalMaxHours.coerceAtLeast(min)
+        prefs.edit()
+            .putInt(KEY_REMINDER_INTERVAL_MIN_HOURS, min)
+            .putInt(KEY_REMINDER_INTERVAL_MAX_HOURS, max)
+            .apply()
+        _state.value = _state.value.copy(
+            reminderIntervalMinHours = min,
+            reminderIntervalMaxHours = max
+        )
+    }
+
+    fun setReminderIntervalMaxHours(hours: Int) {
+        val max = hours.coerceIn(1, 12)
+        val min = _state.value.reminderIntervalMinHours.coerceAtMost(max)
+        prefs.edit()
+            .putInt(KEY_REMINDER_INTERVAL_MIN_HOURS, min)
+            .putInt(KEY_REMINDER_INTERVAL_MAX_HOURS, max)
+            .apply()
+        _state.value = _state.value.copy(
+            reminderIntervalMinHours = min,
+            reminderIntervalMaxHours = max
+        )
+    }
+
     fun setAutoSpeakOnReveal(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_AUTOSPEAK, enabled).apply()
         _state.value = _state.value.copy(autoSpeakOnReveal = enabled)
@@ -182,6 +266,38 @@ class SettingsStore(context: Context) {
     fun setAutoAddSeenToReview(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_AUTO_ADD_SEEN, enabled).apply()
         _state.value = _state.value.copy(autoAddSeenToReview = enabled)
+    }
+
+    fun setGameMatchingEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_GAME_MATCHING_ENABLED, enabled).apply()
+        _state.value = _state.value.copy(gameMatchingEnabled = enabled)
+    }
+
+    fun setGameClozeEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_GAME_CLOZE_ENABLED, enabled).apply()
+        _state.value = _state.value.copy(gameClozeEnabled = enabled)
+    }
+
+    fun setGameRecentEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_GAME_RECENT_ENABLED, enabled).apply()
+        _state.value = _state.value.copy(gameRecentEnabled = enabled)
+    }
+
+    fun setGameReverseRecallEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_GAME_REVERSE_RECALL_ENABLED, enabled).apply()
+        _state.value = _state.value.copy(gameReverseRecallEnabled = enabled)
+    }
+
+    fun setNextGameModeIndex(index: Int) {
+        val value = index.coerceAtLeast(0)
+        prefs.edit().putInt(KEY_NEXT_GAME_MODE_INDEX, value).apply()
+        _state.value = _state.value.copy(nextGameModeIndex = value)
+    }
+
+    fun setGameCoverageCursor(cursor: Int) {
+        val value = cursor.coerceAtLeast(0)
+        prefs.edit().putInt(KEY_GAME_COVERAGE_CURSOR, value).apply()
+        _state.value = _state.value.copy(gameCoverageCursor = value)
     }
 
     fun setReviewAsList(enabled: Boolean) {
@@ -356,8 +472,20 @@ class SettingsStore(context: Context) {
         const val KEY_ENABLED = "reminder_enabled"
         const val KEY_HOUR = "reminder_hour"
         const val KEY_MINUTE = "reminder_minute"
+        const val KEY_REMINDER_WINDOW_START_HOUR = "reminder_window_start_hour"
+        const val KEY_REMINDER_WINDOW_START_MINUTE = "reminder_window_start_minute"
+        const val KEY_REMINDER_WINDOW_END_HOUR = "reminder_window_end_hour"
+        const val KEY_REMINDER_WINDOW_END_MINUTE = "reminder_window_end_minute"
+        const val KEY_REMINDER_INTERVAL_MIN_HOURS = "reminder_interval_min_hours"
+        const val KEY_REMINDER_INTERVAL_MAX_HOURS = "reminder_interval_max_hours"
         const val KEY_AUTOSPEAK = "auto_speak_on_reveal"
         const val KEY_AUTO_ADD_SEEN = "auto_add_seen_to_review"
+        const val KEY_GAME_MATCHING_ENABLED = "game_matching_enabled"
+        const val KEY_GAME_CLOZE_ENABLED = "game_cloze_enabled"
+        const val KEY_GAME_RECENT_ENABLED = "game_recent_enabled"
+        const val KEY_GAME_REVERSE_RECALL_ENABLED = "game_reverse_recall_enabled"
+        const val KEY_NEXT_GAME_MODE_INDEX = "next_game_mode_index"
+        const val KEY_GAME_COVERAGE_CURSOR = "game_coverage_cursor"
         const val KEY_TTS_WORD = "tts_word_repeat"
         const val KEY_TTS_MEANING = "tts_meaning_repeat"
         const val KEY_TTS_EXAMPLE = "tts_example_repeat"

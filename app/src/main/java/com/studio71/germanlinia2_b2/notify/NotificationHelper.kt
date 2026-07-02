@@ -14,6 +14,7 @@ import com.studio71.germanlinia2_b2.R
 object NotificationHelper {
 
     const val CHANNEL_ID = "review_reminders"
+    const val EXTRA_OPEN_ROUTE = "open_route"
     private const val NOTIFICATION_ID = 1001
 
     fun ensureChannel(context: Context) {
@@ -57,6 +58,47 @@ object NotificationHelper {
             .build()
 
         // POST_NOTIFICATIONS is checked by the caller / handled gracefully by the system.
+        try {
+            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        } catch (_: SecurityException) {
+            // Permission not granted yet; silently skip.
+        }
+    }
+
+    fun showGameReminder(
+        context: Context,
+        dueCount: Int,
+        modeRoute: String,
+        modeTitle: String
+    ) {
+        ensureChannel(context)
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra(EXTRA_OPEN_ROUTE, "game/$modeRoute")
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            1,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val text = if (dueCount > 0) {
+            "$modeTitle - $dueCount fallige Worter warten."
+        } else {
+            "$modeTitle - Zeit fur eine kurze Wiederholung."
+        }
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_review)
+            .setContentTitle("Lernspiel starten")
+            .setContentText(text)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
         } catch (_: SecurityException) {

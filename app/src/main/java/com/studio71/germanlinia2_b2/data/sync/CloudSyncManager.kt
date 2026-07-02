@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
 import com.studio71.germanlinia2_b2.data.local.AppDatabase
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
+import com.studio71.germanlinia2_b2.data.local.SeenEventEntity
 import com.studio71.germanlinia2_b2.data.local.WordCommentEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarkEntity
 import com.studio71.germanlinia2_b2.data.settings.SettingsStore
@@ -69,6 +70,7 @@ class CloudSyncManager(
     private val progressDao = db.progressDao()
     private val wordMarkDao = db.wordMarkDao()
     private val wordCommentDao = db.wordCommentDao()
+    private val seenEventDao = db.seenEventDao()
     private val googleApiAvailability = GoogleApiAvailability.getInstance()
 
     private val firebaseConfigured = FirebaseApp.getApps(appContext).isNotEmpty()
@@ -195,7 +197,7 @@ class CloudSyncManager(
             it.copy(
                 statusMessage = "Sync fertig: ${finalSnapshot.progress.size} Fortschritt, " +
                     "${finalSnapshot.marks.size} Markierungen, ${finalSnapshot.comments.size} Kommentare, " +
-                    "${finalSnapshot.ttsHistory.size} TTS-Verlauf.",
+                    "${finalSnapshot.ttsHistory.size} TTS-Verlauf, ${finalSnapshot.seenEvents.size} Seen-Events.",
                 errorMessage = null,
                 lastSyncedAtEpochMs = now
             )
@@ -245,6 +247,7 @@ class CloudSyncManager(
             progress = progressDao.getAll(),
             marks = wordMarkDao.getAll(),
             comments = wordCommentDao.getAll(),
+            seenEvents = seenEventDao.getAll(),
             ttsHistory = settingsStore.state.value.ttsHistory
         )
     }
@@ -254,10 +257,12 @@ class CloudSyncManager(
             progressDao.deleteAll()
             wordMarkDao.deleteAll()
             wordCommentDao.deleteAll()
+            seenEventDao.deleteAll()
 
             if (snapshot.progress.isNotEmpty()) progressDao.upsertAll(snapshot.progress)
             if (snapshot.marks.isNotEmpty()) wordMarkDao.upsertAll(snapshot.marks)
             if (snapshot.comments.isNotEmpty()) wordCommentDao.upsertAll(snapshot.comments)
+            if (snapshot.seenEvents.isNotEmpty()) seenEventDao.upsertAll(snapshot.seenEvents)
         }
         settingsStore.replaceTtsHistoryFromSync(snapshot.ttsHistory)
     }
@@ -326,10 +331,17 @@ class CloudSyncManager(
             .sortedByDescending { it.playedAtEpochMs }
             .take(TTS_HISTORY_LIMIT)
 
+        val mergedSeenEvents = (remote.seenEvents + local.seenEvents)
+            .associateBy { it.eventId }
+            .values
+            .sortedByDescending { it.seenAtEpochMs }
+            .take(SEEN_EVENT_LIMIT)
+
         return LocalSnapshot(
             progress = mergedProgress,
             marks = mergedMarks,
             comments = mergedComments,
+            seenEvents = mergedSeenEvents,
             ttsHistory = mergedHistory
         )
     }
@@ -402,6 +414,7 @@ class CloudSyncManager(
         val progress: List<ProgressEntity>,
         val marks: List<WordMarkEntity>,
         val comments: List<WordCommentEntity>,
+        val seenEvents: List<SeenEventEntity>,
         val ttsHistory: List<TtsHistoryEntry>
     )
 
@@ -410,12 +423,14 @@ class CloudSyncManager(
         val progress: Map<String, ProgressEntity>,
         val marks: Map<String, WordMarkEntity>,
         val comments: Map<String, WordCommentEntity>,
+        val seenEvents: List<SeenEventEntity>,
         val ttsHistory: List<TtsHistoryEntry>
     ) {
         fun toLocal(): LocalSnapshot = LocalSnapshot(
             progress = progress.values.toList(),
             marks = marks.values.toList(),
             comments = comments.values.toList(),
+            seenEvents = seenEvents.sortedByDescending { it.seenAtEpochMs }.take(SEEN_EVENT_LIMIT),
             ttsHistory = ttsHistory.sortedByDescending { it.playedAtEpochMs }.take(TTS_HISTORY_LIMIT)
         )
 
@@ -437,6 +452,13 @@ class CloudSyncManager(
                     "wordId" to c.wordId,
                     "comment" to c.comment,
                     "updatedAtEpochMs" to c.updatedAtEpochMs
+                )
+            },
+            "seenEvents" to seenEvents.map { s ->
+                mapOf(
+                    "eventId" to s.eventId,
+                    "wordId" to s.wordId,
+                    "seenAtEpochMs" to s.seenAtEpochMs
                 )
             },
             "ttsHistory" to ttsHistory.map { h ->
@@ -465,6 +487,7 @@ class CloudSyncManager(
                     progress = local.progress.associateBy { it.wordId },
                     marks = local.marks.associateBy { it.wordId },
                     comments = local.comments.associateBy { it.wordId },
+                    seenEvents = local.seenEvents.sortedByDescending { it.seenAtEpochMs }.take(SEEN_EVENT_LIMIT),
                     ttsHistory = local.ttsHistory.sortedByDescending { it.playedAtEpochMs }.take(TTS_HISTORY_LIMIT)
                 )
 
@@ -505,6 +528,18 @@ class CloudSyncManager(
                     )
                 }
 
+                val seenEvents = data.listValue("seenEvents").mapNotNull { raw ->
+                    val map = raw as? Map<*, *> ?: return@mapNotNull null
+                    val eventId = map.string("eventId") ?: return@mapNotNull null
+                    val wordId = map.string("wordId") ?: return@mapNotNull null
+                    SeenEventEntity(
+                        eventId = eventId,
+                        wordId = wordId,
+                        seenAtEpochMs = map.long("seenAtEpochMs") ?: 0L
+                    )
+                }.sortedByDescending { it.seenAtEpochMs }
+                    .take(SEEN_EVENT_LIMIT)
+
                 val history = data.listValue("ttsHistory").mapNotNull { raw ->
                     val map = raw as? Map<*, *> ?: return@mapNotNull null
                     val id = map.long("id") ?: return@mapNotNull null
@@ -531,6 +566,7 @@ class CloudSyncManager(
                     progress = progressMap,
                     marks = marksMap,
                     comments = commentsMap,
+                    seenEvents = seenEvents,
                     ttsHistory = history
                 )
             }
@@ -542,6 +578,7 @@ class CloudSyncManager(
         const val SYNC_COLLECTION = "sync"
         const val SYNC_DOC = "main"
         const val TTS_HISTORY_LIMIT = 20
+        const val SEEN_EVENT_LIMIT = 5000
 
         // Firestore database id. Keep "(default)" if the project's default DB is
         // Native mode. If the default DB is locked to Datastore Mode, create a

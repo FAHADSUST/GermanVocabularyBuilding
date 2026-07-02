@@ -6,6 +6,8 @@ import com.studio71.germanlinia2_b2.data.image.GoogleImageSearchClient
 import com.studio71.germanlinia2_b2.data.local.AppDatabase
 import com.studio71.germanlinia2_b2.data.local.DailyStatEntity
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
+import com.studio71.germanlinia2_b2.data.local.SeenEventEntity
+import com.studio71.germanlinia2_b2.data.local.SeenEventItem
 import com.studio71.germanlinia2_b2.data.local.SeenWordEntity
 import com.studio71.germanlinia2_b2.data.local.SeenWordItem
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
@@ -18,6 +20,7 @@ import com.studio71.germanlinia2_b2.domain.srs.SrsScheduler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
+import java.util.UUID
 
 /**
  * Single entry point for the UI layer. Wraps the DAOs, the CSV seeding,
@@ -34,6 +37,7 @@ class VocabularyRepository(
     private val statsDao = db.statsDao()
     private val wordMarkDao = db.wordMarkDao()
     private val seenWordDao = db.seenWordDao()
+    private val seenEventDao = db.seenEventDao()
     private val wordCommentDao = db.wordCommentDao()
     private val wordImageDao = db.wordImageDao()
 
@@ -87,6 +91,19 @@ class VocabularyRepository(
         query = query,
         sortMode = sortMode.key
     )
+
+    /** Full source-order snapshot used by game rotation coverage. */
+    suspend fun getAllWordsSourceOrder(): List<VocabularyEntity> =
+        vocabularyDao.getFiltered(
+            level = null,
+            book = null,
+            chapter = null,
+            pos = null,
+            grammarGroup = null,
+            marker = null,
+            query = "",
+            sortMode = SortMode.SOURCE.key
+        )
 
     fun observeLevels() = vocabularyDao.observeLevels()
     fun observeBooks() = vocabularyDao.observeBooks()
@@ -171,6 +188,7 @@ class VocabularyRepository(
     // ---- Progress / SRS ----
 
     fun observeProgress(wordId: String): Flow<ProgressEntity?> = progressDao.observeById(wordId)
+    suspend fun getProgress(wordId: String): ProgressEntity? = progressDao.getById(wordId)
     fun observeDue(): Flow<List<VocabularyEntity>> = progressDao.observeDue(today())
     fun observeDueCount(): Flow<Int> = progressDao.observeDueCount(today())
     fun observeLearnedCount(): Flow<Int> = progressDao.observeLearnedCount()
@@ -197,16 +215,26 @@ class VocabularyRepository(
      */
     suspend fun recordWordSeen(wordId: String, autoAddToReview: Boolean) {
         val today = today()
+        val seenAt = System.currentTimeMillis()
         val inserted = seenWordDao.insert(
             SeenWordEntity(
                 date = today,
                 wordId = wordId,
-                seenAtEpochMs = System.currentTimeMillis()
+                seenAtEpochMs = seenAt
             )
         )
         if (inserted != -1L) {
             bumpStat(today, seen = 1)
         }
+
+        seenEventDao.insert(
+            SeenEventEntity(
+                eventId = UUID.randomUUID().toString(),
+                wordId = wordId,
+                seenAtEpochMs = seenAt
+            )
+        )
+        SyncStateTracker.markLocalMutation(appContext)
 
         if (autoAddToReview && progressDao.getById(wordId) == null) {
             // Auto-add starts at the "day 2" reminder, then follows 3/7/15/30.
@@ -274,6 +302,14 @@ class VocabularyRepository(
     fun observeSeenWords(date: Long): Flow<List<SeenWordItem>> = seenWordDao.observeByDate(date)
 
     fun observeDistinctSeenWordsCount(): Flow<Int> = seenWordDao.observeDistinctWordCount()
+
+    suspend fun getRecentSeenWords(limit: Int = 50): List<SeenWordItem> =
+        seenWordDao.getRecent(limit.coerceIn(1, 500))
+
+    suspend fun getRecentSeenEvents(limit: Int = 50): List<SeenEventItem> =
+        seenEventDao.getRecent(limit.coerceIn(1, 500))
+
+    suspend fun getAllSeenEvents(): List<SeenEventEntity> = seenEventDao.getAll()
 
     fun observeComment(wordId: String): Flow<String> =
         wordCommentDao.observeComment(wordId).map { it.orEmpty() }

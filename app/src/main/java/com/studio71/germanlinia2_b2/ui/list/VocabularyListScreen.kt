@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Stop
@@ -88,6 +89,7 @@ fun VocabularyListScreen(
     onOpenCard: (String) -> Unit,
     onOpenStats: () -> Unit,
     onStartReview: () -> Unit,
+    onStartGame: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
     val words by viewModel.words.collectAsStateWithLifecycle()
@@ -131,6 +133,9 @@ fun VocabularyListScreen(
                             Icon(Icons.Default.Refresh, contentDescription = "Wiederholen")
                         }
                     }
+                    IconButton(onClick = onStartGame) {
+                        Icon(Icons.Default.SportsEsports, contentDescription = "Lernspiel")
+                    }
                     IconButton(onClick = onOpenStats) {
                         Icon(Icons.Default.BarChart, contentDescription = "Statistik")
                     }
@@ -165,30 +170,34 @@ fun VocabularyListScreen(
         Column(Modifier.fillMaxSize().padding(padding)) {
 
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     "Gelernt: $learnedCount   ·   Heute fällig: $dueCount",
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.weight(1f)
                 )
                 Button(
                     onClick = onStartReview,
                     enabled = dueCount > 0,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                    contentPadding = PaddingValues(horizontal = 5.dp, vertical = 2.dp)
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = null, Modifier.size(18.dp))
-                    Text(" Wiederholen ($dueCount)")
+                    Icon(Icons.Default.Refresh, contentDescription = null, Modifier.size(14.dp))
+                    Text(" Wiederholen ($dueCount)", style = MaterialTheme.typography.labelSmall,)
                 }
+                /*IconButton(onClick = onStartGame) {
+                    Icon(Icons.Default.SportsEsports, contentDescription = "Lernspiel")
+                }*/
             }
 
             OutlinedTextField(
                 value = query,
                 onValueChange = viewModel::onQueryChange,
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                placeholder = { Text("Suchen (Wort, EN, DE) …") },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp).height(47.dp),
+                placeholder = { Text("Suchen (Wort, EN, DE) …",
+                        style = MaterialTheme.typography.labelSmall) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {

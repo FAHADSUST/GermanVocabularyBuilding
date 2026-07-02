@@ -14,6 +14,8 @@ import com.studio71.germanlinia2_b2.data.settings.SettingsStore
 import com.studio71.germanlinia2_b2.data.sync.CloudSyncManager
 import com.studio71.germanlinia2_b2.ui.card.WordCardScreen
 import com.studio71.germanlinia2_b2.ui.card.WordCardViewModel
+import com.studio71.germanlinia2_b2.ui.game.GameScreen
+import com.studio71.germanlinia2_b2.ui.game.GameViewModel
 import com.studio71.germanlinia2_b2.ui.list.VocabularyListScreen
 import com.studio71.germanlinia2_b2.ui.list.VocabularyListViewModel
 import com.studio71.germanlinia2_b2.ui.review.ReviewScreen
@@ -33,17 +35,32 @@ object Routes {
     const val SEEN_DATES = "seen_dates"
     const val SEEN_WORDS = "seen_words/{epochDay}"
     const val REVIEW = "review"
+    const val GAME = "game/{mode}"
     const val SETTINGS = "settings"
     fun card(wordId: String) = "card/$wordId"
     fun seenWords(epochDay: Long) = "seen_words/$epochDay"
+    fun game(mode: String) = "game/$mode"
 }
 
 @Composable
-fun AppNav(repository: VocabularyRepository, settings: SettingsStore, cloudSync: CloudSyncManager) {
+fun AppNav(
+    repository: VocabularyRepository,
+    settings: SettingsStore,
+    cloudSync: CloudSyncManager,
+    startDestination: String = Routes.LIST
+) {
     val navController = rememberNavController()
     val appSettings by settings.state.collectAsStateWithLifecycle()
+    val normalizedStart = when {
+        startDestination == Routes.LIST -> Routes.LIST
+        startDestination == Routes.REVIEW -> Routes.REVIEW
+        startDestination == Routes.SETTINGS -> Routes.SETTINGS
+        startDestination == Routes.STATS -> Routes.STATS
+        startDestination.startsWith("game/") -> startDestination
+        else -> Routes.LIST
+    }
 
-    NavHost(navController = navController, startDestination = Routes.LIST) {
+    NavHost(navController = navController, startDestination = normalizedStart) {
 
         composable(Routes.LIST) {
             val vm: VocabularyListViewModel =
@@ -53,6 +70,7 @@ fun AppNav(repository: VocabularyRepository, settings: SettingsStore, cloudSync:
                 onOpenCard = { wordId -> navController.navigate(Routes.card(wordId)) },
                 onOpenStats = { navController.navigate(Routes.STATS) },
                 onStartReview = { navController.navigate(Routes.REVIEW) },
+                onStartGame = { navController.navigate(Routes.game("matching")) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) }
             )
         }
@@ -113,6 +131,21 @@ fun AppNav(repository: VocabularyRepository, settings: SettingsStore, cloudSync:
                 autoSpeakOnReveal = appSettings.autoSpeakOnReveal,
                 reviewAsList = appSettings.reviewAsList,
                 onToggleReviewAsList = { settings.setReviewAsList(it) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Routes.GAME,
+            arguments = listOf(navArgument("mode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val mode = backStackEntry.arguments?.getString("mode").orEmpty()
+            val vm: GameViewModel = viewModel(
+                key = "game-$mode",
+                factory = GameViewModel.Factory(repository, settings, mode)
+            )
+            GameScreen(
+                viewModel = vm,
                 onBack = { navController.popBackStack() }
             )
         }

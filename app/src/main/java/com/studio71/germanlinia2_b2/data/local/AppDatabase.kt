@@ -14,10 +14,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         DailyStatEntity::class,
         WordMarkEntity::class,
         SeenWordEntity::class,
+        SeenEventEntity::class,
         WordCommentEntity::class,
         WordImageEntity::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -26,6 +27,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun statsDao(): StatsDao
     abstract fun wordMarkDao(): WordMarkDao
     abstract fun seenWordDao(): SeenWordDao
+    abstract fun seenEventDao(): SeenEventDao
     abstract fun wordCommentDao(): WordCommentDao
     abstract fun wordImageDao(): WordImageDao
 
@@ -57,6 +59,24 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Adds append-only seen-event history for "last 50 events" review + sync. */
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `seen_event` (
+                        `eventId` TEXT NOT NULL,
+                        `wordId` TEXT NOT NULL,
+                        `seenAtEpochMs` INTEGER NOT NULL,
+                        PRIMARY KEY(`eventId`)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_seen_event_wordId` ON `seen_event` (`wordId`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_seen_event_seenAtEpochMs` ON `seen_event` (`seenAtEpochMs`)")
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -67,7 +87,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "german_vocab.db"
                 )
-                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17)
+                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
                     .fallbackToDestructiveMigration(true)
                     .build()
                     .also { INSTANCE = it }
