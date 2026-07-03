@@ -116,11 +116,11 @@ data class AppSettings(
     val ttsLoopCount: Int = 2,
     /** Pause (milliseconds) inserted between two spoken parts. */
     val ttsGapMs: Int = 350,
-    /** Insert a longer recall pause after every N spoken words. */
+    /** After every N detailed words, replay them as headwords only for self-recall. */
     val ttsRecallPauseEnabled: Boolean = false,
-    /** Number of words between recall pauses. */
+    /** Number of detailed words in one recall batch. */
     val ttsRecallPauseEveryWords: Int = 10,
-    /** Recall pause duration in milliseconds. */
+    /** Pause after each replayed headword in milliseconds. */
     val ttsRecallPauseMs: Int = 5000,
     /** Playback speech rate (1.0 = normal). */
     val ttsSpeechRate: Float = 1.0f,

@@ -128,25 +128,23 @@ class TtsPlaybackService : Service() {
         TtsController.publishState(TtsPlaybackState.PLAYING)
         playbackJob = scope.launch {
             var i = startIndex
-            var wordsSpokenSinceStart = 0
+            val detailedWindow = mutableListOf<Int>()
             while (i in playlist.indices && isActive) {
                 currentIndex = i
-                playWord(playlist[i])
+                val wordIndex = i
+                playWord(playlist[wordIndex], wordIndex)
                 i++
-                wordsSpokenSinceStart++
-                maybeInsertRecallPause(
-                    wordsSpokenSinceStart = wordsSpokenSinceStart,
-                    hasNextWord = i in playlist.indices
-                )
+                detailedWindow += wordIndex
+                maybePlayRecallBatch(detailedWindow)
             }
             if (isActive) finishPlayback()
         }
     }
 
-    private suspend fun playWord(word: VocabularyEntity) {
-        currentIndex = playlist.indexOfFirst { it.id == word.id }.let { if (it >= 0) it else currentIndex }
-        TtsController.publishCurrent(currentIndex, word.id)
-        updateHistoryProgress(currentIndex)
+    private suspend fun playWord(word: VocabularyEntity, index: Int) {
+        currentIndex = index
+        TtsController.publishCurrent(index, word.id)
+        updateHistoryProgress(index)
         updateNotification()
         val s = settings
         val gap = s.ttsGapMs.toLong()
@@ -211,17 +209,35 @@ class TtsPlaybackService : Service() {
         paused.first { !it }
     }
 
-    private suspend fun maybeInsertRecallPause(
-        wordsSpokenSinceStart: Int,
-        hasNextWord: Boolean
-    ) {
-        if (!hasNextWord) return
+    private suspend fun maybePlayRecallBatch(window: MutableList<Int>) {
         val s = settings
-        if (!s.ttsRecallPauseEnabled) return
+        if (!s.ttsRecallPauseEnabled) {
+            window.clear()
+            return
+        }
         val interval = s.ttsRecallPauseEveryWords.coerceAtLeast(1)
-        if (wordsSpokenSinceStart % interval != 0) return
+        if (window.size < interval) return
 
-        var remaining = s.ttsRecallPauseMs.toLong().coerceAtLeast(0L)
+        // Replay only the just-finished chunk as headwords for active recall.
+        val batch = window.toList()
+        window.clear()
+        val recallPauseMs = s.ttsRecallPauseMs.toLong().coerceAtLeast(0L)
+        for (index in batch) {
+            if (playbackJob?.isActive != true) return
+            val word = playlist.getOrNull(index) ?: continue
+            currentIndex = index
+            TtsController.publishCurrent(index, word.id)
+            updateHistoryProgress(index)
+            updateNotification()
+            awaitResumed()
+            if (playbackJob?.isActive != true) return
+            speakAndWait(Step(word.displayWord, Locale.GERMAN))
+            waitWithPauseSupport(recallPauseMs)
+        }
+    }
+
+    private suspend fun waitWithPauseSupport(totalMs: Long) {
+        var remaining = totalMs.coerceAtLeast(0L)
         while (remaining > 0 && playbackJob?.isActive == true) {
             awaitResumed()
             val chunk = minOf(remaining, 250L)
@@ -425,7 +441,7 @@ class TtsPlaybackService : Service() {
         val entry = historyEntry ?: return
         val safeIndex = index.coerceAtLeast(entry.startIndex)
         historyEntry = entry.copy(
-            lastIndex = safeIndex,
+            lastIndex = maxOf(entry.lastIndex, safeIndex),
             totalCount = playlist.size
         )
     }

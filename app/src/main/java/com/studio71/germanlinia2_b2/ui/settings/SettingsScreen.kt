@@ -489,21 +489,21 @@ fun SettingsScreen(
                     HorizontalDivider()
 
                     SettingSwitchRow(
-                        title = "Denkpause aktivieren",
-                        subtitle = "Nach jedem Wort-Intervall eine längere Pause zum Erinnern",
+                        title = "Erinnerungsrunde aktivieren",
+                        subtitle = "Nach jedem Intervall werden diese Wörter nur als Kopfwort wiederholt",
                         checked = state.ttsRecallPauseEnabled,
                         onCheckedChange = settings::setTtsRecallPauseEnabled
                     )
                     StepperRow(
                         title = "Intervall (Wörter)",
-                        subtitle = "Nach wie vielen Wörtern eine Denkpause kommt",
+                        subtitle = "Nach wie vielen detaillierten Wörtern die Erinnerungsrunde startet",
                         value = state.ttsRecallPauseEveryWords,
                         onChange = settings::setTtsRecallPauseEveryWords,
                         min = 1
                     )
                     StepperRow(
-                        title = "Denkpause (Sek.)",
-                        subtitle = "Dauer der Pause, z. B. 5 oder 10 Sekunden",
+                        title = "Pause je Wort (Sek.)",
+                        subtitle = "In der Erinnerungsrunde: Wort sprechen, dann diese Pause",
                         value = (state.ttsRecallPauseMs / 1000).coerceAtLeast(1),
                         onChange = { seconds -> settings.setTtsRecallPauseMs(seconds * 1000) },
                         min = 1
