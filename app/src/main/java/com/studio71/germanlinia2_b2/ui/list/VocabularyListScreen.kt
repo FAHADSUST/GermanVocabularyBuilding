@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -76,6 +78,7 @@ import com.studio71.germanlinia2_b2.ui.card.CardDeck
 import com.studio71.germanlinia2_b2.ui.components.FilterDropdown
 import com.studio71.germanlinia2_b2.ui.components.MarkerFilterChip
 import com.studio71.germanlinia2_b2.ui.components.MarkerStar
+import com.studio71.germanlinia2_b2.ui.components.label
 import com.studio71.germanlinia2_b2.ui.tts.TtsController
 import com.studio71.germanlinia2_b2.ui.tts.TtsPlaybackState
 import com.studio71.germanlinia2_b2.ui.tts.TtsSessionSeed
@@ -255,7 +258,8 @@ fun VocabularyListScreen(
                             onOpenCard(word.id)
                         },
                         onLongClick = { TtsController.start(context, words, index, sessionSeed) },
-                        onSpeak = { speaker.speak(word.word) }
+                        onSpeak = { speaker.speak(word.word) },
+                        onMarkerChange = { viewModel.setMarker(word.id, it) }
                     )
                 }
             }
@@ -457,7 +461,8 @@ private fun WordListItem(
     isPlaying: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onSpeak: () -> Unit
+    onSpeak: () -> Unit,
+    onMarkerChange: (WordMarker) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -497,9 +502,11 @@ private fun WordListItem(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    if (marker != WordMarker.NONE) {
-                        MarkerStar(marker, modifier = Modifier.padding(start = 6.dp))
-                    }
+                    MarkerMenuButton(
+                        current = marker,
+                        onSelect = onMarkerChange,
+                        modifier = Modifier.padding(start = 6.dp)
+                    )
                 }
                 Text(
                     word.english,
@@ -519,6 +526,58 @@ private fun WordListItem(
             }
             IconButton(onClick = onSpeak) {
                 Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Vorlesen")
+            }
+        }
+    }
+}
+
+@Composable
+private fun MarkerMenuButton(
+    current: WordMarker,
+    onSelect: (WordMarker) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = modifier) {
+        if (current == WordMarker.NONE) {
+            Icon(
+                Icons.Outlined.StarOutline,
+                contentDescription = "Markierung auswählen",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(16.dp).clickable { expanded = true }
+            )
+        } else {
+            MarkerStar(
+                marker = current,
+                size = 16.dp,
+                modifier = Modifier.size(16.dp).clickable { expanded = true }
+            )
+        }
+
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        Icons.Outlined.StarOutline,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                text = { Text(WordMarker.NONE.label) },
+                onClick = {
+                    onSelect(WordMarker.NONE)
+                    expanded = false
+                }
+            )
+            listOf(WordMarker.HARD, WordMarker.MEDIUM, WordMarker.EASY).forEach { marker ->
+                DropdownMenuItem(
+                    leadingIcon = { MarkerStar(marker = marker, size = 18.dp) },
+                    text = { Text(marker.label) },
+                    onClick = {
+                        onSelect(marker)
+                        expanded = false
+                    }
+                )
             }
         }
     }

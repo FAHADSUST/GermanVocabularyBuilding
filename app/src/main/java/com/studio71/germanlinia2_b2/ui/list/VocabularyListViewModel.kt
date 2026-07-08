@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class FilterOptions(
     val levels: List<String> = emptyList(),
@@ -72,6 +73,10 @@ class VocabularyListViewModel(
     fun setFilter(filter: VocabularyFilter) { _filter.value = filter }
     fun setSortMode(mode: SortMode) { _sortMode.value = mode }
     fun clearFilters() { _filter.value = VocabularyFilter() }
+
+    fun setMarker(wordId: String, marker: WordMarker) {
+        viewModelScope.launch { repo.setMarker(wordId, marker) }
+    }
 
     class Factory(private val repo: VocabularyRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

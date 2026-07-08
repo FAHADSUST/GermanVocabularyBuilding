@@ -87,7 +87,7 @@ fun WordDetail(
         }
 
         when {
-            imageState.imageUrl != null && !imageLoadFailed -> {
+            /*imageState.imageUrl != null && !imageLoadFailed -> {
                 ElevatedCard(Modifier.fillMaxWidth()) {
                     AsyncImage(
                         model = imageState.imageUrl,
@@ -130,7 +130,7 @@ fun WordDetail(
                         )
                     }
                 }
-            }
+            }*/
 
             imageState.message.isNotBlank() -> {
                 InfoCard {
@@ -170,7 +170,7 @@ fun WordDetail(
                     Text(
                         "„${word.exampleDe}“",
                         modifier = pressModifier,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontStyle = FontStyle.Italic,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
