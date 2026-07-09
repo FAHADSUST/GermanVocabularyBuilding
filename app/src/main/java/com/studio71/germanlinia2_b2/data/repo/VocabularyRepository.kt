@@ -43,20 +43,11 @@ class VocabularyRepository(
 
     fun today(): Long = LocalDate.now().toEpochDay()
 
-    /** Import the bundled CSV the first time the app runs. */
+    /** Import and sync the bundled CSV to make sure updates/mnemonics are pulled in immediately. */
     suspend fun seedIfEmpty() {
-        if (vocabularyDao.count() == 0) {
-            val items = CsvVocabularyImporter.loadFromAssets(appContext)
-            if (items.isNotEmpty()) vocabularyDao.insertAll(items)
-        } else if (vocabularyDao.countMissingMemoryTips() > 0) {
-            // Existing install (post-migration): backfill memory tips from the bundled
-            // CSV, updating ONLY that column so progress/comments/marks stay intact.
-            val items = CsvVocabularyImporter.loadFromAssets(appContext)
-            items.forEach { item ->
-                if (item.memoryTips.isNotBlank()) {
-                    vocabularyDao.updateMemoryTips(item.id, item.memoryTips)
-                }
-            }
+        val items = CsvVocabularyImporter.loadFromAssets(appContext)
+        if (items.isNotEmpty()) {
+            vocabularyDao.insertAll(items)
         }
     }
 
