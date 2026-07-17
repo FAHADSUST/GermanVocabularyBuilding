@@ -83,6 +83,8 @@ import com.studio71.germanlinia2_b2.ui.tts.TtsController
 import com.studio71.germanlinia2_b2.ui.tts.TtsPlaybackState
 import com.studio71.germanlinia2_b2.ui.tts.TtsSessionSeed
 import com.studio71.germanlinia2_b2.ui.tts.rememberGermanSpeaker
+import com.studio71.germanlinia2_b2.ui.theme.getAnnotatedDisplayWord
+import com.studio71.germanlinia2_b2.ui.theme.highlightGermanArticles
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -494,7 +496,7 @@ private fun WordListItem(
                             modifier = Modifier.size(18.dp).padding(end = 4.dp)
                         )
                     }
-                    Text(word.displayWord, style = MaterialTheme.typography.titleMedium)
+                    Text(word.getAnnotatedDisplayWord(), style = MaterialTheme.typography.titleMedium)
                     if (word.posTinyLabel.isNotBlank()) {
                         Text(
                             "  ${word.posTinyLabel}",

@@ -122,6 +122,8 @@ data class AppSettings(
     val ttsRecallPauseEveryWords: Int = 10,
     /** Pause after each replayed headword in milliseconds. */
     val ttsRecallPauseMs: Int = 5000,
+    /** In the recall round, speak each word's meaning after the self-recall pause. */
+    val ttsRecallSpeakMeaning: Boolean = false,
     /** Playback speech rate (1.0 = normal). */
     val ttsSpeechRate: Float = 1.0f,
     /** Active app theme preset. */
@@ -187,6 +189,7 @@ class SettingsStore(context: Context) {
         ttsRecallPauseEnabled = prefs.getBoolean(KEY_TTS_RECALL_PAUSE_ENABLED, false),
         ttsRecallPauseEveryWords = prefs.getInt(KEY_TTS_RECALL_PAUSE_EVERY_WORDS, 10),
         ttsRecallPauseMs = prefs.getInt(KEY_TTS_RECALL_PAUSE_MS, 5000),
+        ttsRecallSpeakMeaning = prefs.getBoolean(KEY_TTS_RECALL_SPEAK_MEANING, false),
         ttsSpeechRate = prefs.getFloat(KEY_TTS_RATE, 1.0f),
         themePreset = ThemePreset.fromStorage(prefs.getString(KEY_THEME, ThemePreset.SYSTEM.storageValue)),
         themeCustomPrimary = prefs.getString(KEY_THEME_CUSTOM_PRIMARY, DEFAULT_CUSTOM_PRIMARY) ?: DEFAULT_CUSTOM_PRIMARY,
@@ -358,6 +361,11 @@ class SettingsStore(context: Context) {
         _state.value = _state.value.copy(ttsRecallPauseMs = v)
     }
 
+    fun setTtsRecallSpeakMeaning(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_TTS_RECALL_SPEAK_MEANING, enabled).apply()
+        _state.value = _state.value.copy(ttsRecallSpeakMeaning = enabled)
+    }
+
     fun setTtsSpeechRate(value: Float) {
         val v = value.coerceIn(0.5f, 2.0f)
         prefs.edit().putFloat(KEY_TTS_RATE, v).apply()
@@ -495,6 +503,7 @@ class SettingsStore(context: Context) {
         const val KEY_TTS_RECALL_PAUSE_ENABLED = "tts_recall_pause_enabled"
         const val KEY_TTS_RECALL_PAUSE_EVERY_WORDS = "tts_recall_pause_every_words"
         const val KEY_TTS_RECALL_PAUSE_MS = "tts_recall_pause_ms"
+        const val KEY_TTS_RECALL_SPEAK_MEANING = "tts_recall_speak_meaning"
         const val KEY_TTS_RATE = "tts_speech_rate"
         const val KEY_THEME = "theme_preset"
         const val KEY_THEME_CUSTOM_PRIMARY = "theme_custom_primary"

@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalDate
+import com.studio71.germanlinia2_b2.ui.theme.highlightGermanArticles
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +82,7 @@ fun SeenWordsByDateScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
-                        Text(item.displayWord, style = MaterialTheme.typography.bodyLarge)
+                        Text(item.displayWord.highlightGermanArticles(), style = MaterialTheme.typography.bodyLarge)
                         if (item.english.isNotBlank()) {
                             Text(
                                 item.english,

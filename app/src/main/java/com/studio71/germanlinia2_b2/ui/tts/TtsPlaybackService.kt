@@ -222,6 +222,7 @@ class TtsPlaybackService : Service() {
         val batch = window.toList()
         window.clear()
         val recallPauseMs = s.ttsRecallPauseMs.toLong().coerceAtLeast(0L)
+        val gap = s.ttsGapMs.toLong().coerceAtLeast(0L)
         for (index in batch) {
             if (playbackJob?.isActive != true) return
             val word = playlist.getOrNull(index) ?: continue
@@ -233,6 +234,17 @@ class TtsPlaybackService : Service() {
             if (playbackJob?.isActive != true) return
             speakAndWait(Step(word.displayWord, Locale.GERMAN))
             waitWithPauseSupport(recallPauseMs)
+            // After the self-recall pause, optionally confirm by speaking the meaning.
+            if (s.ttsRecallSpeakMeaning) {
+                val meaning = word.english.ifBlank { word.germanMeaning }
+                if (meaning.isNotBlank()) {
+                    awaitResumed()
+                    if (playbackJob?.isActive != true) return
+                    val meaningLocale = if (word.english.isNotBlank()) Locale.ENGLISH else Locale.GERMAN
+                    speakAndWait(Step(meaning, meaningLocale))
+                    if (gap > 0) delay(gap)
+                }
+            }
         }
     }
 

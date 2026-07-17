@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
 import com.studio71.germanlinia2_b2.data.repo.WordImageState
+import com.studio71.germanlinia2_b2.ui.theme.getAnnotatedDisplayWord
 
 /**
  * Reusable compact word body (header + meaning/forms/grammar + synonyms/antonyms).
@@ -227,7 +228,7 @@ private fun HeaderCard(
                 ) { pressModifier ->
                     Text(
                         buildAnnotatedString {
-                            append(word.displayWord)
+                            append(word.getAnnotatedDisplayWord())
                             if (word.plural.isNotBlank()) {
                                 withStyle(SpanStyle(fontWeight = FontWeight.Normal)) {
                                     append("  (Pl. ${word.plural})")

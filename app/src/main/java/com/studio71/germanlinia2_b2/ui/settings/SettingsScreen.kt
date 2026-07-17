@@ -508,6 +508,12 @@ fun SettingsScreen(
                         onChange = { seconds -> settings.setTtsRecallPauseMs(seconds * 1000) },
                         min = 1
                     )
+                    SettingSwitchRow(
+                        title = "Bedeutung nach Pause",
+                        subtitle = "Nach der Pause wird die Bedeutung gesprochen, damit du dich prüfen kannst",
+                        checked = state.ttsRecallSpeakMeaning,
+                        onCheckedChange = settings::setTtsRecallSpeakMeaning
+                    )
                 }
             }
 

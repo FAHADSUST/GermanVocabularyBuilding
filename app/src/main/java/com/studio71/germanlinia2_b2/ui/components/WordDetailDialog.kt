@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.studio71.germanlinia2_b2.data.local.VocabularyEntity
 import com.studio71.germanlinia2_b2.data.repo.WordImageState
+import com.studio71.germanlinia2_b2.ui.theme.getAnnotatedDisplayWord
 
 /**
  * Quick popup details for a word reached from a synonym/antonym chip.
@@ -53,7 +54,7 @@ fun WordDetailDialog(
         title = {
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                    Text(word.displayWord, style = MaterialTheme.typography.titleLarge)
+                    Text(word.getAnnotatedDisplayWord(), style = MaterialTheme.typography.titleLarge)
                     if (word.posTinyLabel.isNotBlank()) {
                         Text(
                             word.posTinyLabel,
@@ -72,56 +73,6 @@ fun WordDetailDialog(
                 Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                when {
-                    imageState.imageUrl != null && !imageLoadFailed -> {
-                        ElevatedCard(Modifier.fillMaxWidth()) {
-                            AsyncImage(
-                                model = imageState.imageUrl,
-                                contentDescription = "Bedeutungsbild",
-                                modifier = Modifier.fillMaxWidth().height(160.dp),
-                                contentScale = ContentScale.Crop,
-                                onError = { imageLoadFailed = true }
-                            )
-                        }
-                    }
-
-                    imageLoadFailed -> {
-                        Text(
-                            "Bedeutungsbild konnte nicht dargestellt werden.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (onRetryImage != null) {
-                            TextButton(onClick = onRetryImage) {
-                                Text("Bild erneut suchen")
-                            }
-                        }
-                    }
-
-                    imageState.isLoading -> {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            CircularProgressIndicator(modifier = Modifier.height(18.dp), strokeWidth = 2.dp)
-                            Text(
-                                "Bedeutungsbild wird geladen …",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    imageState.message.isNotBlank() -> {
-                        Text(
-                            imageState.message,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (imageState.canRetry && onRetryImage != null) {
-                            TextButton(onClick = onRetryImage) {
-                                Text("Bild erneut suchen")
-                            }
-                        }
-                    }
-                }
 
                 LabeledLine("EN", word.english)
                 LabeledLine("DE", word.germanMeaning)
