@@ -94,8 +94,8 @@ data class AppSettings(
     val reminderWindowStartMinute: Int = 0,
     val reminderWindowEndHour: Int = 23,
     val reminderWindowEndMinute: Int = 0,
-    val reminderIntervalMinHours: Int = 2,
-    val reminderIntervalMaxHours: Int = 3,
+    val reminderIntervalMinHours: Int = 1,
+    val reminderIntervalMaxHours: Int = 1,
     val autoSpeakOnReveal: Boolean = false,
     val autoAddSeenToReview: Boolean = false,
     val gameMatchingEnabled: Boolean = true,
@@ -103,7 +103,10 @@ data class AppSettings(
     val gameRecentEnabled: Boolean = true,
     val gameReverseRecallEnabled: Boolean = false,
     val nextGameModeIndex: Int = 0,
+    /** Legacy single-cursor value kept for backward compatibility with older snapshots. */
     val gameCoverageCursor: Int = 0,
+    val gameSeenMarkedCoverageCursor: Int = 0,
+    val gameNewCoverageCursor: Int = 0,
     /** How often the headword itself is spoken within one loop. */
     val ttsWordRepeat: Int = 1,
     /** How often the (English) meaning is spoken within one loop. */
@@ -170,8 +173,8 @@ class SettingsStore(context: Context) {
         reminderWindowStartMinute = prefs.getInt(KEY_REMINDER_WINDOW_START_MINUTE, 0),
         reminderWindowEndHour = prefs.getInt(KEY_REMINDER_WINDOW_END_HOUR, 23),
         reminderWindowEndMinute = prefs.getInt(KEY_REMINDER_WINDOW_END_MINUTE, 0),
-        reminderIntervalMinHours = prefs.getInt(KEY_REMINDER_INTERVAL_MIN_HOURS, 2).coerceIn(1, 12),
-        reminderIntervalMaxHours = prefs.getInt(KEY_REMINDER_INTERVAL_MAX_HOURS, 3).coerceIn(1, 12),
+        reminderIntervalMinHours = prefs.getInt(KEY_REMINDER_INTERVAL_MIN_HOURS, 1).coerceIn(1, 12),
+        reminderIntervalMaxHours = prefs.getInt(KEY_REMINDER_INTERVAL_MAX_HOURS, 1).coerceIn(1, 12),
         autoSpeakOnReveal = prefs.getBoolean(KEY_AUTOSPEAK, false),
         autoAddSeenToReview = prefs.getBoolean(KEY_AUTO_ADD_SEEN, false),
         gameMatchingEnabled = prefs.getBoolean(KEY_GAME_MATCHING_ENABLED, true),
@@ -180,6 +183,11 @@ class SettingsStore(context: Context) {
         gameReverseRecallEnabled = prefs.getBoolean(KEY_GAME_REVERSE_RECALL_ENABLED, false),
         nextGameModeIndex = prefs.getInt(KEY_NEXT_GAME_MODE_INDEX, 0).coerceAtLeast(0),
         gameCoverageCursor = prefs.getInt(KEY_GAME_COVERAGE_CURSOR, 0).coerceAtLeast(0),
+        gameSeenMarkedCoverageCursor = prefs.getInt(
+            KEY_GAME_SEEN_MARKED_COVERAGE_CURSOR,
+            prefs.getInt(KEY_GAME_COVERAGE_CURSOR, 0)
+        ).coerceAtLeast(0),
+        gameNewCoverageCursor = prefs.getInt(KEY_GAME_NEW_COVERAGE_CURSOR, 0).coerceAtLeast(0),
         ttsWordRepeat = prefs.getInt(KEY_TTS_WORD, 1),
         ttsMeaningRepeat = prefs.getInt(KEY_TTS_MEANING, 1),
         ttsExampleRepeat = prefs.getInt(KEY_TTS_EXAMPLE, 1),
@@ -301,6 +309,18 @@ class SettingsStore(context: Context) {
         val value = cursor.coerceAtLeast(0)
         prefs.edit().putInt(KEY_GAME_COVERAGE_CURSOR, value).apply()
         _state.value = _state.value.copy(gameCoverageCursor = value)
+    }
+
+    fun setGameSeenMarkedCoverageCursor(cursor: Int) {
+        val value = cursor.coerceAtLeast(0)
+        prefs.edit().putInt(KEY_GAME_SEEN_MARKED_COVERAGE_CURSOR, value).apply()
+        _state.value = _state.value.copy(gameSeenMarkedCoverageCursor = value)
+    }
+
+    fun setGameNewCoverageCursor(cursor: Int) {
+        val value = cursor.coerceAtLeast(0)
+        prefs.edit().putInt(KEY_GAME_NEW_COVERAGE_CURSOR, value).apply()
+        _state.value = _state.value.copy(gameNewCoverageCursor = value)
     }
 
     fun setReviewAsList(enabled: Boolean) {
@@ -494,6 +514,8 @@ class SettingsStore(context: Context) {
         const val KEY_GAME_REVERSE_RECALL_ENABLED = "game_reverse_recall_enabled"
         const val KEY_NEXT_GAME_MODE_INDEX = "next_game_mode_index"
         const val KEY_GAME_COVERAGE_CURSOR = "game_coverage_cursor"
+        const val KEY_GAME_SEEN_MARKED_COVERAGE_CURSOR = "game_seen_marked_coverage_cursor"
+        const val KEY_GAME_NEW_COVERAGE_CURSOR = "game_new_coverage_cursor"
         const val KEY_TTS_WORD = "tts_word_repeat"
         const val KEY_TTS_MEANING = "tts_meaning_repeat"
         const val KEY_TTS_EXAMPLE = "tts_example_repeat"

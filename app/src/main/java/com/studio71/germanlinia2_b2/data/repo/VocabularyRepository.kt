@@ -96,6 +96,13 @@ class VocabularyRepository(
             sortMode = SortMode.SOURCE.key
         )
 
+    /** Word ids that are already known to the user via seeing details or manual marking. */
+    suspend fun getSeenOrMarkedWordIds(): Set<String> {
+        val seen = seenWordDao.getDistinctWordIds()
+        val marked = wordMarkDao.getMarkedWordIds()
+        return (seen + marked).toSet()
+    }
+
     fun observeLevels() = vocabularyDao.observeLevels()
     fun observeBooks() = vocabularyDao.observeBooks()
     fun observeChapters() = vocabularyDao.observeChapters()

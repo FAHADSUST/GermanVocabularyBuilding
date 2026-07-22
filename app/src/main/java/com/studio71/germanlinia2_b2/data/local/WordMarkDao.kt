@@ -24,6 +24,9 @@ interface WordMarkDao {
     @Query("SELECT * FROM word_mark")
     suspend fun getAll(): List<WordMarkEntity>
 
+    @Query("SELECT wordId FROM word_mark")
+    suspend fun getMarkedWordIds(): List<String>
+
     /** Live marker for a single word (null when unmarked). */
     @Query("SELECT marker FROM word_mark WHERE wordId = :wordId")
     fun observeMarker(wordId: String): Flow<Int?>

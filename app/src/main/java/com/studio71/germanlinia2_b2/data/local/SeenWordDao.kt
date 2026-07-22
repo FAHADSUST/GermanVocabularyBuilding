@@ -47,6 +47,9 @@ interface SeenWordDao {
     @Query("SELECT COUNT(DISTINCT wordId) FROM seen_word")
     fun observeDistinctWordCount(): Flow<Int>
 
+    @Query("SELECT DISTINCT wordId FROM seen_word")
+    suspend fun getDistinctWordIds(): List<String>
+
     @Query(
         """
         SELECT
