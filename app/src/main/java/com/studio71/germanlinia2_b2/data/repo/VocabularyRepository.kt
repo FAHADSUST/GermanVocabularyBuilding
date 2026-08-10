@@ -40,6 +40,7 @@ class VocabularyRepository(
     private val seenEventDao = db.seenEventDao()
     private val wordCommentDao = db.wordCommentDao()
     private val wordImageDao = db.wordImageDao()
+    private val activeGameDao = db.activeGameDao()
 
     fun today(): Long = LocalDate.now().toEpochDay()
 
@@ -47,6 +48,10 @@ class VocabularyRepository(
     suspend fun seedIfEmpty() {
         val items = CsvVocabularyImporter.loadFromAssets(appContext)
         if (items.isNotEmpty()) {
+            val dbCount = vocabularyDao.count()
+            if (dbCount != items.size) {
+                vocabularyDao.clearTable()
+            }
             vocabularyDao.insertAll(items)
         }
     }
@@ -308,6 +313,20 @@ class VocabularyRepository(
         seenEventDao.getRecent(limit.coerceIn(1, 500))
 
     suspend fun getAllSeenEvents(): List<SeenEventEntity> = seenEventDao.getAll()
+
+    // ---- Active Games (Unfinished Sessions) ----
+
+    fun observeActiveGames(): kotlinx.coroutines.flow.Flow<List<com.studio71.germanlinia2_b2.data.local.ActiveGameEntity>> = activeGameDao.observeAll()
+
+    suspend fun getActiveGame(id: String): com.studio71.germanlinia2_b2.data.local.ActiveGameEntity? = activeGameDao.getById(id)
+
+    suspend fun saveActiveGame(game: com.studio71.germanlinia2_b2.data.local.ActiveGameEntity) {
+        activeGameDao.upsert(game)
+    }
+
+    suspend fun deleteActiveGame(id: String) {
+        activeGameDao.delete(id)
+    }
 
     fun observeComment(wordId: String): Flow<String> =
         wordCommentDao.observeComment(wordId).map { it.orEmpty() }

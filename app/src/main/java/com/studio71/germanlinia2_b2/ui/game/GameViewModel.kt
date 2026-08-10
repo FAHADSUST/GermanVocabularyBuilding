@@ -61,11 +61,13 @@ data class GameUiState(
 class GameViewModel(
     private val repo: VocabularyRepository,
     private val settings: SettingsStore,
-    modeRoute: String
+    modeRoute: String,
+    private val sessionId: String? = null
 ) : ViewModel() {
 
     private val mode = GameMode.fromRoute(modeRoute)
     private var allWords: List<VocabularyEntity> = emptyList()
+    private var activeSessionId: String = sessionId ?: java.util.UUID.randomUUID().toString()
 
     private val _state = kotlinx.coroutines.flow.MutableStateFlow(
         GameUiState(mode = mode, title = mode.title)
@@ -78,6 +80,58 @@ class GameViewModel(
 
     private fun load() {
         viewModelScope.launch {
+            if (sessionId != null) {
+                val savedGame = repo.getActiveGame(sessionId)
+                if (savedGame != null) {
+                    val wordIds = savedGame.wordIds.split(",").filter { it.isNotBlank() }
+                    val batch = wordIds.mapNotNull { repo.getById(it) }
+                    allWords = repo.getAllWordsSourceOrder()
+                    
+                    when (mode) {
+                        GameMode.MATCHING -> {
+                            val matchedIds = savedGame.extraData.split(",").filter { it.isNotBlank() }.toSet()
+                            val unmatchedLeft = batch.filterNot { it.id in matchedIds }
+                            _state.value = _state.value.copy(
+                                loading = false,
+                                batch = batch,
+                                matchingLeftColumn = unmatchedLeft,
+                                matchingRightColumn = unmatchedLeft.shuffled(),
+                                matchedLeftToRight = matchedIds.associateWith { it },
+                                knownCount = savedGame.knownCount,
+                                againCount = savedGame.againCount,
+                                finished = unmatchedLeft.isEmpty() && batch.isNotEmpty()
+                            )
+                        }
+
+                        GameMode.CLOZE -> {
+                            _state.value = _state.value.copy(
+                                loading = false,
+                                batch = batch,
+                                clozeIndex = savedGame.progressIndex,
+                                knownCount = savedGame.knownCount,
+                                againCount = savedGame.againCount,
+                                finished = savedGame.progressIndex >= batch.size && batch.isNotEmpty()
+                            )
+                        }
+
+                        GameMode.REVERSE_RECALL -> {
+                            _state.value = _state.value.copy(
+                                loading = false,
+                                batch = batch,
+                                reverseIndex = savedGame.progressIndex,
+                                knownCount = savedGame.knownCount,
+                                againCount = savedGame.againCount,
+                                finished = savedGame.progressIndex >= batch.size && batch.isNotEmpty()
+                            )
+                        }
+
+                        GameMode.RECENT -> {
+                        }
+                    }
+                    return@launch
+                }
+            }
+
             when (mode) {
                 GameMode.MATCHING -> {
                     val batch = loadMixedBatch()
@@ -88,6 +142,7 @@ class GameViewModel(
                         matchingRightColumn = batch.shuffled(),
                         message = if (batch.isEmpty()) "Keine Worter verfugbar." else ""
                     )
+                    saveOrUpdateActiveGame()
                 }
 
                 GameMode.CLOZE -> {
@@ -97,6 +152,7 @@ class GameViewModel(
                         batch = batch,
                         message = if (batch.isEmpty()) "Keine Worter verfugbar." else ""
                     )
+                    saveOrUpdateActiveGame()
                 }
 
                 GameMode.REVERSE_RECALL -> {
@@ -106,6 +162,7 @@ class GameViewModel(
                         batch = batch,
                         message = if (batch.isEmpty()) "Keine Worter verfugbar." else ""
                     )
+                    saveOrUpdateActiveGame()
                 }
 
                 GameMode.RECENT -> {
@@ -113,7 +170,8 @@ class GameViewModel(
                     val eventRows = repo.getRecentSeenEvents(50).map { it.toRow() }
                     val merged = (uniqueRows + eventRows)
                         .sortedByDescending { it.seenAtEpochMs }
-                        .take(100)
+                        .distinctBy { it.wordId }
+                        .take(50)
                     _state.value = _state.value.copy(
                         loading = false,
                         recentRows = merged,
@@ -181,6 +239,7 @@ class GameViewModel(
             )
             viewModelScope.launch {
                 applyOutcome(left, known = true)
+                saveOrUpdateActiveGame()
             }
         } else {
             _state.value = s.copy(
@@ -190,6 +249,7 @@ class GameViewModel(
             )
             viewModelScope.launch {
                 applyOutcome(left, known = false)
+                saveOrUpdateActiveGame()
             }
         }
     }
@@ -243,6 +303,9 @@ class GameViewModel(
             againCount = s.againCount + if (known) 0 else 1,
             finished = nextIndex >= s.batch.size && s.batch.isNotEmpty()
         )
+        viewModelScope.launch {
+            saveOrUpdateActiveGame()
+        }
     }
 
     fun revealReverse() {
@@ -262,7 +325,42 @@ class GameViewModel(
                 againCount = s.againCount + if (known) 0 else 1,
                 finished = next >= s.batch.size && s.batch.isNotEmpty()
             )
+            saveOrUpdateActiveGame()
         }
+    }
+
+    private suspend fun saveOrUpdateActiveGame() {
+        val s = _state.value
+        if (s.mode == GameMode.RECENT || s.batch.isEmpty()) return
+
+        if (s.finished) {
+            repo.deleteActiveGame(activeSessionId)
+            return
+        }
+
+        val wordIds = s.batch.joinToString(",") { it.id }
+        val progressIndex = when (s.mode) {
+            GameMode.CLOZE -> s.clozeIndex
+            GameMode.REVERSE_RECALL -> s.reverseIndex
+            else -> s.matchedLeftToRight.size
+        }
+        val extraData = when (s.mode) {
+            GameMode.MATCHING -> s.matchedLeftToRight.keys.joinToString(",")
+            else -> ""
+        }
+
+        repo.saveActiveGame(
+            com.studio71.germanlinia2_b2.data.local.ActiveGameEntity(
+                id = activeSessionId,
+                mode = s.mode.routeValue,
+                createdAtEpochMs = System.currentTimeMillis(),
+                wordIds = wordIds,
+                progressIndex = progressIndex,
+                knownCount = s.knownCount,
+                againCount = s.againCount,
+                extraData = extraData
+            )
+        )
     }
 
     fun setRecentFilter(filter: RecentFilter) {
@@ -322,11 +420,12 @@ class GameViewModel(
     class Factory(
         private val repo: VocabularyRepository,
         private val settings: SettingsStore,
-        private val modeRoute: String
+        private val modeRoute: String,
+        private val sessionId: String? = null
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            GameViewModel(repo, settings, modeRoute) as T
+            GameViewModel(repo, settings, modeRoute, sessionId) as T
     }
 }
 

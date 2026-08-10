@@ -16,9 +16,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         SeenWordEntity::class,
         SeenEventEntity::class,
         WordCommentEntity::class,
-        WordImageEntity::class
+        WordImageEntity::class,
+        ActiveGameEntity::class
     ],
-    version = 19,
+    version = 20,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -30,6 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun seenEventDao(): SeenEventDao
     abstract fun wordCommentDao(): WordCommentDao
     abstract fun wordImageDao(): WordImageDao
+    abstract fun activeGameDao(): ActiveGameDao
 
     companion object {
         val MIGRATION_15_16 = object : Migration(15, 16) {
@@ -127,6 +129,26 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `active_game` (
+                        `id` TEXT NOT NULL,
+                        `mode` TEXT NOT NULL,
+                        `createdAtEpochMs` INTEGER NOT NULL,
+                        `wordIds` TEXT NOT NULL,
+                        `progressIndex` INTEGER NOT NULL,
+                        `knownCount` INTEGER NOT NULL,
+                        `againCount` INTEGER NOT NULL,
+                        `extraData` TEXT NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -137,7 +159,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "german_vocab.db"
                 )
-                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19)
+                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20)
                     .build()
                     .also { INSTANCE = it }
             }

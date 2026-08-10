@@ -35,11 +35,14 @@ object Routes {
     const val SEEN_DATES = "seen_dates"
     const val SEEN_WORDS = "seen_words/{epochDay}"
     const val REVIEW = "review"
-    const val GAME = "game/{mode}"
+    const val GAME = "game/{mode}?sessionId={sessionId}"
+    const val GAME_MENU = "game_menu"
     const val SETTINGS = "settings"
     fun card(wordId: String) = "card/$wordId"
     fun seenWords(epochDay: Long) = "seen_words/$epochDay"
-    fun game(mode: String) = "game/$mode"
+    fun game(mode: String, sessionId: String? = null): String {
+        return if (sessionId != null) "game/$mode?sessionId=$sessionId" else "game/$mode"
+    }
 }
 
 @Composable
@@ -70,7 +73,7 @@ fun AppNav(
                 onOpenCard = { wordId -> navController.navigate(Routes.card(wordId)) },
                 onOpenStats = { navController.navigate(Routes.STATS) },
                 onStartReview = { navController.navigate(Routes.REVIEW) },
-                onStartGame = { navController.navigate(Routes.game("matching")) },
+                onStartGame = { navController.navigate(Routes.GAME_MENU) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) }
             )
         }
@@ -137,16 +140,35 @@ fun AppNav(
 
         composable(
             route = Routes.GAME,
-            arguments = listOf(navArgument("mode") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("mode") { type = NavType.StringType },
+                navArgument("sessionId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) { backStackEntry ->
             val mode = backStackEntry.arguments?.getString("mode").orEmpty()
+            val sessionId = backStackEntry.arguments?.getString("sessionId")
+            val vmKey = if (sessionId != null) "game-$mode-$sessionId" else "game-$mode"
             val vm: GameViewModel = viewModel(
-                key = "game-$mode",
-                factory = GameViewModel.Factory(repository, settings, mode)
+                key = vmKey,
+                factory = GameViewModel.Factory(repository, settings, mode, sessionId)
             )
             GameScreen(
                 viewModel = vm,
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.GAME_MENU) {
+            com.studio71.germanlinia2_b2.ui.game.GamesMenuScreen(
+                repository = repository,
+                onBack = { navController.popBackStack() },
+                onStartGame = { mode, sessionId ->
+                    navController.navigate(Routes.game(mode, sessionId))
+                }
             )
         }
 

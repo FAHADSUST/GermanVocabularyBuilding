@@ -15,6 +15,9 @@ interface VocabularyDao {
     @Query("SELECT COUNT(*) FROM vocabulary")
     suspend fun count(): Int
 
+    @Query("DELETE FROM vocabulary")
+    suspend fun clearTable()
+
     /** How many rows still have no memory tip (used to backfill existing installs). */
     @Query("SELECT COUNT(*) FROM vocabulary WHERE memoryTips = '' OR memoryTips IS NULL")
     suspend fun countMissingMemoryTips(): Int
@@ -54,7 +57,20 @@ interface VocabularyDao {
                 germanMeaning LIKE '%' || :query || '%'
           )
         ORDER BY
+          CASE WHEN :query != '' THEN
+            CASE
+              -- Direct exact match in word (with or without article) or sortKey
+              WHEN word = :query COLLATE NOCASE OR (article || ' ' || word) = :query COLLATE NOCASE OR sortKey = :query COLLATE NOCASE THEN 1
+              -- Direct prefix match (word starts with query)
+              WHEN word LIKE :query || '%' OR sortKey LIKE :query || '%' THEN 2
+              -- Direct substring match (query is in word)
+              WHEN word LIKE '%' || :query || '%' OR sortKey LIKE '%' || :query || '%' THEN 3
+              -- Match in description or other places
+              ELSE 4
+            END
+          ELSE 1 END ASC,
           CASE WHEN :sortMode = 'ALPHA' THEN sortKey END ASC,
+          CASE WHEN :sortMode = 'ALPHA_DESC' THEN sortKey END DESC,
           CASE WHEN :sortMode = 'FREQUENCY' THEN frequencyRank END ASC,
           CASE WHEN :sortMode = 'SOURCE' THEN orderIndex END ASC,
           CASE WHEN :sortMode = 'CHAPTER' THEN level END ASC,
@@ -91,7 +107,20 @@ interface VocabularyDao {
                 germanMeaning LIKE '%' || :query || '%'
           )
         ORDER BY
+          CASE WHEN :query != '' THEN
+            CASE
+              -- Direct exact match in word (with or without article) or sortKey
+              WHEN word = :query COLLATE NOCASE OR (article || ' ' || word) = :query COLLATE NOCASE OR sortKey = :query COLLATE NOCASE THEN 1
+              -- Direct prefix match (word starts with query)
+              WHEN word LIKE :query || '%' OR sortKey LIKE :query || '%' THEN 2
+              -- Direct substring match (query is in word)
+              WHEN word LIKE '%' || :query || '%' OR sortKey LIKE '%' || :query || '%' THEN 3
+              -- Match in description or other places
+              ELSE 4
+            END
+          ELSE 1 END ASC,
           CASE WHEN :sortMode = 'ALPHA' THEN sortKey END ASC,
+          CASE WHEN :sortMode = 'ALPHA_DESC' THEN sortKey END DESC,
           CASE WHEN :sortMode = 'FREQUENCY' THEN frequencyRank END ASC,
           CASE WHEN :sortMode = 'SOURCE' THEN orderIndex END ASC,
           CASE WHEN :sortMode = 'CHAPTER' THEN level END ASC,
