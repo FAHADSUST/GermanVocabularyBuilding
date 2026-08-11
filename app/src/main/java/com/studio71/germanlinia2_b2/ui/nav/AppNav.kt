@@ -27,6 +27,8 @@ import com.studio71.germanlinia2_b2.ui.stats.SeenWordsByDateScreen
 import com.studio71.germanlinia2_b2.ui.stats.SeenWordsByDateViewModel
 import com.studio71.germanlinia2_b2.ui.stats.StatsScreen
 import com.studio71.germanlinia2_b2.ui.stats.StatsViewModel
+import com.studio71.germanlinia2_b2.ui.notes.ExtraNotesScreen
+import com.studio71.germanlinia2_b2.ui.notes.ExtraNotesViewModel
 
 object Routes {
     const val LIST = "list"
@@ -38,6 +40,7 @@ object Routes {
     const val GAME = "game/{mode}?sessionId={sessionId}"
     const val GAME_MENU = "game_menu"
     const val SETTINGS = "settings"
+    const val EXTRA_NOTES = "extra_notes"
     fun card(wordId: String) = "card/$wordId"
     fun seenWords(epochDay: Long) = "seen_words/$epochDay"
     fun game(mode: String, sessionId: String? = null): String {
@@ -177,6 +180,15 @@ fun AppNav(
                 settings = settings,
                 repository = repository,
                 cloudSync = cloudSync,
+                onBack = { navController.popBackStack() },
+                onOpenExtraNotes = { navController.navigate(Routes.EXTRA_NOTES) }
+            )
+        }
+
+        composable(Routes.EXTRA_NOTES) {
+            val vm: ExtraNotesViewModel = viewModel(factory = ExtraNotesViewModel.Factory(repository))
+            ExtraNotesScreen(
+                viewModel = vm,
                 onBack = { navController.popBackStack() }
             )
         }

@@ -17,9 +17,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         SeenEventEntity::class,
         WordCommentEntity::class,
         WordImageEntity::class,
-        ActiveGameEntity::class
+        ActiveGameEntity::class,
+        ExtraNoteEntity::class
     ],
-    version = 20,
+    version = 21,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -32,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun wordCommentDao(): WordCommentDao
     abstract fun wordImageDao(): WordImageDao
     abstract fun activeGameDao(): ActiveGameDao
+    abstract fun extraNoteDao(): ExtraNoteDao
 
     companion object {
         val MIGRATION_15_16 = object : Migration(15, 16) {
@@ -149,6 +151,22 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `extra_notes` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `content` TEXT NOT NULL,
+                        `createdAtEpochMs` INTEGER NOT NULL,
+                        `updatedAtEpochMs` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -159,7 +177,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "german_vocab.db"
                 )
-                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20)
+                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21)
                     .build()
                     .also { INSTANCE = it }
             }

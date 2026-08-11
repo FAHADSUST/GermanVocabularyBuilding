@@ -15,6 +15,10 @@ class GermanSpeaker(
         if (text.isBlank()) return
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, text.hashCode().toString())
     }
+
+    fun stop() {
+        tts.stop()
+    }
 }
 
 /**

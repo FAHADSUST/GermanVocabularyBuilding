@@ -75,7 +75,8 @@ fun SettingsScreen(
     settings: SettingsStore,
     repository: VocabularyRepository,
     cloudSync: CloudSyncManager,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenExtraNotes: () -> Unit
 ) {
     val state by settings.state.collectAsStateWithLifecycle()
     val syncState by cloudSync.uiState.collectAsStateWithLifecycle()
@@ -141,6 +142,18 @@ fun SettingsScreen(
                             title = "Theme auswählen",
                             subtitle = "Hell, Eye Friendly, Dark, Custom und weitere",
                             onClick = { showThemeSubSettings = true }
+                        )
+                    }
+                }
+
+                // --- Extra Notes ---
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Extra Notizen & Texte", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                        SettingNavigationRow(
+                            title = "Meine Notizen & TTS",
+                            subtitle = "Texte einfügen, speichern, bearbeiten und vorlesen lassen",
+                            onClick = onOpenExtraNotes
                         )
                     }
                 }

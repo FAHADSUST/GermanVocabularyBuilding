@@ -15,6 +15,7 @@ import com.studio71.germanlinia2_b2.data.local.WordCommentEntity
 import com.studio71.germanlinia2_b2.data.local.WordImageEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarkEntity
 import com.studio71.germanlinia2_b2.data.local.WordMarker
+import com.studio71.germanlinia2_b2.data.local.ExtraNoteEntity
 import com.studio71.germanlinia2_b2.data.sync.SyncStateTracker
 import com.studio71.germanlinia2_b2.domain.srs.SrsScheduler
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +42,7 @@ class VocabularyRepository(
     private val wordCommentDao = db.wordCommentDao()
     private val wordImageDao = db.wordImageDao()
     private val activeGameDao = db.activeGameDao()
+    private val extraNoteDao = db.extraNoteDao()
 
     fun today(): Long = LocalDate.now().toEpochDay()
 
@@ -377,5 +379,10 @@ class VocabularyRepository(
             else -> WordImageState()
         }
     }
+
+    fun observeAllNotes(): Flow<List<ExtraNoteEntity>> = extraNoteDao.observeAll()
+    suspend fun getNoteById(id: Int): ExtraNoteEntity? = extraNoteDao.getById(id)
+    suspend fun upsertNote(note: ExtraNoteEntity) = extraNoteDao.upsert(note)
+    suspend fun deleteNote(id: Int) = extraNoteDao.delete(id)
 }
 
