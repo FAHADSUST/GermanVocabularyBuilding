@@ -466,6 +466,8 @@ private fun WordListItem(
     onSpeak: () -> Unit,
     onMarkerChange: (WordMarker) -> Unit
 ) {
+    val grammarPreposition = word.listPrepositionLabel()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -517,6 +519,13 @@ private fun WordListItem(
                 )
                 if (word.germanMeaning.isNotBlank()) {
                     Text(word.germanMeaning, style = MaterialTheme.typography.bodySmall)
+                }
+                if (grammarPreposition != null) {
+                    Text(
+                        "Präp.: $grammarPreposition",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
                 }
                 if (word.exampleDe.isNotBlank()) {
                     Text(
@@ -583,5 +592,19 @@ private fun MarkerMenuButton(
             }
         }
     }
+}
+
+private fun VocabularyEntity.listPrepositionLabel(): String? {
+    if (preposition.isBlank()) return null
+
+    val group = grammarGroup.trim()
+    val hasPrepositionGrammar =
+        group.contains("mit Präposition", ignoreCase = true) ||
+            group.contains("mit Praposition", ignoreCase = true)
+    if (!hasPrepositionGrammar) return null
+
+    val prep = preposition.trim()
+    val governedCase = governCase.trim()
+    return if (governedCase.isBlank()) prep else "$prep + $governedCase"
 }
 
