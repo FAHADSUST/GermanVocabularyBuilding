@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BatteryStd
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -36,6 +37,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -84,6 +86,7 @@ fun SettingsScreen(
     var showThemeSubSettings by rememberSaveable { mutableStateOf(false) }
     var cloudEmail by rememberSaveable { mutableStateOf("") }
     var cloudPassword by rememberSaveable { mutableStateOf("") }
+    var showResetReviewDialog by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -438,6 +441,13 @@ fun SettingsScreen(
                         checked = state.gameReverseRecallEnabled,
                         onCheckedChange = { settings.setGameReverseRecallEnabled(it) }
                     )
+                    HorizontalDivider()
+                    FilledTonalButton(
+                        onClick = { showResetReviewDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Wiederholungsplan zurücksetzen")
+                    }
                 }
             }
 
@@ -617,6 +627,32 @@ fun SettingsScreen(
             }
             }
         }
+    }
+
+    if (showResetReviewDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetReviewDialog = false },
+            title = { Text("Wiederholungsplan zurücksetzen?") },
+            text = {
+                Text(
+                    "Alle Wörter werden aus dem Wiederholungsplan entfernt. " +
+                        "Statistik, Markierungen und Kommentare bleiben erhalten."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showResetReviewDialog = false
+                    scope.launch { repository.resetReviewPipeline() }
+                }) {
+                    Text("Zurücksetzen")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetReviewDialog = false }) {
+                    Text("Abbrechen")
+                }
+            }
+        )
     }
 }
 

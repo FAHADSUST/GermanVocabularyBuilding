@@ -11,7 +11,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.SetOptions
 import com.studio71.germanlinia2_b2.data.local.AppDatabase
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
 import com.studio71.germanlinia2_b2.data.local.SeenEventEntity
@@ -281,12 +280,14 @@ class CloudSyncManager(
     }
 
     private suspend fun writeRemoteSnapshot(uid: String, snapshot: RemoteSnapshot) {
+        // Full replace, not merge: merge only overwrites the keys it sends, so entries
+        // removed locally (e.g. after a review-plan reset) would linger in the cloud map.
         firestore!!
             .collection(USERS_COLLECTION)
             .document(uid)
             .collection(SYNC_COLLECTION)
             .document(SYNC_DOC)
-            .set(snapshot.toMap(), SetOptions.merge())
+            .set(snapshot.toMap())
             .await()
     }
 

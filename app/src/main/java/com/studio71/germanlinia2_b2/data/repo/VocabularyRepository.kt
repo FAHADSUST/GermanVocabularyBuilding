@@ -273,6 +273,12 @@ class VocabularyRepository(
         bumpStat(today, reviewed = 1)
     }
 
+    /** Empties the SRS plan. Words re-enter via markLearned, games or auto-add. */
+    suspend fun resetReviewPipeline() {
+        progressDao.deleteAll()
+        SyncStateTracker.markLocalMutation(appContext)
+    }
+
     // ---- Difficulty markers (hard / medium / easy) ----
 
     /** Live marker for one word; emits [WordMarker.NONE] when unmarked. */
