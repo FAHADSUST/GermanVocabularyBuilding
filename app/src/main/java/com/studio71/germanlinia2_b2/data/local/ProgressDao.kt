@@ -24,6 +24,9 @@ interface ProgressDao {
     @Query("DELETE FROM progress")
     suspend fun deleteAll()
 
+    @Query("DELETE FROM progress WHERE wordId = :wordId")
+    suspend fun delete(wordId: String)
+
     @Query("SELECT * FROM progress WHERE wordId = :wordId")
     fun observeById(wordId: String): Flow<ProgressEntity?>
 
@@ -55,7 +58,16 @@ interface ProgressDao {
     )
     suspend fun getDue(day: Long): List<VocabularyEntity>
 
-    @Query("SELECT COUNT(*) FROM progress")
+    /** Words in the plan plus words that finished it; reset-archived words don't count. */
+    @Query(
+        """
+        SELECT COUNT(*) FROM (
+            SELECT wordId FROM progress
+            UNION
+            SELECT wordId FROM archived_word WHERE reason = '${ArchivedWordEntity.REASON_MASTERED}'
+        )
+        """
+    )
     fun observeLearnedCount(): Flow<Int>
 }
 

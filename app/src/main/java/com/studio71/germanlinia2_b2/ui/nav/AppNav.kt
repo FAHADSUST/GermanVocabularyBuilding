@@ -12,6 +12,8 @@ import androidx.navigation.navArgument
 import com.studio71.germanlinia2_b2.data.repo.VocabularyRepository
 import com.studio71.germanlinia2_b2.data.settings.SettingsStore
 import com.studio71.germanlinia2_b2.data.sync.CloudSyncManager
+import com.studio71.germanlinia2_b2.ui.archive.ArchiveScreen
+import com.studio71.germanlinia2_b2.ui.archive.ArchiveViewModel
 import com.studio71.germanlinia2_b2.ui.card.WordCardScreen
 import com.studio71.germanlinia2_b2.ui.card.WordCardViewModel
 import com.studio71.germanlinia2_b2.ui.game.GameScreen
@@ -41,6 +43,7 @@ object Routes {
     const val GAME_MENU = "game_menu"
     const val SETTINGS = "settings"
     const val EXTRA_NOTES = "extra_notes"
+    const val ARCHIVE = "archive"
     fun card(wordId: String) = "card/$wordId"
     fun seenWords(epochDay: Long) = "seen_words/$epochDay"
     fun game(mode: String, sessionId: String? = null): String {
@@ -181,13 +184,22 @@ fun AppNav(
                 repository = repository,
                 cloudSync = cloudSync,
                 onBack = { navController.popBackStack() },
-                onOpenExtraNotes = { navController.navigate(Routes.EXTRA_NOTES) }
+                onOpenExtraNotes = { navController.navigate(Routes.EXTRA_NOTES) },
+                onOpenArchive = { navController.navigate(Routes.ARCHIVE) }
             )
         }
 
         composable(Routes.EXTRA_NOTES) {
             val vm: ExtraNotesViewModel = viewModel(factory = ExtraNotesViewModel.Factory(repository))
             ExtraNotesScreen(
+                viewModel = vm,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.ARCHIVE) {
+            val vm: ArchiveViewModel = viewModel(factory = ArchiveViewModel.Factory(repository))
+            ArchiveScreen(
                 viewModel = vm,
                 onBack = { navController.popBackStack() }
             )

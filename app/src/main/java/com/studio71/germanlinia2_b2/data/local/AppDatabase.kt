@@ -18,9 +18,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         WordCommentEntity::class,
         WordImageEntity::class,
         ActiveGameEntity::class,
-        ExtraNoteEntity::class
+        ExtraNoteEntity::class,
+        ArchivedWordEntity::class
     ],
-    version = 21,
+    version = 22,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,6 +35,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun wordImageDao(): WordImageDao
     abstract fun activeGameDao(): ActiveGameDao
     abstract fun extraNoteDao(): ExtraNoteDao
+    abstract fun archivedWordDao(): ArchivedWordDao
 
     companion object {
         val MIGRATION_15_16 = object : Migration(15, 16) {
@@ -174,6 +176,29 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Adds the archive for words that left the review plan (reset or finished). */
+        val MIGRATION_21_22 = object : Migration(21, 22) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `archived_word` (
+                        `wordId` TEXT NOT NULL,
+                        `archivedAtEpochMs` INTEGER NOT NULL,
+                        `reason` TEXT NOT NULL,
+                        PRIMARY KEY(`wordId`)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        /** Supports app downgrades by removing the v22-only table. */
+        val MIGRATION_22_21 = object : Migration(22, 21) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS `archived_word`")
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -184,7 +209,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "german_vocab.db"
                 )
-                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_20)
+                    .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_20, MIGRATION_21_22, MIGRATION_22_21)
                     .build()
                     .also { INSTANCE = it }
             }

@@ -1,9 +1,12 @@
 package com.studio71.germanlinia2_b2.data.repo
 
 import android.content.Context
+import androidx.room.withTransaction
 import com.studio71.germanlinia2_b2.data.csv.CsvVocabularyImporter
 import com.studio71.germanlinia2_b2.data.image.GoogleImageSearchClient
 import com.studio71.germanlinia2_b2.data.local.AppDatabase
+import com.studio71.germanlinia2_b2.data.local.ArchivedWordEntity
+import com.studio71.germanlinia2_b2.data.local.ArchivedWordItem
 import com.studio71.germanlinia2_b2.data.local.DailyStatEntity
 import com.studio71.germanlinia2_b2.data.local.ProgressEntity
 import com.studio71.germanlinia2_b2.data.local.SeenEventEntity
@@ -43,6 +46,7 @@ class VocabularyRepository(
     private val wordImageDao = db.wordImageDao()
     private val activeGameDao = db.activeGameDao()
     private val extraNoteDao = db.extraNoteDao()
+    private val archivedWordDao = db.archivedWordDao()
 
     fun today(): Long = LocalDate.now().toEpochDay()
 
@@ -241,7 +245,8 @@ class VocabularyRepository(
         )
         SyncStateTracker.markLocalMutation(appContext)
 
-        if (autoAddToReview && progressDao.getById(wordId) == null) {
+        // A word that finished the plan does not re-enter just because it was opened again.
+        if (autoAddToReview && progressDao.getById(wordId) == null && !archivedWordDao.isMastered(wordId)) {
             // Auto-add starts at the "day 2" reminder, then follows 3/7/15/30.
             progressDao.upsert(
                 ProgressEntity(
@@ -260,7 +265,17 @@ class VocabularyRepository(
     suspend fun reviewSuccess(wordId: String) {
         val today = today()
         val current = progressDao.getById(wordId) ?: return
-        progressDao.upsert(SrsScheduler.onReviewSuccess(current, today))
+        if (SrsScheduler.isFinalStage(current)) {
+            // Final review passed: archive the word instead of keeping it due forever.
+            db.withTransaction {
+                archivedWordDao.upsert(
+                    ArchivedWordEntity(wordId, System.currentTimeMillis(), ArchivedWordEntity.REASON_MASTERED)
+                )
+                progressDao.delete(wordId)
+            }
+        } else {
+            progressDao.upsert(SrsScheduler.onReviewSuccess(current, today))
+        }
         SyncStateTracker.markLocalMutation(appContext)
         bumpStat(today, reviewed = 1)
     }
@@ -273,10 +288,54 @@ class VocabularyRepository(
         bumpStat(today, reviewed = 1)
     }
 
-    /** Empties the SRS plan. Words re-enter via markLearned, games or auto-add. */
+    /**
+     * Moves every word of the SRS plan into the archive and empties the plan.
+     * Words can be taken back from the archive; they also re-enter via markLearned,
+     * games or auto-add.
+     */
     suspend fun resetReviewPipeline() {
-        progressDao.deleteAll()
+        val now = System.currentTimeMillis()
+        db.withTransaction {
+            archivedWordDao.upsertAll(
+                progressDao.getAll().map {
+                    ArchivedWordEntity(it.wordId, now, ArchivedWordEntity.REASON_RESET)
+                }
+            )
+            progressDao.deleteAll()
+        }
         SyncStateTracker.markLocalMutation(appContext)
+    }
+
+    // ---- Archive (words that left the plan) ----
+
+    fun observeArchive(): Flow<List<ArchivedWordItem>> = archivedWordDao.observeAll()
+    fun observeArchivedCount(): Flow<Int> = archivedWordDao.observeCount()
+
+    /** True when the word passed its final review, so it should not re-enter the plan on its own. */
+    suspend fun isFinished(wordId: String): Boolean = archivedWordDao.isMastered(wordId)
+
+    /** Takes one word back into the plan; its schedule starts over (first review tomorrow). */
+    suspend fun restoreFromArchive(wordId: String) {
+        db.withTransaction {
+            if (progressDao.getById(wordId) == null) {
+                progressDao.upsert(SrsScheduler.onLearned(wordId, today()))
+            }
+            archivedWordDao.delete(wordId)
+        }
+        SyncStateTracker.markLocalMutation(appContext)
+    }
+
+    /** Takes every archived word back into the plan and returns how many were restored. */
+    suspend fun restoreAllFromArchive(): Int {
+        val today = today()
+        val restored = db.withTransaction {
+            val ids = archivedWordDao.getArchivedWordIds()
+            progressDao.upsertAll(ids.map { SrsScheduler.onLearned(it, today) })
+            archivedWordDao.deleteRestored()
+            ids.size
+        }
+        if (restored > 0) SyncStateTracker.markLocalMutation(appContext)
+        return restored
     }
 
     // ---- Difficulty markers (hard / medium / easy) ----

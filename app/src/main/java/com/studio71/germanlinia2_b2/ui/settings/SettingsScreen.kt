@@ -78,7 +78,8 @@ fun SettingsScreen(
     repository: VocabularyRepository,
     cloudSync: CloudSyncManager,
     onBack: () -> Unit,
-    onOpenExtraNotes: () -> Unit
+    onOpenExtraNotes: () -> Unit,
+    onOpenArchive: () -> Unit
 ) {
     val state by settings.state.collectAsStateWithLifecycle()
     val syncState by cloudSync.uiState.collectAsStateWithLifecycle()
@@ -87,6 +88,8 @@ fun SettingsScreen(
     var cloudEmail by rememberSaveable { mutableStateOf("") }
     var cloudPassword by rememberSaveable { mutableStateOf("") }
     var showResetReviewDialog by rememberSaveable { mutableStateOf(false) }
+    val archivedCount by remember(repository) { repository.observeArchivedCount() }
+        .collectAsStateWithLifecycle(initialValue = 0)
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -442,6 +445,16 @@ fun SettingsScreen(
                         onCheckedChange = { settings.setGameReverseRecallEnabled(it) }
                     )
                     HorizontalDivider()
+                    SettingNavigationRow(
+                        title = "Archiv",
+                        subtitle = if (archivedCount == 0) {
+                            "Zurückgesetzte und abgeschlossene Wörter erscheinen hier"
+                        } else {
+                            "$archivedCount Wörter · zurückgesetzt oder abgeschlossen"
+                        },
+                        onClick = onOpenArchive
+                    )
+                    HorizontalDivider()
                     FilledTonalButton(
                         onClick = { showResetReviewDialog = true },
                         modifier = Modifier.fillMaxWidth()
@@ -635,7 +648,8 @@ fun SettingsScreen(
             title = { Text("Wiederholungsplan zurücksetzen?") },
             text = {
                 Text(
-                    "Alle Wörter werden aus dem Wiederholungsplan entfernt. " +
+                    "Alle Wörter werden ins Archiv verschoben und aus dem Wiederholungsplan " +
+                        "entfernt. Dort kannst du sie wieder aufnehmen. " +
                         "Statistik, Markierungen und Kommentare bleiben erhalten."
                 )
             },

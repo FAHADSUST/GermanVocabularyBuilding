@@ -400,6 +400,8 @@ class GameViewModel(
     private suspend fun applyOutcome(wordId: String, known: Boolean) {
         val progress = repo.getProgress(wordId)
         if (progress == null) {
+            // A finished word answered correctly stays out of the plan; a miss brings it back.
+            if (known && repo.isFinished(wordId)) return
             repo.markLearned(wordId)
             if (!known) {
                 repo.reviewFail(wordId)
